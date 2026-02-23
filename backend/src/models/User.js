@@ -35,6 +35,17 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product',
     }],
+    addresses: [{
+        label: { type: String, enum: ['Home', 'Work', 'Other'], default: 'Home' },
+        fullName: { type: String, required: true },
+        phone: { type: String, required: true },
+        addressLine1: { type: String, required: true },
+        addressLine2: String,
+        city: { type: String, required: true },
+        state: { type: String, required: true },
+        pincode: { type: String, required: true },
+        isDefault: { type: Boolean, default: false },
+    }],
     refreshToken: {
         type: String,
         select: false,

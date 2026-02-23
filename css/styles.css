@@ -2359,6 +2359,75 @@ p {
   h1 {
     font-size: 2rem;
   }
+
+  /* Hero CTA buttons stack vertically */
+  .hero__ctas {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .hero__ctas .btn {
+    width: 100%;
+    max-width: 280px;
+  }
+
+  /* Reduce section padding */
+  .section {
+    padding: var(--space-2xl) var(--space-md);
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+  }
+
+  /* Header actions tighter on small screens */
+  .header__actions {
+    gap: var(--space-xs);
+  }
+
+  .header__actions button,
+  .header__actions a {
+    width: 36px;
+    height: 36px;
+  }
+
+  /* Testimonial cards fit within screen */
+  .testimonial-card {
+    min-width: 260px;
+  }
+
+  /* Checkout single column on mobile */
+  .checkout-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .checkout-form__row {
+    grid-template-columns: 1fr;
+  }
+
+  /* Cart drawer items tighter */
+  .cart-item {
+    gap: var(--space-sm);
+  }
+
+  .cart-item__img {
+    width: 56px;
+    height: 56px;
+  }
+
+  /* Quick-view modal smaller padding */
+  .quickview__details {
+    padding: var(--space-lg);
+  }
+
+  /* Search overlay padding */
+  .search-overlay__content {
+    padding: var(--space-lg) var(--space-md);
+  }
+
+  .search-overlay__input {
+    font-size: 1.2rem;
+  }
 }
 
 /* ===== FOCUS STATES (a11y) ===== */
@@ -3188,6 +3257,67 @@ textarea:focus-visible {
 
 [data-theme="dark"] .auth-modal__field input {
   background: var(--color-bg);
+}
+
+/* Google Sign-In Button */
+.auth-modal__divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin: var(--space-md) 0;
+}
+
+.auth-modal__divider::before,
+.auth-modal__divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+.auth-modal__divider span {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+}
+
+.auth-modal__google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  width: 100%;
+  padding: 12px 20px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.02em;
+}
+
+.auth-modal__google:hover {
+  border-color: var(--color-accent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.auth-modal__google svg {
+  flex-shrink: 0;
+}
+
+[data-theme="dark"] .auth-modal__google {
+  background: var(--color-bg);
+  border-color: var(--color-border);
+}
+
+[data-theme="dark"] .auth-modal__google:hover {
+  border-color: var(--color-accent);
 }
 
 @media (max-width: 480px) {

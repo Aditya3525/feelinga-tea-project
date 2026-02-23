@@ -1,10 +1,14 @@
 import { Router } from 'express';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
+import { OAuth2Client } from 'google-auth-library';
+import crypto from 'crypto';
 import User from '../../models/User.js';
 import { AppError } from '../../middleware/errorHandler.js';
 import { authenticate } from '../../middleware/auth.js';
 import { validate } from '../../middleware/validate.js';
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const router = Router();
 
@@ -127,6 +131,156 @@ router.post('/logout', authenticate, async (req, res, next) => {
 // GET /auth/me
 router.get('/me', authenticate, (req, res) => {
     res.json({ status: 'success', data: { user: req.user } });
+});
+
+// PATCH /auth/me — Update profile
+const updateProfileSchema = z.object({
+    name: z.string().min(2).max(80).optional(),
+    email: z.string().email().optional(),
+    phone: z.string().max(15).optional(),
+});
+
+router.patch('/me', authenticate, validate(updateProfileSchema), async (req, res, next) => {
+    try {
+        const { name, email, phone } = req.body;
+        const user = req.user;
+
+        if (email && email !== user.email) {
+            const existing = await User.findOne({ email });
+            if (existing) throw new AppError('Email already in use', 409);
+            user.email = email;
+        }
+        if (name) user.name = name;
+        if (phone !== undefined) user.phone = phone;
+
+        await user.save({ validateBeforeSave: false });
+
+        res.json({ status: 'success', data: { user } });
+    } catch (err) {
+        next(err);
+    }
+});
+
+// POST /auth/change-password
+const changePasswordSchema = z.object({
+    currentPassword: z.string().min(1),
+    newPassword: z.string().min(8).max(100),
+});
+
+router.post('/change-password', authenticate, validate(changePasswordSchema), async (req, res, next) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        const user = await User.findById(req.user._id).select('+password');
+
+        if (!(await user.comparePassword(currentPassword))) {
+            throw new AppError('Current password is incorrect', 401);
+        }
+
+        user.password = newPassword;
+        await user.save();
+
+        res.json({ status: 'success', message: 'Password updated successfully' });
+    } catch (err) {
+        next(err);
+    }
+});
+
+// POST /auth/me/addresses — Add address
+const addressSchema = z.object({
+    label: z.enum(['Home', 'Work', 'Other']).default('Home'),
+    fullName: z.string().min(2),
+    phone: z.string().min(10),
+    addressLine1: z.string().min(5),
+    addressLine2: z.string().optional(),
+    city: z.string().min(2),
+    state: z.string().min(2),
+    pincode: z.string().min(5),
+    isDefault: z.boolean().optional(),
+});
+
+router.post('/me/addresses', authenticate, validate(addressSchema), async (req, res, next) => {
+    try {
+        const user = req.user;
+        const address = req.body;
+
+        // If this is the first or set as default, unset others
+        if (address.isDefault || user.addresses.length === 0) {
+            user.addresses.forEach(a => a.isDefault = false);
+            address.isDefault = true;
+        }
+
+        user.addresses.push(address);
+        await user.save({ validateBeforeSave: false });
+
+        res.status(201).json({ status: 'success', data: { addresses: user.addresses } });
+    } catch (err) {
+        next(err);
+    }
+});
+
+// DELETE /auth/me/addresses/:id — Remove address
+router.delete('/me/addresses/:id', authenticate, async (req, res, next) => {
+    try {
+        const user = req.user;
+        const idx = user.addresses.findIndex(a => a._id.toString() === req.params.id);
+        if (idx === -1) throw new AppError('Address not found', 404);
+
+        const wasDefault = user.addresses[idx].isDefault;
+        user.addresses.splice(idx, 1);
+
+        // If removed address was default, set first remaining as default
+        if (wasDefault && user.addresses.length > 0) {
+            user.addresses[0].isDefault = true;
+        }
+
+        await user.save({ validateBeforeSave: false });
+
+        res.json({ status: 'success', data: { addresses: user.addresses } });
+    } catch (err) {
+        next(err);
+    }
+});
+
+// POST /auth/google — Google One Tap / Sign-In
+router.post('/google', async (req, res, next) => {
+    try {
+        const { credential } = req.body;
+        if (!credential) throw new AppError('Google credential required', 400);
+
+        // Verify the Google ID token
+        const ticket = await googleClient.verifyIdToken({
+            idToken: credential,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+        const payload = ticket.getPayload();
+        const { email, name, sub: googleId } = payload;
+
+        // Find or create user
+        let user = await User.findOne({ email });
+        if (!user) {
+            user = await User.create({
+                name,
+                email,
+                password: crypto.randomBytes(32).toString('hex'), // random password
+                googleId,
+            });
+        }
+
+        const accessToken = signAccessToken(user);
+        const refreshToken = signRefreshToken(user);
+        user.refreshToken = refreshToken;
+        await user.save({ validateBeforeSave: false });
+
+        res.json({
+            status: 'success',
+            data: { user, accessToken, refreshToken },
+        });
+    } catch (err) {
+        if (err.message?.includes('Token used too late') || err.message?.includes('Invalid token')) {
+            return next(new AppError('Invalid Google token', 401));
+        }
+        next(err);
+    }
 });
 
 export default router;

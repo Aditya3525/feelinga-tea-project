@@ -1,9 +1,11 @@
-import 'dotenv/config';
+﻿import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import connectDB from './config/db.js';
 import errorHandler from './middleware/errorHandler.js';
 
@@ -19,8 +21,21 @@ const PORT = process.env.PORT || 5000;
 
 // ===== GLOBAL MIDDLEWARE =====
 
-// Security headers
-app.use(helmet());
+// Security headers (relaxed for Google Identity Services)
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://accounts.google.com", "https://apis.google.com"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://accounts.google.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com"],
+            imgSrc: ["'self'", "data:", "https:"],
+            frameSrc: ["https://accounts.google.com"],
+            connectSrc: ["'self'", "https://accounts.google.com"],
+        },
+    },
+    crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
+}));
 
 // CORS — allow all origins in dev (file:// protocol)
 app.use(cors({
@@ -57,7 +72,7 @@ const authLimiter = rateLimit({
 app.get('/api/v1/health', (req, res) => {
     res.json({
         status: 'success',
-        message: 'Serené Tea API is running',
+        message: 'feelinga API is running',
         timestamp: new Date().toISOString(),
         environment: process.env.NODE_ENV,
     });
@@ -69,12 +84,21 @@ app.use('/api/v1/orders', orderRoutes);
 app.use('/api/v1/reviews', reviewRoutes);
 app.use('/api/v1/cart', cartRoutes);
 
-// 404 handler
-app.all('*', (req, res) => {
-    res.status(404).json({
-        status: 'error',
-        message: `Route ${req.method} ${req.url} not found`,
-    });
+// ===== SERVE FRONTEND STATIC FILES =====
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const frontendPath = path.resolve(__dirname, '..', '..');
+app.use(express.static(frontendPath));
+
+// Fallback: serve index.html for non-API routes
+app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) {
+        return res.status(404).json({
+            status: 'error',
+            message: `Route ${req.method} ${req.url} not found`,
+        });
+    }
+    res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
 // Global error handler
@@ -85,7 +109,7 @@ app.use(errorHandler);
 const start = async () => {
     await connectDB();
     app.listen(PORT, () => {
-        console.log(`\n✓ Serené Tea API running on http://localhost:${PORT}`);
+        console.log(`\n✓ feelinga API running on http://localhost:${PORT}`);
         console.log(`  Environment: ${process.env.NODE_ENV}`);
         console.log(`  Health: http://localhost:${PORT}/api/v1/health\n`);
     });
