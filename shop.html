@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Browse our complete collection of premium wellness teas. Filter by type, mood, origin, and price.">
+    <title>Shop All Teas — Serené Tea</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <!-- HEADER -->
+    <header class="header" id="header">
+        <div class="header__inner">
+            <a href="index.html" class="header__logo">Serené<span>.</span></a>
+            <nav class="header__nav" aria-label="Main navigation">
+                <a href="shop.html" class="active">Shop</a>
+                <a href="shop.html#moods">Moods</a>
+                <a href="gifting.html">Gifting</a>
+                <a href="learn.html">Learn</a>
+                <a href="about.html">About</a>
+                <a href="contact.html">Contact</a>
+            </nav>
+            <div class="header__actions">
+                <button aria-label="Search"><svg width="20" height="20" fill="none" stroke="currentColor"
+                        stroke-width="1.8" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="m21 21-4.35-4.35" />
+                    </svg></button>
+                <a href="#" aria-label="Account"><svg width="20" height="20" fill="none" stroke="currentColor"
+                        stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg></a>
+                <button aria-label="Cart" id="cartBtn"><svg width="20" height="20" fill="none" stroke="currentColor"
+                        stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+                        <path d="M3 6h18" />
+                        <path d="M16 10a4 4 0 0 1-8 0" />
+                    </svg><span class="cart-count" id="cartCount">0</span></button>
+                <button class="hamburger" id="hamburger" aria-label="Menu"
+                    aria-expanded="false"><span></span><span></span><span></span></button>
+            </div>
+        </div>
+    </header>
+    <nav class="mobile-nav" id="mobileNav" aria-label="Mobile navigation">
+        <a href="shop.html">Shop All Teas</a><a href="gifting.html">Gifting</a><a href="learn.html">Learn</a><a
+            href="about.html">About Us</a><a href="contact.html">Contact</a><a href="faq.html">FAQ</a>
+    </nav>
+    <div class="cart-overlay" id="cartOverlay"></div>
+    <aside class="cart-drawer" id="cartDrawer" aria-label="Shopping cart">
+        <div class="cart-drawer__header">
+            <h3>Your Cart</h3><button id="cartClose" aria-label="Close cart"><svg width="24" height="24" fill="none"
+                    stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                    <path d="M18 6 6 18M6 6l12 12" />
+                </svg></button>
+        </div>
+        <div class="cart-drawer__items" id="cartItems">
+            <div class="cart-empty">
+                <div class="icon">🍃</div>
+                <p>Your cart is empty</p>
+            </div>
+        </div>
+        <div class="cart-drawer__footer">
+            <div class="cart-drawer__total"><span>Subtotal</span><span id="cartTotal">₹0</span></div><button
+                class="btn btn--primary" style="width:100%">Checkout</button>
+        </div>
+    </aside>
+
+    <main id="main">
+
+        <!-- Page Hero -->
+        <div class="page-hero">
+            <div class="container">
+                <nav class="breadcrumb" aria-label="Breadcrumb"><a href="index.html">Home</a> <span>/</span>
+                    <span>Shop</span>
+                </nav>
+                <p class="overline">Our Collection</p>
+                <h1>Shop All Teas</h1>
+                <p>Explore 50+ handcrafted teas sourced from India's finest estates.</p>
+            </div>
+        </div>
+
+        <!-- PLP Layout -->
+        <div class="container">
+            <div class="plp-layout section">
+
+                <!-- Sidebar Filters -->
+                <aside class="plp-sidebar" aria-label="Filters">
+                    <div class="filter-group" data-filter="type">
+                        <div class="filter-group__title">Tea Type</div>
+                        <div class="filter-group__options">
+                            <label class="filter-option"><input type="checkbox" value="green"> Green Tea</label>
+                            <label class="filter-option"><input type="checkbox" value="black"> Black Tea</label>
+                            <label class="filter-option"><input type="checkbox" value="white"> White Tea</label>
+                            <label class="filter-option"><input type="checkbox" value="oolong"> Oolong</label>
+                            <label class="filter-option"><input type="checkbox" value="herbal"> Herbal & Tisane</label>
+                            <label class="filter-option"><input type="checkbox" value="chai"> Masala Chai</label>
+                        </div>
+                    </div>
+                    <div class="filter-group" data-filter="mood">
+                        <div class="filter-group__title">Mood / Benefit</div>
+                        <div class="filter-group__options">
+                            <label class="filter-option"><input type="checkbox" value="energize"> Energize</label>
+                            <label class="filter-option"><input type="checkbox" value="relax"> Relax</label>
+                            <label class="filter-option"><input type="checkbox" value="focus"> Focus</label>
+                            <label class="filter-option"><input type="checkbox" value="detox"> Detox</label>
+                            <label class="filter-option"><input type="checkbox" value="glow"> Glow</label>
+                        </div>
+                    </div>
+                    <div class="filter-group" data-filter="origin">
+                        <div class="filter-group__title">Origin</div>
+                        <div class="filter-group__options">
+                            <label class="filter-option"><input type="checkbox" value="darjeeling"> Darjeeling</label>
+                            <label class="filter-option"><input type="checkbox" value="assam"> Assam</label>
+                            <label class="filter-option"><input type="checkbox" value="nilgiri"> Nilgiri</label>
+                            <label class="filter-option"><input type="checkbox" value="kangra"> Kangra</label>
+                        </div>
+                    </div>
+                    <div class="filter-group" data-filter="price">
+                        <div class="filter-group__title">Price Range</div>
+                        <div class="filter-group__options">
+                            <label class="filter-option"><input type="checkbox" value="under500"> Under ₹500</label>
+                            <label class="filter-option"><input type="checkbox" value="500-999"> ₹500 – ₹999</label>
+                            <label class="filter-option"><input type="checkbox" value="1000-plus"> ₹1,000+</label>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Products -->
+                <div>
+                    <div class="plp-topbar">
+                        <button class="btn btn--sm btn--secondary mobile-filter-toggle">☰ Filters</button>
+                        <span class="plp-topbar__count">Showing 12 teas</span>
+                        <div class="plp-topbar__sort">
+                            <select id="plpSort" aria-label="Sort products">
+                                <option value="popular">Sort: Popular</option>
+                                <option value="newest">Newest</option>
+                                <option value="price-asc">Price: Low to High</option>
+                                <option value="price-desc">Price: High to Low</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="plp-products">
+                        <!-- Product 1 -->
+                        <div class="product-card" data-type="black" data-mood="energize" data-origin="assam"
+                            data-price="499" data-date="6">
+                            <div class="product-card__img"><img src="images/darjeeling-tea.png"
+                                    alt="Classic Assam Breakfast"></div>
+                            <div class="product-card__body">
+                                <div class="product-card__type">Black Tea</div>
+                                <a href="product.html" class="product-card__name">Classic Assam Breakfast</a>
+                                <div class="product-card__note">Bold, malty with rich amber liquor</div>
+                                <div class="product-card__bottom">
+                                    <div class="product-card__price">₹499</div>
+                                    <div class="product-card__rating">★★★★★ <span>(156)</span></div>
+                                </div>
+                                <button class="btn btn--primary btn--sm" style="width:100%;margin-top:12px"
+                                    onclick="addToCart('Classic Assam Breakfast', 499)">Add to Cart</button>
+                            </div>
+                        </div>
+                        <!-- Product 2 -->
+                        <div class="product-card" data-type="green" data-mood="focus" data-origin="darjeeling"
+                            data-price="599" data-date="5">
+                            <div class="product-card__img"><img src="images/green-tea.png"
+                                    alt="Himalayan Green Reserve"></div>
+                            <div class="product-card__body">
+                                <div class="product-card__type">Green Tea</div>
+                                <a href="product.html" class="product-card__name">Himalayan Green Reserve</a>
+                                <div class="product-card__note">Light, refreshing with vegetal notes</div>
+                                <div class="product-card__bottom">
+                                    <div class="product-card__price">₹599</div>
+                                    <div class="product-card__rating">★★★★★ <span>(203)</span></div>
+                                </div>
+                                <button class="btn btn--primary btn--sm" style="width:100%;margin-top:12px"
+                                    onclick="addToCart('Himalayan Green Reserve', 599)">Add to Cart</button>
+                            </div>
+                        </div>
+                        <!-- Product 3 -->
+                        <div class="product-card" data-type="chai" data-mood="energize" data-origin="assam"
+                            data-price="399" data-date="10">
+                            <span class="product-card__badge" style="background:var(--color-gold)">Best Seller</span>
+                            <div class="product-card__img"><img src="images/masala-chai.png" alt="Heritage Spiced Chai">
+                            </div>
+                            <div class="product-card__body">
+                                <div class="product-card__type">Masala Chai</div>
+                                <a href="product.html" class="product-card__name">Heritage Spiced Chai</a>
+                                <div class="product-card__note">Warm spices with CTC tea base</div>
+                                <div class="product-card__bottom">
+                                    <div class="product-card__price">₹399</div>
+                                    <div class="product-card__rating">★★★★★ <span>(312)</span></div>
+                                </div>
+                                <button class="btn btn--primary btn--sm" style="width:100%;margin-top:12px"
+                                    onclick="addToCart('Heritage Spiced Chai', 399)">Add to Cart</button>
+                            </div>
+                        </div>
+                        <!-- Product 4 -->
+                        <div class="product-card" data-type="white" data-mood="relax" data-origin="darjeeling"
+                            data-price="899" data-date="12">
+                            <span class="product-card__badge">New</span>
+                            <div class="product-card__img"><img src="images/white-tea.png" alt="Moonlight White Peony">
+                            </div>
+                            <div class="product-card__body">
+                                <div class="product-card__type">White Tea</div>
+                                <a href="product.html" class="product-card__name">Moonlight White Peony</a>
+                                <div class="product-card__note">Delicate floral with honey sweetness</div>
+                                <div class="product-card__bottom">
+                                    <div class="product-card__price">₹899</div>
+                                    <div class="product-card__rating">★★★★★ <span>(24)</span></div>
+                                </div>
+                                <button class="btn btn--primary btn--sm" style="width:100%;margin-top:12px"
+                                    onclick="addToCart('Moonlight White Peony', 899)">Add to Cart</button>
+                            </div>
+                        </div>
+                        <!-- Product 5 -->
+                        <div class="product-card" data-type="herbal" data-mood="glow" data-origin="nilgiri"
+                            data-price="549" data-date="8">
+                            <div class="product-card__img"><img src="images/herbal-tea.png" alt="Turmeric Golden Glow">
+                            </div>
+                            <div class="product-card__body">
+                                <div class="product-card__type">Herbal</div>
+                                <a href="product.html" class="product-card__name">Turmeric Golden Glow</a>
+                                <div class="product-card__note">Anti-inflammatory wellness blend</div>
+                                <div class="product-card__bottom">
+                                    <div class="product-card__price">₹549</div>
+                                    <div class="product-card__rating">★★★★★ <span>(89)</span></div>
+                                </div>
+                                <button class="btn btn--primary btn--sm" style="width:100%;margin-top:12px"
+                                    onclick="addToCart('Turmeric Golden Glow', 549)">Add to Cart</button>
+                            </div>
+                        </div>
+                        <!-- Product 6 -->
+                        <div class="product-card" data-type="herbal" data-mood="relax" data-origin="nilgiri"
+                            data-price="649" data-date="11">
+                            <span class="product-card__badge">New</span>
+                            <div class="product-card__img"><img src="images/herbal-tea.png" alt="Rose Chamomile Dream">
+                            </div>
+                            <div class="product-card__body">
+                                <div class="product-card__type">Herbal Infusion</div>
+                                <a href="product.html" class="product-card__name">Rose Chamomile Dream</a>
+                                <div class="product-card__note">Soothing blend of rose petals & chamomile</div>
+                                <div class="product-card__bottom">
+                                    <div class="product-card__price">₹649</div>
+                                    <div class="product-card__rating">★★★★★ <span>(18)</span></div>
+                                </div>
+                                <button class="btn btn--primary btn--sm" style="width:100%;margin-top:12px"
+                                    onclick="addToCart('Rose Chamomile Dream', 649)">Add to Cart</button>
+                            </div>
+                        </div>
+                        <!-- Product 7 -->
+                        <div class="product-card" data-type="oolong" data-mood="focus" data-origin="darjeeling"
+                            data-price="1199" data-date="9">
+                            <div class="product-card__img"><img src="images/oolong-tea.png"
+                                    alt="Darjeeling Muscatel Oolong"></div>
+                            <div class="product-card__body">
+                                <div class="product-card__type">Oolong</div>
+                                <a href="product.html" class="product-card__name">Darjeeling Muscatel Oolong</a>
+                                <div class="product-card__note">Rich muscatel grape with malty depth</div>
+                                <div class="product-card__bottom">
+                                    <div class="product-card__price">₹1,199</div>
+                                    <div class="product-card__rating">★★★★★ <span>(12)</span></div>
+                                </div>
+                                <button class="btn btn--primary btn--sm" style="width:100%;margin-top:12px"
+                                    onclick="addToCart('Darjeeling Muscatel Oolong', 1199)">Add to Cart</button>
+                            </div>
+                        </div>
+                        <!-- Product 8 -->
+                        <div class="product-card" data-type="green" data-mood="detox" data-origin="kangra"
+                            data-price="749" data-date="7">
+                            <div class="product-card__img"><img src="images/green-tea.png" alt="Spring Flush Sencha">
+                            </div>
+                            <div class="product-card__body">
+                                <div class="product-card__type">Green Tea</div>
+                                <a href="product.html" class="product-card__name">Spring Flush Sencha</a>
+                                <div class="product-card__note">Bright, grassy with umami finish</div>
+                                <div class="product-card__bottom">
+                                    <div class="product-card__price">₹749</div>
+                                    <div class="product-card__rating">★★★★☆ <span>(31)</span></div>
+                                </div>
+                                <button class="btn btn--primary btn--sm" style="width:100%;margin-top:12px"
+                                    onclick="addToCart('Spring Flush Sencha', 749)">Add to Cart</button>
+                            </div>
+                        </div>
+                        <!-- Product 9 -->
+                        <div class="product-card" data-type="black" data-mood="energize" data-origin="darjeeling"
+                            data-price="1299" data-date="4">
+                            <span class="product-card__badge" style="background:var(--color-gold)">Limited</span>
+                            <div class="product-card__img"><img src="images/darjeeling-tea.png"
+                                    alt="First Flush Darjeeling"></div>
+                            <div class="product-card__body">
+                                <div class="product-card__type">Black Tea</div>
+                                <a href="product.html" class="product-card__name">First Flush Darjeeling</a>
+                                <div class="product-card__note">Exquisite muscatel with floral body</div>
+                                <div class="product-card__bottom">
+                                    <div class="product-card__price">₹1,299</div>
+                                    <div class="product-card__rating">★★★★★ <span>(78)</span></div>
+                                </div>
+                                <button class="btn btn--primary btn--sm" style="width:100%;margin-top:12px"
+                                    onclick="addToCart('First Flush Darjeeling', 1299)">Add to Cart</button>
+                            </div>
+                        </div>
+                        <!-- Product 10 -->
+                        <div class="product-card" data-type="herbal" data-mood="detox" data-origin="nilgiri"
+                            data-price="479" data-date="3">
+                            <div class="product-card__img"><img src="images/green-tea.png" alt="Peppermint Detox"></div>
+                            <div class="product-card__body">
+                                <div class="product-card__type">Herbal</div>
+                                <a href="product.html" class="product-card__name">Peppermint Detox</a>
+                                <div class="product-card__note">Cool, cleansing with digestive benefits</div>
+                                <div class="product-card__bottom">
+                                    <div class="product-card__price">₹479</div>
+                                    <div class="product-card__rating">★★★★☆ <span>(56)</span></div>
+                                </div>
+                                <button class="btn btn--primary btn--sm" style="width:100%;margin-top:12px"
+                                    onclick="addToCart('Peppermint Detox', 479)">Add to Cart</button>
+                            </div>
+                        </div>
+                        <!-- Product 11 -->
+                        <div class="product-card" data-type="green" data-mood="glow" data-origin="kangra"
+                            data-price="1190" data-date="2">
+                            <div class="product-card__img"><img src="images/matcha-tea.png" alt="Ceremonial Matcha">
+                            </div>
+                            <div class="product-card__body">
+                                <div class="product-card__type">Green Tea</div>
+                                <a href="product.html" class="product-card__name">Ceremonial Matcha</a>
+                                <div class="product-card__note">Premium Japanese-style stone-ground</div>
+                                <div class="product-card__bottom">
+                                    <div class="product-card__price">₹1,190</div>
+                                    <div class="product-card__rating">★★★★★ <span>(44)</span></div>
+                                </div>
+                                <button class="btn btn--primary btn--sm" style="width:100%;margin-top:12px"
+                                    onclick="addToCart('Ceremonial Matcha', 1190)">Add to Cart</button>
+                            </div>
+                        </div>
+                        <!-- Product 12 -->
+                        <div class="product-card" data-type="white" data-mood="relax" data-origin="darjeeling"
+                            data-price="1899" data-date="1">
+                            <span class="product-card__badge" style="background:var(--color-gold)">Rare</span>
+                            <div class="product-card__img"><img src="images/white-tea.png" alt="Silver Needle White">
+                            </div>
+                            <div class="product-card__body">
+                                <div class="product-card__type">White Tea</div>
+                                <a href="product.html" class="product-card__name">Silver Needle White</a>
+                                <div class="product-card__note">Rare buds with delicate sweetness</div>
+                                <div class="product-card__bottom">
+                                    <div class="product-card__price">₹1,899</div>
+                                    <div class="product-card__rating">★★★★★ <span>(19)</span></div>
+                                </div>
+                                <button class="btn btn--primary btn--sm" style="width:100%;margin-top:12px"
+                                    onclick="addToCart('Silver Needle White', 1899)">Add to Cart</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="load-more">
+                        <button class="btn btn--secondary" id="loadMore" style="display:none">Load More</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__grid">
+                <div class="footer__brand">
+                    <a href="index.html" class="header__logo" style="color:#fff">Serené<span>.</span></a>
+                    <p>Crafted wellness teas for modern rituals.</p>
+                    <div class="footer__social"><a href="#" aria-label="Instagram">IG</a><a href="#"
+                            aria-label="Facebook">FB</a><a href="#" aria-label="Twitter">TW</a></div>
+                </div>
+                <div>
+                    <h4 class="footer__heading">Shop</h4>
+                    <div class="footer__links"><a href="shop.html">All Teas</a><a href="gifting.html">Gift Sets</a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="footer__heading">Company</h4>
+                    <div class="footer__links"><a href="about.html">About Us</a><a href="learn.html">Blog</a><a
+                            href="contact.html">Contact</a></div>
+                </div>
+                <div>
+                    <h4 class="footer__heading">Help</h4>
+                    <div class="footer__links"><a href="faq.html">FAQ</a><a href="#">Shipping</a><a href="#">Privacy</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer__bottom"><span>© 2026 Serené Tea. All rights reserved.</span><span>Made with 🍃 in
+                    India</span></div>
+        </div>
+    </footer>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

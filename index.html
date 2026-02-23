@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="Serené Tea — Crafted wellness teas for modern rituals. Discover premium loose leaf teas sourced from the finest estates.">
+  <title>Serené Tea — Premium Wellness Teas for Modern Rituals</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+  <!-- Skip Link -->
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <!-- ===== HEADER ===== -->
+  <header class="header" id="header">
+    <div class="header__inner">
+      <a href="index.html" class="header__logo" aria-label="Serené Tea Home">Serené<span>.</span></a>
+      <nav class="header__nav" aria-label="Main navigation">
+        <a href="shop.html">Shop</a>
+        <a href="shop.html#moods">Moods</a>
+        <a href="gifting.html">Gifting</a>
+        <a href="learn.html">Learn</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+      <div class="header__actions">
+        <button aria-label="Search" id="searchBtn">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" />
+          </svg>
+        </button>
+        <a href="#" aria-label="Account">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+        </a>
+        <button aria-label="Cart" id="cartBtn">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+            <path d="M3 6h18" />
+            <path d="M16 10a4 4 0 0 1-8 0" />
+          </svg>
+          <span class="cart-count" id="cartCount">0</span>
+        </button>
+        <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Nav -->
+  <nav class="mobile-nav" id="mobileNav" aria-label="Mobile navigation">
+    <a href="shop.html">Shop All Teas</a>
+    <a href="shop.html#moods">Shop by Mood</a>
+    <a href="gifting.html">Gifting</a>
+    <a href="learn.html">Learn</a>
+    <a href="about.html">About Us</a>
+    <a href="contact.html">Contact</a>
+    <a href="faq.html">FAQ</a>
+  </nav>
+
+  <!-- Cart Overlay -->
+  <div class="cart-overlay" id="cartOverlay"></div>
+
+  <!-- Cart Drawer -->
+  <aside class="cart-drawer" id="cartDrawer" aria-label="Shopping cart">
+    <div class="cart-drawer__header">
+      <h3>Your Cart</h3>
+      <button id="cartClose" aria-label="Close cart">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path d="M18 6 6 18M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    <div class="cart-drawer__items" id="cartItems">
+      <div class="cart-empty">
+        <div class="icon">🍃</div>
+        <p>Your cart is empty</p>
+        <a href="shop.html" class="btn btn--ghost" style="justify-content:center">Start Shopping</a>
+      </div>
+    </div>
+    <div class="cart-drawer__footer">
+      <div class="cart-drawer__total">
+        <span>Subtotal</span>
+        <span id="cartTotal">₹0</span>
+      </div>
+      <button class="btn btn--primary" style="width:100%">Checkout</button>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <main id="main">
+
+    <!-- 1. HERO -->
+    <section class="hero">
+      <div class="hero__bg"></div>
+      <div class="hero__overlay"></div>
+      <div class="container hero__content">
+        <div class="hero__trust">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2L9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2z" />
+          </svg>
+          <span>Garden-Fresh · Single-Origin · Wellness-Focused</span>
+        </div>
+        <h1>Crafted Wellness Teas for <em>Modern Rituals</em></h1>
+        <p class="subtitle">From mist-covered estates to your cup — discover artisanal teas that nourish your body, calm
+          your mind, and elevate your everyday moments.</p>
+        <div class="hero__ctas">
+          <a href="shop.html" class="btn btn--primary">Shop Teas</a>
+          <a href="about.html" class="btn btn--secondary">Our Story</a>
+        </div>
+      </div>
+      <div class="hero__decor" aria-hidden="true">
+        <div class="hero__decor-inner"><img src="images/tea-lifestyle.png" alt="Tea ritual"
+            style="width:100%;height:100%;object-fit:cover;border-radius:50%"></div>
+      </div>
+    </section>
+
+    <!-- 2. SHOP BY MOOD -->
+    <section class="section" id="moods">
+      <div class="container">
+        <div class="section-header fade-in">
+          <p class="overline">Find Your Blend</p>
+          <h2>Shop by Mood</h2>
+          <p>Let your mood guide you to the perfect cup.</p>
+        </div>
+        <div class="mood-grid fade-in">
+          <a href="shop.html?mood=energize" class="mood-card">
+            <div class="mood-card__icon">⚡</div>
+            <h4>Energize</h4>
+            <p>Start your day with vibrant, uplifting blends.</p>
+            <span class="btn btn--ghost btn--sm">Explore</span>
+          </a>
+          <a href="shop.html?mood=relax" class="mood-card">
+            <div class="mood-card__icon">🌿</div>
+            <h4>Relax</h4>
+            <p>Soothing teas that melt away the day's stress.</p>
+            <span class="btn btn--ghost btn--sm">Explore</span>
+          </a>
+          <a href="shop.html?mood=focus" class="mood-card">
+            <div class="mood-card__icon">🧠</div>
+            <h4>Focus</h4>
+            <p>Sharpen your clarity and stay centered.</p>
+            <span class="btn btn--ghost btn--sm">Explore</span>
+          </a>
+          <a href="shop.html?mood=detox" class="mood-card">
+            <div class="mood-card__icon">💧</div>
+            <h4>Detox</h4>
+            <p>Light, detoxifying infusions for renewal.</p>
+            <span class="btn btn--ghost btn--sm">Explore</span>
+          </a>
+          <a href="shop.html?mood=glow" class="mood-card">
+            <div class="mood-card__icon">✨</div>
+            <h4>Glow</h4>
+            <p>Nourish your skin and radiate from within.</p>
+            <span class="btn btn--ghost btn--sm">Explore</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. COMMERCE: NEW ARRIVALS / BEST SELLERS / SEASONAL -->
+    <section class="section section--alt">
+      <div class="container">
+        <div class="section-header fade-in">
+          <p class="overline">Our Collection</p>
+          <h2>Discover Our Teas</h2>
+        </div>
+        <div class="commerce-tabs fade-in" role="tablist">
+          <button class="commerce-tab active" role="tab" data-tab="new" aria-selected="true">New Arrivals</button>
+          <button class="commerce-tab" role="tab" data-tab="best" aria-selected="false">Best Sellers</button>
+          <button class="commerce-tab" role="tab" data-tab="seasonal" aria-selected="false">Seasonal Gifts</button>
+        </div>
+
+        <!-- New Arrivals -->
+        <div class="product-grid fade-in" id="tab-new">
+          <div class="product-card">
+            <span class="product-card__badge">New</span>
+            <div class="product-card__img"><img src="images/white-tea.png" alt="Moonlight White Peony tea"></div>
+            <div class="product-card__body">
+              <div class="product-card__type">White Tea</div>
+              <div class="product-card__name">Moonlight White Peony</div>
+              <div class="product-card__note">Delicate floral with honey sweetness</div>
+              <div class="product-card__bottom">
+                <div class="product-card__price">₹899</div>
+                <div class="product-card__rating">★★★★★ <span>(24)</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="product-card">
+            <span class="product-card__badge">New</span>
+            <div class="product-card__img"><img src="images/herbal-tea.png" alt="Rose Chamomile Dream tea"></div>
+            <div class="product-card__body">
+              <div class="product-card__type">Herbal Infusion</div>
+              <div class="product-card__name">Rose Chamomile Dream</div>
+              <div class="product-card__note">Soothing blend of rose petals & chamomile</div>
+              <div class="product-card__bottom">
+                <div class="product-card__price">₹649</div>
+                <div class="product-card__rating">★★★★★ <span>(18)</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="product-card">
+            <span class="product-card__badge">New</span>
+            <div class="product-card__img"><img src="images/green-tea.png" alt="Spring Flush Sencha tea"></div>
+            <div class="product-card__body">
+              <div class="product-card__type">Green Tea</div>
+              <div class="product-card__name">Spring Flush Sencha</div>
+              <div class="product-card__note">Bright, grassy with umami finish</div>
+              <div class="product-card__bottom">
+                <div class="product-card__price">₹749</div>
+                <div class="product-card__rating">★★★★☆ <span>(31)</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="product-card">
+            <span class="product-card__badge">New</span>
+            <div class="product-card__img"><img src="images/oolong-tea.png" alt="Darjeeling Muscatel Oolong tea"></div>
+            <div class="product-card__body">
+              <div class="product-card__type">Oolong</div>
+              <div class="product-card__name">Darjeeling Muscatel Oolong</div>
+              <div class="product-card__note">Rich muscatel grape with malty depth</div>
+              <div class="product-card__bottom">
+                <div class="product-card__price">₹1,199</div>
+                <div class="product-card__rating">★★★★★ <span>(12)</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Best Sellers (hidden by default) -->
+        <div class="product-grid" id="tab-best" style="display:none">
+          <div class="product-card">
+            <span class="product-card__badge" style="background:var(--color-gold)">Best Seller</span>
+            <div class="product-card__img"><img src="images/darjeeling-tea.png" alt="Classic Assam Breakfast tea"></div>
+            <div class="product-card__body">
+              <div class="product-card__type">Black Tea</div>
+              <div class="product-card__name">Classic Assam Breakfast</div>
+              <div class="product-card__note">Bold, malty with rich amber liquor</div>
+              <div class="product-card__bottom">
+                <div class="product-card__price">₹499</div>
+                <div class="product-card__rating">★★★★★ <span>(156)</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="product-card">
+            <span class="product-card__badge" style="background:var(--color-gold)">Best Seller</span>
+            <div class="product-card__img"><img src="images/green-tea.png" alt="Himalayan Green Reserve tea"></div>
+            <div class="product-card__body">
+              <div class="product-card__type">Green Tea</div>
+              <div class="product-card__name">Himalayan Green Reserve</div>
+              <div class="product-card__note">Light, refreshing with vegetal notes</div>
+              <div class="product-card__bottom">
+                <div class="product-card__price">₹599</div>
+                <div class="product-card__rating">★★★★★ <span>(203)</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="product-card">
+            <span class="product-card__badge" style="background:var(--color-gold)">Best Seller</span>
+            <div class="product-card__img"><img src="images/masala-chai.png" alt="Heritage Spiced Chai"></div>
+            <div class="product-card__body">
+              <div class="product-card__type">Masala Chai</div>
+              <div class="product-card__name">Heritage Spiced Chai</div>
+              <div class="product-card__note">Warm spices with CTC tea base</div>
+              <div class="product-card__bottom">
+                <div class="product-card__price">₹399</div>
+                <div class="product-card__rating">★★★★★ <span>(312)</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="product-card">
+            <span class="product-card__badge" style="background:var(--color-gold)">Best Seller</span>
+            <div class="product-card__img"><img src="images/herbal-tea.png" alt="Turmeric Golden Glow tea"></div>
+            <div class="product-card__body">
+              <div class="product-card__type">Herbal</div>
+              <div class="product-card__name">Turmeric Golden Glow</div>
+              <div class="product-card__note">Anti-inflammatory wellness blend</div>
+              <div class="product-card__bottom">
+                <div class="product-card__price">₹549</div>
+                <div class="product-card__rating">★★★★★ <span>(89)</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seasonal Gifts (hidden by default) -->
+        <div class="product-grid" id="tab-seasonal" style="display:none">
+          <div class="product-card">
+            <span class="product-card__badge" style="background:var(--color-success)">Gift Set</span>
+            <div class="product-card__img"><img src="images/gift-box.png" alt="Spring Festival Tea Box"></div>
+            <div class="product-card__body">
+              <div class="product-card__type">Gift Collection</div>
+              <div class="product-card__name">Spring Festival Tea Box</div>
+              <div class="product-card__note">5 curated teas in a premium gift box</div>
+              <div class="product-card__bottom">
+                <div class="product-card__price">₹1,499</div>
+                <div class="product-card__rating">★★★★★ <span>(45)</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="product-card">
+            <span class="product-card__badge" style="background:var(--color-success)">Gift Set</span>
+            <div class="product-card__img"><img src="images/gift-box.png" alt="Wellness Ritual Box"></div>
+            <div class="product-card__body">
+              <div class="product-card__type">Gift Collection</div>
+              <div class="product-card__name">Wellness Ritual Box</div>
+              <div class="product-card__note">3 wellness blends with infuser</div>
+              <div class="product-card__bottom">
+                <div class="product-card__price">₹999</div>
+                <div class="product-card__rating">★★★★★ <span>(67)</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="product-card">
+            <span class="product-card__badge" style="background:var(--color-success)">Gift Set</span>
+            <div class="product-card__img"><img src="images/gift-box.png" alt="Connoisseur's Collection"></div>
+            <div class="product-card__body">
+              <div class="product-card__type">Luxury Hamper</div>
+              <div class="product-card__name">Connoisseur's Collection</div>
+              <div class="product-card__note">8 rare teas with teaware in wooden chest</div>
+              <div class="product-card__bottom">
+                <div class="product-card__price">₹3,999</div>
+                <div class="product-card__rating">★★★★★ <span>(28)</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="product-card">
+            <span class="product-card__badge" style="background:var(--color-success)">Gift Set</span>
+            <div class="product-card__img"><img src="images/herbal-tea.png" alt="Tea & Honey Pairing Set"></div>
+            <div class="product-card__body">
+              <div class="product-card__type">Gift Collection</div>
+              <div class="product-card__name">Tea & Honey Pairing Set</div>
+              <div class="product-card__note">2 teas paired with artisanal honey</div>
+              <div class="product-card__bottom">
+                <div class="product-card__price">₹799</div>
+                <div class="product-card__rating">★★★★☆ <span>(34)</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-center" style="margin-top:var(--space-2xl)">
+          <a href="shop.html" class="btn btn--secondary">View All Teas</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. TEA MASTER'S SELECTIONS -->
+    <section class="section">
+      <div class="container">
+        <div class="section-header fade-in">
+          <p class="overline">Expert Curated</p>
+          <h2>Tea Master's Selections</h2>
+          <p>Hand-picked by our master taster for exceptional quality and character.</p>
+        </div>
+        <div class="curated-grid fade-in">
+          <div class="curated-card">
+            <div class="curated-card__img"><img src="images/darjeeling-tea.png" alt="First Flush Darjeeling"
+                style="width:100%;height:100%;object-fit:cover;border-radius:var(--radius-md)"></div>
+            <div class="curated-card__body">
+              <h4>First Flush Darjeeling</h4>
+              <p>"The champagne of teas — this spring harvest delivers an exquisite muscatel aroma with a light, floral
+                body."</p>
+              <div class="curated-card__meta">₹1,299 · Limited Edition</div>
+            </div>
+          </div>
+          <div class="curated-card">
+            <div class="curated-card__img"><img src="images/white-tea.png" alt="Silver Needle White tea"
+                style="width:100%;height:100%;object-fit:cover;border-radius:var(--radius-md)"></div>
+            <div class="curated-card__body">
+              <h4>Silver Needle White</h4>
+              <p>"Rare, hand-plucked buds with the most delicate sweetness. Best enjoyed in quiet afternoon solitude."
+              </p>
+              <div class="curated-card__meta">₹1,899 · Single Estate</div>
+            </div>
+          </div>
+          <div class="curated-card">
+            <div class="curated-card__img"><img src="images/oolong-tea.png" alt="Aged Pu-erh Reserve"
+                style="width:100%;height:100%;object-fit:cover;border-radius:var(--radius-md)"></div>
+            <div class="curated-card__body">
+              <h4>Aged Pu-erh Reserve</h4>
+              <p>"Deep, earthy complexity with a smooth, velvety finish. A meditative tea for the true connoisseur."</p>
+              <div class="curated-card__meta">₹2,499 · Rare Find</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. STORY & ORIGIN -->
+    <section class="section section--alt">
+      <div class="container">
+        <div class="story-grid fade-in">
+          <div class="story__content">
+            <p class="overline">Our Story</p>
+            <h2>Born from a Love of Ritual</h2>
+            <p>Serené began with a simple belief: that a cup of tea can be a moment of mindfulness in a busy world. We
+              partner directly with small-estate growers across Darjeeling, Assam, and the Nilgiris to bring you teas
+              that are as kind to the earth as they are to your senses.</p>
+            <div class="story__stats">
+              <div>
+                <div class="story__stat-value">15+</div>
+                <div class="story__stat-label">Partner Estates</div>
+              </div>
+              <div>
+                <div class="story__stat-value">50+</div>
+                <div class="story__stat-label">Tea Varieties</div>
+              </div>
+              <div>
+                <div class="story__stat-value">10K+</div>
+                <div class="story__stat-label">Happy Sippers</div>
+              </div>
+            </div>
+            <div style="margin-top:var(--space-xl)">
+              <a href="about.html" class="btn btn--ghost">Learn More About Us</a>
+            </div>
+          </div>
+          <div class="story__visual">
+            <img src="images/hero-estate.png" alt="Mist-covered tea gardens of Darjeeling"
+              style="width:100%;height:100%;object-fit:cover;border-radius:var(--radius-lg)">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. LEARN THE ART OF TEA -->
+    <section class="section">
+      <div class="container">
+        <div class="section-header fade-in">
+          <p class="overline">Knowledge</p>
+          <h2>Learn the Art of Tea</h2>
+          <p>Explore guides, stories, and brewing wisdom from our experts.</p>
+        </div>
+        <div class="guide-grid fade-in">
+          <a href="learn.html" class="guide-card">
+            <div class="guide-card__icon">🫖</div>
+            <h4>The Perfect Brew</h4>
+            <p>Temperature, timing, and technique — master the art of brewing every tea type.</p>
+            <span class="btn btn--ghost btn--sm">Read Guide</span>
+          </a>
+          <a href="learn.html" class="guide-card">
+            <div class="guide-card__icon">🌱</div>
+            <h4>Tea & Wellness</h4>
+            <p>How different teas support your immunity, digestion, and mental clarity.</p>
+            <span class="btn btn--ghost btn--sm">Read Guide</span>
+          </a>
+          <a href="learn.html" class="guide-card">
+            <div class="guide-card__icon">🗺️</div>
+            <h4>Origin Stories</h4>
+            <p>Journey through India's finest tea regions and meet the growers behind your cup.</p>
+            <span class="btn btn--ghost btn--sm">Read Guide</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. TESTIMONIALS -->
+    <section class="section section--alt">
+      <div class="container">
+        <div class="section-header fade-in">
+          <p class="overline">Reviews</p>
+          <h2>What Our Sippers Say</h2>
+        </div>
+        <div class="testimonials-track fade-in">
+          <div class="testimonial-card">
+            <div class="testimonial-card__stars">★★★★★</div>
+            <div class="testimonial-card__text">"The Darjeeling First Flush is absolutely divine. It's like sipping on
+              liquid sunshine — delicate, fragrant, and utterly refreshing. Best tea I've had in years."</div>
+            <div class="testimonial-card__author">Priya Sharma</div>
+            <div class="testimonial-card__role">Tea Enthusiast, Mumbai</div>
+          </div>
+          <div class="testimonial-card">
+            <div class="testimonial-card__stars">★★★★★</div>
+            <div class="testimonial-card__text">"I ordered the Wellness Ritual gift box for my mother and she was
+              overjoyed. The packaging is gorgeous and the teas are exceptionally fresh. Will order again!"</div>
+            <div class="testimonial-card__author">Arjun Mehta</div>
+            <div class="testimonial-card__role">Repeat Customer, Delhi</div>
+          </div>
+          <div class="testimonial-card">
+            <div class="testimonial-card__stars">★★★★★</div>
+            <div class="testimonial-card__text">"Their Heritage Spiced Chai has replaced my morning coffee entirely. The
+              blend of spices is perfectly balanced — warm but never overwhelming. An everyday essential."</div>
+            <div class="testimonial-card__author">Kavya Nair</div>
+            <div class="testimonial-card__role">Wellness Coach, Bangalore</div>
+          </div>
+          <div class="testimonial-card">
+            <div class="testimonial-card__stars">★★★★★</div>
+            <div class="testimonial-card__text">"As a café owner, I switched to Serené for our premium tea menu. Our
+              customers immediately noticed the quality difference. Exceptional sourcing and consistency."</div>
+            <div class="testimonial-card__author">Rohan Desai</div>
+            <div class="testimonial-card__role">Café Owner, Pune</div>
+          </div>
+        </div>
+        <div class="testimonials__summary fade-in">
+          <strong>4.8 / 5</strong> from 500+ reviews · Trusted since 2019
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. NEWSLETTER + FOOTER -->
+    <section class="section">
+      <div class="container">
+        <div class="newsletter fade-in">
+          <h3>Join the Tea Circle</h3>
+          <p>Get early access to new arrivals, brewing tips, and 10% off your first order.</p>
+          <form class="newsletter__form" onsubmit="event.preventDefault(); alert('Thank you for subscribing!')">
+            <input type="email" placeholder="Your email address" required aria-label="Email address">
+            <button type="submit">Subscribe</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__brand">
+          <a href="index.html" class="header__logo" style="color:#fff">Serené<span>.</span></a>
+          <p>Crafted wellness teas for modern rituals. Sourced with care from India's finest estates, delivered fresh to
+            your doorstep.</p>
+          <div class="footer__social">
+            <a href="#" aria-label="Instagram">IG</a>
+            <a href="#" aria-label="Facebook">FB</a>
+            <a href="#" aria-label="Twitter">TW</a>
+            <a href="#" aria-label="Pinterest">PI</a>
+          </div>
+        </div>
+        <div>
+          <h4 class="footer__heading">Shop</h4>
+          <div class="footer__links">
+            <a href="shop.html">All Teas</a>
+            <a href="shop.html">Green Tea</a>
+            <a href="shop.html">Black Tea</a>
+            <a href="shop.html">Herbal & Wellness</a>
+            <a href="gifting.html">Gift Sets</a>
+          </div>
+        </div>
+        <div>
+          <h4 class="footer__heading">Company</h4>
+          <div class="footer__links">
+            <a href="about.html">About Us</a>
+            <a href="learn.html">Blog & Guides</a>
+            <a href="contact.html">Contact</a>
+            <a href="faq.html">FAQ</a>
+            <a href="#">Careers</a>
+          </div>
+        </div>
+        <div>
+          <h4 class="footer__heading">Help</h4>
+          <div class="footer__links">
+            <a href="#">Shipping & Returns</a>
+            <a href="#">Track Order</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <span>© 2026 Serené Tea. All rights reserved.</span>
+        <span>Made with 🍃 in India</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+
+</html>

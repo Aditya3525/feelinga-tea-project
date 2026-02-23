@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Find the perfect tea gift. Curated gift sets, luxury hampers, and thoughtful tea collections for every occasion.">
+    <title>Tea Gifts & Hampers — Serené Tea</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+    <header class="header" id="header">
+        <div class="header__inner"><a href="index.html" class="header__logo">Serené<span>.</span></a>
+            <nav class="header__nav" aria-label="Main navigation"><a href="shop.html">Shop</a><a
+                    href="shop.html#moods">Moods</a><a href="gifting.html" class="active">Gifting</a><a
+                    href="learn.html">Learn</a><a href="about.html">About</a><a href="contact.html">Contact</a></nav>
+            <div class="header__actions"><button aria-label="Search"><svg width="20" height="20" fill="none"
+                        stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="m21 21-4.35-4.35" />
+                    </svg></button><a href="#" aria-label="Account"><svg width="20" height="20" fill="none"
+                        stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg></a><button aria-label="Cart" id="cartBtn"><svg width="20" height="20" fill="none"
+                        stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+                        <path d="M3 6h18" />
+                        <path d="M16 10a4 4 0 0 1-8 0" />
+                    </svg><span class="cart-count" id="cartCount">0</span></button><button class="hamburger"
+                    id="hamburger" aria-label="Menu"
+                    aria-expanded="false"><span></span><span></span><span></span></button></div>
+        </div>
+    </header>
+    <nav class="mobile-nav" id="mobileNav" aria-label="Mobile navigation"><a href="shop.html">Shop</a><a
+            href="gifting.html">Gifting</a><a href="learn.html">Learn</a><a href="about.html">About</a><a
+            href="contact.html">Contact</a><a href="faq.html">FAQ</a></nav>
+    <div class="cart-overlay" id="cartOverlay"></div>
+    <aside class="cart-drawer" id="cartDrawer" aria-label="Shopping cart">
+        <div class="cart-drawer__header">
+            <h3>Your Cart</h3><button id="cartClose" aria-label="Close cart"><svg width="24" height="24" fill="none"
+                    stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                    <path d="M18 6 6 18M6 6l12 12" />
+                </svg></button>
+        </div>
+        <div class="cart-drawer__items" id="cartItems">
+            <div class="cart-empty">
+                <div class="icon">🍃</div>
+                <p>Your cart is empty</p>
+            </div>
+        </div>
+        <div class="cart-drawer__footer">
+            <div class="cart-drawer__total"><span>Subtotal</span><span id="cartTotal">₹0</span></div><button
+                class="btn btn--primary" style="width:100%">Checkout</button>
+        </div>
+    </aside>
+
+    <main id="main">
+        <!-- Gift Hero -->
+        <section class="gift-hero">
+            <div class="container">
+                <p class="overline">The Art of Giving</p>
+                <h1>Tea Gifts for Every Occasion</h1>
+                <p class="subtitle" style="margin:0 auto">Thoughtfully curated gift sets that bring warmth, wellness,
+                    and joy. Perfect for birthdays, festivals, corporate gifting, or just because.</p>
+            </div>
+        </section>
+
+        <!-- Gift Tiers -->
+        <section class="section">
+            <div class="container">
+                <div class="section-header fade-in">
+                    <p class="overline">By Budget</p>
+                    <h2>Find the Perfect Gift</h2>
+                </div>
+                <div class="gift-tiers fade-in">
+                    <div class="gift-tier">
+                        <div class="gift-tier__icon">🎁</div>
+                        <h3>Under ₹599</h3>
+                        <p>Charming tea samplers and single-origin pouches in beautiful packaging. Ideal for stocking
+                            stuffers and small gestures of kindness.</p>
+                        <a href="shop.html" class="btn btn--primary btn--sm">Browse Gifts</a>
+                    </div>
+                    <div class="gift-tier">
+                        <div class="gift-tier__icon">🎀</div>
+                        <h3>Under ₹1,499</h3>
+                        <p>Curated multi-tea boxes with tasting notes. Includes our signature Wellness Ritual Box and
+                            Tea Trail Discovery Set.</p>
+                        <a href="shop.html" class="btn btn--primary btn--sm">Browse Gifts</a>
+                    </div>
+                    <div class="gift-tier">
+                        <div class="gift-tier__icon">🏆</div>
+                        <h3>Luxury Hampers</h3>
+                        <p>Premium wooden chests with 6–8 rare teas, teaware, and artisanal honey. The ultimate gift for
+                            connoisseurs.</p>
+                        <a href="shop.html" class="btn btn--primary btn--sm">Browse Gifts</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Gift Products -->
+        <section class="section section--alt">
+            <div class="container">
+                <div class="section-header fade-in">
+                    <p class="overline">Most Loved</p>
+                    <h2>Popular Gift Sets</h2>
+                </div>
+                <div class="product-grid fade-in">
+                    <div class="product-card">
+                        <span class="product-card__badge" style="background:var(--color-success)">Gift Set</span>
+                        <div class="product-card__img"><span class="product-card__img-placeholder">🎁</span></div>
+                        <div class="product-card__body">
+                            <div class="product-card__type">Gift Collection</div>
+                            <div class="product-card__name">Spring Festival Tea Box</div>
+                            <div class="product-card__note">5 curated teas in a premium gift box</div>
+                            <div class="product-card__bottom">
+                                <div class="product-card__price">₹1,499</div>
+                                <div class="product-card__rating">★★★★★ <span>(45)</span></div>
+                            </div>
+                            <button class="btn btn--primary btn--sm" style="width:100%;margin-top:12px"
+                                onclick="addToCart('Spring Festival Tea Box', 1499)">Add to Cart</button>
+                        </div>
+                    </div>
+                    <div class="product-card">
+                        <span class="product-card__badge" style="background:var(--color-success)">Gift Set</span>
+                        <div class="product-card__img"><span class="product-card__img-placeholder">🎀</span></div>
+                        <div class="product-card__body">
+                            <div class="product-card__type">Gift Collection</div>
+                            <div class="product-card__name">Wellness Ritual Box</div>
+                            <div class="product-card__note">3 wellness blends with bamboo infuser</div>
+                            <div class="product-card__bottom">
+                                <div class="product-card__price">₹999</div>
+                                <div class="product-card__rating">★★★★★ <span>(67)</span></div>
+                            </div>
+                            <button class="btn btn--primary btn--sm" style="width:100%;margin-top:12px"
+                                onclick="addToCart('Wellness Ritual Box', 999)">Add to Cart</button>
+                        </div>
+                    </div>
+                    <div class="product-card">
+                        <span class="product-card__badge" style="background:var(--color-success)">Gift Set</span>
+                        <div class="product-card__img"><span class="product-card__img-placeholder">🏆</span></div>
+                        <div class="product-card__body">
+                            <div class="product-card__type">Luxury Hamper</div>
+                            <div class="product-card__name">Connoisseur's Collection</div>
+                            <div class="product-card__note">8 rare teas with teaware in wooden chest</div>
+                            <div class="product-card__bottom">
+                                <div class="product-card__price">₹3,999</div>
+                                <div class="product-card__rating">★★★★★ <span>(28)</span></div>
+                            </div>
+                            <button class="btn btn--primary btn--sm" style="width:100%;margin-top:12px"
+                                onclick="addToCart('Connoisseur Collection', 3999)">Add to Cart</button>
+                        </div>
+                    </div>
+                    <div class="product-card">
+                        <span class="product-card__badge" style="background:var(--color-success)">Gift Set</span>
+                        <div class="product-card__img"><span class="product-card__img-placeholder">💝</span></div>
+                        <div class="product-card__body">
+                            <div class="product-card__type">Gift Collection</div>
+                            <div class="product-card__name">Tea & Honey Pairing</div>
+                            <div class="product-card__note">2 teas paired with artisanal honey</div>
+                            <div class="product-card__bottom">
+                                <div class="product-card__price">₹799</div>
+                                <div class="product-card__rating">★★★★☆ <span>(34)</span></div>
+                            </div>
+                            <button class="btn btn--primary btn--sm" style="width:100%;margin-top:12px"
+                                onclick="addToCart('Tea & Honey Pairing', 799)">Add to Cart</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gift Options -->
+        <section class="section">
+            <div class="container">
+                <div class="section-header fade-in">
+                    <h2>Make It Special</h2>
+                    <p>Personalize your gift with these options at checkout.</p>
+                </div>
+                <div class="gift-options fade-in" style="max-width:600px;margin:0 auto">
+                    <div class="gift-option"><input type="checkbox" id="giftWrap"><label for="giftWrap"><strong>Gift
+                                Wrap</strong> — Premium kraft paper with dried flower sprig (+₹49)</label></div>
+                    <div class="gift-option"><input type="checkbox" id="giftMsg"><label for="giftMsg"><strong>Personal
+                                Message</strong> — Handwritten note card included (Free)</label></div>
+                    <div class="gift-option"><input type="checkbox" id="giftBox"><label for="giftBox"><strong>Upgrade to
+                                Gift Box</strong> — Rigid box with magnetic closure (+₹149)</label></div>
+                </div>
+                <div style="text-align:center;margin-top:var(--space-xl)">
+                    <p style="font-size:0.9rem;margin:0 auto"><strong>Delivery:</strong> Standard 3–5 business days ·
+                        Express 1–2 days available · Free shipping on orders ₹500+</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Corporate Gifting CTA -->
+        <section class="section section--alt">
+            <div class="container text-center fade-in">
+                <p class="overline">For Businesses</p>
+                <h2>Corporate Tea Gifting</h2>
+                <p style="margin:var(--space-md) auto var(--space-xl)">Impress clients and delight your team with
+                    custom-branded tea gift sets. Minimum order of 25 units. Volume discounts available.</p>
+                <a href="contact.html" class="btn btn--primary">Enquire Now</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__grid">
+                <div class="footer__brand"><a href="index.html" class="header__logo"
+                        style="color:#fff">Serené<span>.</span></a>
+                    <p>Crafted wellness teas for modern rituals.</p>
+                    <div class="footer__social"><a href="#" aria-label="Instagram">IG</a><a href="#"
+                            aria-label="Facebook">FB</a><a href="#" aria-label="Twitter">TW</a></div>
+                </div>
+                <div>
+                    <h4 class="footer__heading">Shop</h4>
+                    <div class="footer__links"><a href="shop.html">All Teas</a><a href="gifting.html">Gift Sets</a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="footer__heading">Company</h4>
+                    <div class="footer__links"><a href="about.html">About Us</a><a href="learn.html">Blog</a><a
+                            href="contact.html">Contact</a></div>
+                </div>
+                <div>
+                    <h4 class="footer__heading">Help</h4>
+                    <div class="footer__links"><a href="faq.html">FAQ</a><a href="#">Shipping</a><a href="#">Privacy</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer__bottom"><span>© 2026 Serené Tea.</span><span>Made with 🍃 in India</span></div>
+        </div>
+    </footer>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

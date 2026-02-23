@@ -1,0 +1,248 @@
+import 'dotenv/config';
+import mongoose from 'mongoose';
+import Product from '../models/Product.js';
+import User from '../models/User.js';
+
+const products = [
+    {
+        slug: 'classic-assam-breakfast',
+        name: 'Classic Assam Breakfast',
+        type: 'Black Tea',
+        description: 'A bold, full-bodied black tea from the finest Assam estates. Rich malty character with a brisk, coppery liquor that pairs perfectly with milk.',
+        shortDescription: 'Bold, malty with rich amber liquor',
+        prices: { '50g': 299, '100g': 499, '200g': 898 },
+        moods: ['energize'],
+        origin: 'Assam, India',
+        caffeine: 'high',
+        tastingNotes: ['Malt', 'Honey', 'Caramel'],
+        brewingInstructions: { temperature: '95°C', steepTime: '3-5 min', amount: '2g per cup' },
+        images: ['/images/products/assam-breakfast.png'],
+        rating: 4.8, reviewCount: 156,
+        isBestSeller: false, isNewArrival: true,
+        tags: ['morning', 'bold', 'classic', 'milk-tea'],
+    },
+    {
+        slug: 'himalayan-green-reserve',
+        name: 'Himalayan Green Reserve',
+        type: 'Green Tea',
+        description: 'Light, refreshing green tea from high-altitude gardens in the Himalayas. Delicate vegetal notes with a clean, sweet finish.',
+        shortDescription: 'Light, refreshing with vegetal notes',
+        prices: { '50g': 359, '100g': 599, '200g': 1079 },
+        moods: ['focus', 'detox'],
+        origin: 'Darjeeling, India',
+        caffeine: 'medium',
+        tastingNotes: ['Grass', 'Jasmine', 'Sweet Melon'],
+        brewingInstructions: { temperature: '75°C', steepTime: '2-3 min', amount: '2g per cup' },
+        images: ['/images/products/himalayan-green.png'],
+        rating: 4.7, reviewCount: 203,
+        isBestSeller: false, isNewArrival: true,
+        tags: ['fresh', 'light', 'everyday'],
+    },
+    {
+        slug: 'heritage-spiced-chai',
+        name: 'Heritage Spiced Chai',
+        type: 'Masala Chai',
+        description: 'Warm spices blended with a robust CTC tea base. Traditional Indian chai with cardamom, ginger, cinnamon, and cloves.',
+        shortDescription: 'Warm spices with CTC tea base',
+        prices: { '50g': 239, '100g': 399, '200g': 719 },
+        moods: ['energize', 'immunity'],
+        origin: 'Assam, India',
+        caffeine: 'high',
+        tastingNotes: ['Cardamom', 'Ginger', 'Cinnamon'],
+        brewingInstructions: { temperature: '100°C', steepTime: '5-7 min', amount: '3g per cup' },
+        images: ['/images/products/heritage-chai.png'],
+        rating: 4.9, reviewCount: 312,
+        isBestSeller: true, isNew: true,
+        tags: ['chai', 'spiced', 'traditional', 'winter'],
+    },
+    {
+        slug: 'silver-needle-white',
+        name: 'Silver Needle White',
+        type: 'White Tea',
+        description: 'The most prized white tea, made from pure buds. Extraordinarily delicate with notes of honey and white flowers.',
+        shortDescription: 'Delicate, pure buds with honey notes',
+        prices: { '50g': 599, '100g': 999, '200g': 1799 },
+        moods: ['glow', 'relax'],
+        origin: 'Nilgiri, India',
+        caffeine: 'low',
+        tastingNotes: ['Honey', 'White Flowers', 'Vanilla'],
+        brewingInstructions: { temperature: '70°C', steepTime: '4-5 min', amount: '3g per cup' },
+        images: ['/images/products/silver-needle.png'],
+        rating: 4.6, reviewCount: 89,
+        isBestSeller: false, isNewArrival: true,
+        tags: ['premium', 'delicate', 'antioxidant'],
+    },
+    {
+        slug: 'darjeeling-first-flush',
+        name: 'Darjeeling First Flush',
+        type: 'Black Tea',
+        description: 'The champagne of teas. Light, muscatel character from the first spring harvest in Darjeeling gardens.',
+        shortDescription: 'Light muscatel, champagne of teas',
+        prices: { '50g': 449, '100g': 749, '200g': 1349 },
+        moods: ['focus', 'energize'],
+        origin: 'Darjeeling, India',
+        caffeine: 'medium',
+        tastingNotes: ['Muscatel', 'Floral', 'Citrus'],
+        brewingInstructions: { temperature: '90°C', steepTime: '3-4 min', amount: '2g per cup' },
+        images: ['/images/products/darjeeling-ff.png'],
+        rating: 4.8, reviewCount: 178,
+        isBestSeller: true, isNew: false,
+        tags: ['premium', 'muscatel', 'spring'],
+    },
+    {
+        slug: 'kashmiri-kahwa',
+        name: 'Kashmiri Kahwa',
+        type: 'Green Tea',
+        description: 'Traditional Kashmiri green tea with saffron, almonds, and warm spices. A luxurious, aromatic experience.',
+        shortDescription: 'Saffron-infused with almonds & spices',
+        prices: { '50g': 499, '100g': 849, '200g': 1529 },
+        moods: ['immunity', 'relax'],
+        origin: 'Kashmir, India',
+        caffeine: 'medium',
+        tastingNotes: ['Saffron', 'Almond', 'Cardamom'],
+        brewingInstructions: { temperature: '80°C', steepTime: '4-5 min', amount: '2g per cup' },
+        images: ['/images/products/kashmiri-kahwa.png'],
+        rating: 4.7, reviewCount: 145,
+        isBestSeller: false, isNewArrival: true,
+        tags: ['saffron', 'luxury', 'traditional'],
+    },
+    {
+        slug: 'chamomile-lavender-calm',
+        name: 'Chamomile Lavender Calm',
+        type: 'Herbal',
+        description: 'Caffeine-free herbal blend of chamomile flowers and French lavender. Perfect for evening relaxation and better sleep.',
+        shortDescription: 'Calming chamomile with lavender',
+        prices: { '50g': 349, '100g': 599, '200g': 1079 },
+        moods: ['relax', 'glow'],
+        origin: 'Blended, India',
+        caffeine: 'none',
+        tastingNotes: ['Chamomile', 'Lavender', 'Honey'],
+        brewingInstructions: { temperature: '100°C', steepTime: '5-7 min', amount: '2g per cup' },
+        images: ['/images/products/chamomile-lavender.png'],
+        rating: 4.5, reviewCount: 98,
+        isBestSeller: false, isNewArrival: true,
+        tags: ['herbal', 'sleep', 'caffeine-free', 'evening'],
+    },
+    {
+        slug: 'oolong-oriental-beauty',
+        name: 'Oolong Oriental Beauty',
+        type: 'Oolong',
+        description: 'Semi-oxidized oolong with natural honey sweetness. Complex flavor profile that evolves with each infusion.',
+        shortDescription: 'Semi-oxidized with honey sweetness',
+        prices: { '50g': 549, '100g': 899, '200g': 1619 },
+        moods: ['focus', 'detox'],
+        origin: 'Nilgiri, India',
+        caffeine: 'medium',
+        tastingNotes: ['Honey', 'Peach', 'Roasted'],
+        brewingInstructions: { temperature: '85°C', steepTime: '3-5 min', amount: '3g per cup' },
+        images: ['/images/products/oolong-beauty.png'],
+        rating: 4.6, reviewCount: 67,
+        isBestSeller: false, isNewArrival: true,
+        tags: ['oolong', 'complex', 'multi-steep'],
+    },
+    {
+        slug: 'matcha-ceremonial-grade',
+        name: 'Matcha Ceremonial Grade',
+        type: 'Matcha',
+        description: 'Stone-ground Japanese-style matcha from shade-grown leaves. Vibrant green with umami richness and creamy texture.',
+        shortDescription: 'Stone-ground, vibrant & umami-rich',
+        prices: { '50g': 799, '100g': 1399, '200g': 2519 },
+        moods: ['focus', 'energize', 'detox'],
+        origin: 'Nilgiri, India',
+        caffeine: 'high',
+        tastingNotes: ['Umami', 'Sweet Grass', 'Cream'],
+        brewingInstructions: { temperature: '70°C', steepTime: 'Whisk 15s', amount: '2g per bowl' },
+        images: ['/images/products/matcha-ceremonial.png'],
+        rating: 4.9, reviewCount: 234,
+        isBestSeller: true, isNew: false,
+        tags: ['matcha', 'premium', 'superfood'],
+    },
+    {
+        slug: 'tulsi-ginger-immunity',
+        name: 'Tulsi Ginger Immunity',
+        type: 'Herbal Infusion',
+        description: 'Holy basil (tulsi) infused with fresh ginger for a warming, immunity-boosting herbal tea. Caffeine-free daily wellness.',
+        shortDescription: 'Holy basil & ginger wellness blend',
+        prices: { '50g': 279, '100g': 449, '200g': 809 },
+        moods: ['immunity', 'detox'],
+        origin: 'Uttarakhand, India',
+        caffeine: 'none',
+        tastingNotes: ['Tulsi', 'Ginger', 'Pepper'],
+        brewingInstructions: { temperature: '100°C', steepTime: '5-7 min', amount: '2g per cup' },
+        images: ['/images/products/tulsi-ginger.png'],
+        rating: 4.4, reviewCount: 112,
+        isBestSeller: false, isNewArrival: true,
+        tags: ['herbal', 'immunity', 'ayurvedic', 'caffeine-free'],
+    },
+    {
+        slug: 'earl-grey-bergamot',
+        name: 'Earl Grey Bergamot',
+        type: 'Black Tea',
+        description: 'Classic black tea scented with Italian bergamot oil. Aromatic and citrusy with a smooth, elegant finish.',
+        shortDescription: 'Bergamot-scented classic black tea',
+        prices: { '50g': 349, '100g': 579, '200g': 1039 },
+        moods: ['focus', 'energize'],
+        origin: 'Assam, India',
+        caffeine: 'high',
+        tastingNotes: ['Bergamot', 'Citrus', 'Malt'],
+        brewingInstructions: { temperature: '95°C', steepTime: '3-4 min', amount: '2g per cup' },
+        images: ['/images/products/earl-grey.png'],
+        rating: 4.7, reviewCount: 189,
+        isBestSeller: false, isNew: false,
+        tags: ['classic', 'aromatic', 'everyday'],
+    },
+    {
+        slug: 'rose-petal-green',
+        name: 'Rose Petal Green',
+        type: 'Green Tea',
+        description: 'Delicate green tea blended with real rose petals. Floral aroma with a smooth, slightly sweet body and antioxidant-rich profile.',
+        shortDescription: 'Floral green tea with rose petals',
+        prices: { '50g': 399, '100g': 669, '200g': 1199 },
+        moods: ['glow', 'relax'],
+        origin: 'Darjeeling, India',
+        caffeine: 'low',
+        tastingNotes: ['Rose', 'Green Apple', 'Honey'],
+        brewingInstructions: { temperature: '75°C', steepTime: '2-3 min', amount: '2g per cup' },
+        images: ['/images/products/rose-green.png'],
+        rating: 4.5, reviewCount: 134,
+        isBestSeller: false, isNewArrival: true,
+        tags: ['floral', 'skincare', 'antioxidant'],
+    },
+];
+
+const adminUser = {
+    name: 'Serené Admin',
+    email: 'admin@serenetea.com',
+    password: 'Admin@123456',
+    role: 'admin',
+};
+
+const seed = async () => {
+    try {
+        await mongoose.connect(process.env.MONGODB_URI);
+        console.log('✓ Connected to MongoDB\n');
+
+        // Clear existing data
+        await Product.deleteMany({});
+        await User.deleteMany({});
+        console.log('✓ Cleared existing data');
+
+        // Seed products
+        const createdProducts = await Product.insertMany(products);
+        console.log(`✓ Seeded ${createdProducts.length} products`);
+
+        // Seed admin user
+        const admin = await User.create(adminUser);
+        console.log(`✓ Created admin user: ${admin.email}`);
+
+        console.log('\n— Seed complete! —');
+        console.log(`  Admin login: ${adminUser.email} / ${adminUser.password}\n`);
+
+        process.exit(0);
+    } catch (err) {
+        console.error('✗ Seed error:', err.message);
+        process.exit(1);
+    }
+};
+
+seed();

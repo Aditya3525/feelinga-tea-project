@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Explore tea guides, brewing tips, wellness articles, and origin stories from Serené Tea experts.">
+    <title>Learn — Tea Guides & Blog — Serené Tea</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+    <header class="header" id="header">
+        <div class="header__inner"><a href="index.html" class="header__logo">Serené<span>.</span></a>
+            <nav class="header__nav" aria-label="Main navigation"><a href="shop.html">Shop</a><a
+                    href="shop.html#moods">Moods</a><a href="gifting.html">Gifting</a><a href="learn.html"
+                    class="active">Learn</a><a href="about.html">About</a><a href="contact.html">Contact</a></nav>
+            <div class="header__actions"><button aria-label="Search"><svg width="20" height="20" fill="none"
+                        stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="m21 21-4.35-4.35" />
+                    </svg></button><a href="#" aria-label="Account"><svg width="20" height="20" fill="none"
+                        stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg></a><button aria-label="Cart" id="cartBtn"><svg width="20" height="20" fill="none"
+                        stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+                        <path d="M3 6h18" />
+                        <path d="M16 10a4 4 0 0 1-8 0" />
+                    </svg><span class="cart-count" id="cartCount">0</span></button><button class="hamburger"
+                    id="hamburger" aria-label="Menu"
+                    aria-expanded="false"><span></span><span></span><span></span></button></div>
+        </div>
+    </header>
+    <nav class="mobile-nav" id="mobileNav" aria-label="Mobile navigation"><a href="shop.html">Shop</a><a
+            href="gifting.html">Gifting</a><a href="learn.html">Learn</a><a href="about.html">About</a><a
+            href="contact.html">Contact</a><a href="faq.html">FAQ</a></nav>
+    <div class="cart-overlay" id="cartOverlay"></div>
+    <aside class="cart-drawer" id="cartDrawer" aria-label="Shopping cart">
+        <div class="cart-drawer__header">
+            <h3>Your Cart</h3><button id="cartClose" aria-label="Close cart"><svg width="24" height="24" fill="none"
+                    stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                    <path d="M18 6 6 18M6 6l12 12" />
+                </svg></button>
+        </div>
+        <div class="cart-drawer__items" id="cartItems">
+            <div class="cart-empty">
+                <div class="icon">🍃</div>
+                <p>Your cart is empty</p>
+            </div>
+        </div>
+        <div class="cart-drawer__footer">
+            <div class="cart-drawer__total"><span>Subtotal</span><span id="cartTotal">₹0</span></div><button
+                class="btn btn--primary" style="width:100%">Checkout</button>
+        </div>
+    </aside>
+
+    <main id="main">
+        <div class="page-hero">
+            <div class="container">
+                <p class="overline">Knowledge</p>
+                <h1>Learn the Art of Tea</h1>
+                <p>Brewing guides, wellness insights, and stories from the gardens — all steeped in expertise.</p>
+            </div>
+        </div>
+
+        <section class="section">
+            <div class="container">
+                <div class="blog-grid fade-in">
+                    <article class="blog-card">
+                        <div class="blog-card__img">🫖</div>
+                        <div class="blog-card__body">
+                            <div class="blog-card__tag">Brewing Guide</div>
+                            <h3 class="blog-card__title">The Perfect Brew: Temperature & Timing for Every Tea Type</h3>
+                            <p class="blog-card__excerpt">Master the art of brewing with our comprehensive guide
+                                covering green, black, white, oolong, and herbal teas. Get the temperature and steep
+                                time right every time.</p>
+                            <div class="blog-card__meta">8 min read · Feb 18, 2026</div>
+                        </div>
+                    </article>
+                    <article class="blog-card">
+                        <div class="blog-card__img">🌿</div>
+                        <div class="blog-card__body">
+                            <div class="blog-card__tag">Wellness</div>
+                            <h3 class="blog-card__title">5 Teas That Support Your Immune System Naturally</h3>
+                            <p class="blog-card__excerpt">From tulsi to turmeric, these wellness blends are packed with
+                                natural antioxidants and anti-inflammatory compounds that help keep you healthy
+                                year-round.</p>
+                            <div class="blog-card__meta">6 min read · Feb 10, 2026</div>
+                        </div>
+                    </article>
+                    <article class="blog-card">
+                        <div class="blog-card__img">🏔️</div>
+                        <div class="blog-card__body">
+                            <div class="blog-card__tag">Origin Story</div>
+                            <h3 class="blog-card__title">Inside a Darjeeling Tea Estate: From Bush to Cup</h3>
+                            <p class="blog-card__excerpt">Join us on a visit to one of our partner estates in the
+                                Darjeeling hills and discover how altitude, mist, and skilled hands create the world's
+                                most prized teas.</p>
+                            <div class="blog-card__meta">10 min read · Jan 28, 2026</div>
+                        </div>
+                    </article>
+                    <article class="blog-card">
+                        <div class="blog-card__img">🍵</div>
+                        <div class="blog-card__body">
+                            <div class="blog-card__tag">Tea Education</div>
+                            <h3 class="blog-card__title">Green vs. Black vs. White Tea: What's the Real Difference?</h3>
+                            <p class="blog-card__excerpt">They all come from the same plant, but the processing makes
+                                all the difference. Learn how oxidation, rolling, and withering create distinct tea
+                                experiences.</p>
+                            <div class="blog-card__meta">7 min read · Jan 15, 2026</div>
+                        </div>
+                    </article>
+                    <article class="blog-card">
+                        <div class="blog-card__img">✨</div>
+                        <div class="blog-card__body">
+                            <div class="blog-card__tag">Lifestyle</div>
+                            <h3 class="blog-card__title">Creating a Mindful Tea Ritual: Your 5-Minute Daily Practice
+                            </h3>
+                            <p class="blog-card__excerpt">A simple, calming tea ritual can transform your day. Here's
+                                how to create a daily practice that grounds you and brings intentionality to the
+                                everyday.</p>
+                            <div class="blog-card__meta">5 min read · Jan 5, 2026</div>
+                        </div>
+                    </article>
+                    <article class="blog-card">
+                        <div class="blog-card__img">🎁</div>
+                        <div class="blog-card__body">
+                            <div class="blog-card__tag">Gifting</div>
+                            <h3 class="blog-card__title">The Ultimate Tea Gift Guide for Every Occasion</h3>
+                            <p class="blog-card__excerpt">Whether it's a birthday, housewarming, or just because — find
+                                the perfect tea gift for the tea lover (or newbie) in your life.</p>
+                            <div class="blog-card__meta">6 min read · Dec 20, 2025</div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__grid">
+                <div class="footer__brand"><a href="index.html" class="header__logo"
+                        style="color:#fff">Serené<span>.</span></a>
+                    <p>Crafted wellness teas for modern rituals.</p>
+                    <div class="footer__social"><a href="#" aria-label="Instagram">IG</a><a href="#"
+                            aria-label="Facebook">FB</a><a href="#" aria-label="Twitter">TW</a></div>
+                </div>
+                <div>
+                    <h4 class="footer__heading">Shop</h4>
+                    <div class="footer__links"><a href="shop.html">All Teas</a><a href="gifting.html">Gift Sets</a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="footer__heading">Company</h4>
+                    <div class="footer__links"><a href="about.html">About Us</a><a href="learn.html">Blog</a><a
+                            href="contact.html">Contact</a></div>
+                </div>
+                <div>
+                    <h4 class="footer__heading">Help</h4>
+                    <div class="footer__links"><a href="faq.html">FAQ</a><a href="#">Shipping</a><a href="#">Privacy</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer__bottom"><span>© 2026 Serené Tea.</span><span>Made with 🍃 in India</span></div>
+        </div>
+    </footer>
+    <script src="js/main.js"></script>
+</body>
+
+</html>
