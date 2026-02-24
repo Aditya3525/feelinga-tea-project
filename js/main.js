@@ -964,4 +964,113 @@ document.addEventListener('DOMContentLoaded', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
+  // ===== WHATSAPP FLOATING BUTTON =====
+  const waBtn = document.createElement('a');
+  waBtn.href = 'https://wa.me/919673592818?text=Hi%20feelinga!%20I%20have%20a%20question%20about%20your%20teas.';
+  waBtn.target = '_blank';
+  waBtn.rel = 'noopener noreferrer';
+  waBtn.className = 'whatsapp-float';
+  waBtn.setAttribute('aria-label', 'Chat with us on WhatsApp');
+  waBtn.innerHTML = `
+    <svg viewBox="0 0 32 32" width="28" height="28" fill="#fff">
+      <path d="M16.004 0h-.008C7.174 0 0 7.176 0 16.004c0 3.502 1.14 6.746 3.072 9.378L1.06 31.116l5.96-1.966a15.93 15.93 0 0 0 8.984 2.754C24.826 31.904 32 24.826 32 16.004 32 7.176 24.826 0 16.004 0zm9.53 22.598c-.4 1.126-1.978 2.06-3.24 2.334-.862.184-1.99.332-5.784-1.244-4.854-2.018-7.98-6.942-8.222-7.264-.232-.322-1.95-2.602-1.95-4.962s1.234-3.52 1.672-4.002c.438-.482.958-.602 1.276-.602.318 0 .636.002.914.016.294.016.688-.112 1.076.82.4.962 1.362 3.322 1.482 3.564.12.242.2.524.04.846-.16.322-.24.524-.482.806-.242.282-.508.63-.726.846-.242.242-.494.504-.212.988.282.484 1.254 2.072 2.694 3.356 1.852 1.65 3.414 2.162 3.898 2.404.484.242.766.202 1.048-.122.282-.322 1.214-1.414 1.536-1.898.322-.484.644-.404 1.088-.242.444.162 2.804 1.322 3.288 1.564.484.242.806.362.926.564.12.202.12 1.166-.28 2.292z"/>
+    </svg>
+    <span class="whatsapp-float__tooltip">Chat with us!</span>
+  `;
+  document.body.appendChild(waBtn);
+  // ===== SHOP FILTERS & SORT =====
+  const plpProducts = document.querySelector('.plp-products');
+  if (plpProducts) {
+    const cards = Array.from(plpProducts.querySelectorAll('.product-card'));
+    const filterGroups = document.querySelectorAll('.filter-group');
+    const sortSelect = document.getElementById('plpSort');
+    const countDisplay = document.querySelector('.plp-topbar__count');
+    const mobileFilterToggle = document.querySelector('.mobile-filter-toggle');
+    const sidebar = document.querySelector('.plp-sidebar');
+
+    // Mobile filter toggle
+    if (mobileFilterToggle && sidebar) {
+      mobileFilterToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+        mobileFilterToggle.textContent = sidebar.classList.contains('open') ? '✕ Close' : '☰ Filters';
+      });
+    }
+
+    function getActiveFilters() {
+      const filters = {};
+      filterGroups.forEach(group => {
+        const key = group.dataset.filter;
+        const checked = Array.from(group.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+        if (checked.length > 0) filters[key] = checked;
+      });
+      return filters;
+    }
+
+    function matchesPrice(cardPrice, priceFilter) {
+      const p = parseInt(cardPrice, 10);
+      return priceFilter.some(range => {
+        if (range === 'under500') return p < 500;
+        if (range === '500-999') return p >= 500 && p <= 999;
+        if (range === '1000-plus') return p >= 1000;
+        return false;
+      });
+    }
+
+    function applyFilters() {
+      const filters = getActiveFilters();
+      let visibleCount = 0;
+
+      cards.forEach(card => {
+        let show = true;
+
+        if (filters.type && !filters.type.includes(card.dataset.type)) show = false;
+        if (filters.mood && !filters.mood.includes(card.dataset.mood)) show = false;
+        if (filters.origin && !filters.origin.includes(card.dataset.origin)) show = false;
+        if (filters.price && !matchesPrice(card.dataset.price, filters.price)) show = false;
+
+        card.style.display = show ? '' : 'none';
+        if (show) visibleCount++;
+      });
+
+      if (countDisplay) {
+        countDisplay.textContent = `Showing ${visibleCount} tea${visibleCount !== 1 ? 's' : ''}`;
+      }
+    }
+
+    function applySort() {
+      if (!sortSelect) return;
+      const val = sortSelect.value;
+      const sorted = [...cards].sort((a, b) => {
+        const pa = parseInt(a.dataset.price, 10);
+        const pb = parseInt(b.dataset.price, 10);
+        const da = parseInt(a.dataset.date || '0', 10);
+        const db = parseInt(b.dataset.date || '0', 10);
+        switch (val) {
+          case 'price-asc': return pa - pb;
+          case 'price-desc': return pb - pa;
+          case 'newest': return db - da;
+          default: return 0; // popular = original order
+        }
+      });
+      sorted.forEach(card => plpProducts.appendChild(card));
+    }
+
+    // Wire up filter checkboxes
+    filterGroups.forEach(group => {
+      group.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        cb.addEventListener('change', () => {
+          applyFilters();
+        });
+      });
+    });
+
+    // Wire up sort
+    if (sortSelect) {
+      sortSelect.addEventListener('change', () => {
+        applySort();
+        applyFilters();
+      });
+    }
+  }
+
 });

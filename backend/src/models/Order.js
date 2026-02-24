@@ -67,7 +67,7 @@ const orderSchema = new mongoose.Schema({
 orderSchema.pre('save', async function (next) {
     if (this.isNew && !this.orderNumber) {
         const count = await mongoose.model('Order').countDocuments();
-        this.orderNumber = `SRN-${String(count + 100001).slice(-6)}`;
+        this.orderNumber = `FLG-${String(count + 100001).slice(-6)}`;
     }
     next();
 });
