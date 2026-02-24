@@ -24,7 +24,7 @@
             <form id="adminLoginForm">
                 <div class="auth-modal__field">
                     <label for="adminEmail">Email</label>
-                    <input type="email" id="adminEmail" placeholder="admin@feelinga.com" required>
+                    <input type="email" id="adminEmail" placeholder="admin@serenetea.com" required>
                 </div>
                 <div class="auth-modal__field">
                     <label for="adminPassword">Password</label>
@@ -169,6 +169,28 @@
                     </div>
                 </div>
 
+                <div class="admin__insights">
+                    <div class="admin__card">
+                        <h3 class="admin__card-title">Order Status Breakdown</h3>
+                        <div id="statusBreakdown" class="admin__insight-body">
+                            <p class="admin__empty">No status data</p>
+                        </div>
+                    </div>
+                    <div class="admin__card">
+                        <h3 class="admin__card-title">Last 6 Months Revenue</h3>
+                        <div id="monthlyRevenueTrend" class="admin__insight-body">
+                            <p class="admin__empty">No revenue data</p>
+                        </div>
+                    </div>
+                    <div class="admin__card">
+                        <h3 class="admin__card-title">Admin Activity</h3>
+                        <div id="activityFeed" class="admin__insight-body">
+                            <p class="admin__empty">No activity yet</p>
+                        </div>
+                        <div class="admin__pagination" id="activityPagination"></div>
+                    </div>
+                </div>
+
                 <div class="admin__card">
                     <h3 class="admin__card-title">Recent Orders</h3>
                     <div class="admin__table-wrap" id="recentOrdersTable">
@@ -181,13 +203,34 @@
             <section class="admin__section" id="sectionProducts">
                 <div class="admin__section-header">
                     <h3>All Products</h3>
-                    <button class="btn btn--primary btn--sm" id="addProductBtn">+ Add Product</button>
+                    <div class="admin__section-actions">
+                        <input type="search" id="productSearch" class="admin__input admin__input--sm"
+                            placeholder="Search products...">
+                        <select id="productTypeFilter" class="admin__input admin__input--sm">
+                            <option value="">All types</option>
+                            <option value="Black Tea">Black Tea</option>
+                            <option value="Green Tea">Green Tea</option>
+                            <option value="White Tea">White Tea</option>
+                            <option value="Oolong">Oolong</option>
+                            <option value="Herbal">Herbal</option>
+                            <option value="Herbal Infusion">Herbal Infusion</option>
+                            <option value="Masala Chai">Masala Chai</option>
+                            <option value="Matcha">Matcha</option>
+                        </select>
+                        <input type="number" id="bulkProductStock" class="admin__input admin__input--sm"
+                            placeholder="Set stock" min="0">
+                        <button class="btn btn--outline btn--sm" id="applyBulkProductStock">Update Stock</button>
+                        <button class="btn btn--outline btn--sm" id="deleteSelectedProducts">Delete Selected</button>
+                        <button class="btn btn--outline btn--sm" id="exportProductsBtn">Export CSV</button>
+                        <button class="btn btn--primary btn--sm" id="addProductBtn">+ Add Product</button>
+                    </div>
                 </div>
                 <div class="admin__card">
                     <div class="admin__table-wrap">
                         <table class="admin__table" id="productsTable">
                             <thead>
                                 <tr>
+                                    <th style="width:36px"><input type="checkbox" id="selectAllProducts"></th>
                                     <th>Product</th>
                                     <th>Type</th>
                                     <th>Price (100g)</th>
@@ -199,6 +242,7 @@
                             <tbody id="productsBody"></tbody>
                         </table>
                     </div>
+                    <div class="admin__pagination" id="productsPagination"></div>
                 </div>
             </section>
 
@@ -206,12 +250,37 @@
             <section class="admin__section" id="sectionOrders">
                 <div class="admin__section-header">
                     <h3>All Orders</h3>
+                    <div class="admin__section-actions">
+                        <input type="search" id="orderSearch" class="admin__input admin__input--sm"
+                            placeholder="Search order # or customer...">
+                        <select id="orderStatusFilter" class="admin__input admin__input--sm">
+                            <option value="">All statuses</option>
+                            <option value="pending">Pending</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="processing">Processing</option>
+                            <option value="shipped">Shipped</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                        <select id="bulkOrderStatus" class="admin__input admin__input--sm">
+                            <option value="">Bulk status...</option>
+                            <option value="pending">Pending</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="processing">Processing</option>
+                            <option value="shipped">Shipped</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                        <button class="btn btn--outline btn--sm" id="applyBulkOrderStatus">Apply</button>
+                        <button class="btn btn--outline btn--sm" id="exportOrdersBtn">Export CSV</button>
+                    </div>
                 </div>
                 <div class="admin__card">
                     <div class="admin__table-wrap">
                         <table class="admin__table" id="ordersTable">
                             <thead>
                                 <tr>
+                                    <th style="width:36px"><input type="checkbox" id="selectAllOrders"></th>
                                     <th>Order #</th>
                                     <th>Customer</th>
                                     <th>Items</th>
@@ -225,6 +294,7 @@
                         </table>
                     </div>
                     <p class="admin__empty" id="ordersEmpty">No orders yet</p>
+                    <div class="admin__pagination" id="ordersPagination"></div>
                 </div>
             </section>
         </main>
@@ -293,6 +363,20 @@
             </form>
         </div>
     </div>
+
+    <!-- Order Details Modal -->
+    <div class="admin-modal" id="orderModal">
+        <div class="admin-modal__overlay"></div>
+        <div class="admin-modal__dialog">
+            <div class="admin-modal__header">
+                <h3>Order Details</h3>
+                <button class="auth-modal__close" id="closeOrderModal">&times;</button>
+            </div>
+            <div id="orderModalBody"></div>
+        </div>
+    </div>
+
+    <div id="adminToastContainer" class="admin-toast-container"></div>
 
     <script src="js/admin.js"></script>
 </body>

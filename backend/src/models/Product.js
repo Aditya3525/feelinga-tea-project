@@ -85,7 +85,6 @@ const productSchema = new mongoose.Schema({
 });
 
 // Indexes for performance
-productSchema.index({ slug: 1 });
 productSchema.index({ type: 1 });
 productSchema.index({ moods: 1 });
 productSchema.index({ 'prices.100g': 1 });

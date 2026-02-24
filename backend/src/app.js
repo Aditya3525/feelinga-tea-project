@@ -8,6 +8,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import connectDB from './config/db.js';
 import errorHandler from './middleware/errorHandler.js';
+import { authenticate, authorize } from './middleware/auth.js';
 
 // Route modules
 import authRoutes from './modules/auth/routes.js';
@@ -15,6 +16,7 @@ import productRoutes from './modules/products/routes.js';
 import orderRoutes from './modules/orders/routes.js';
 import reviewRoutes from './modules/reviews/routes.js';
 import cartRoutes from './modules/cart/routes.js';
+import adminRoutes from './modules/admin/routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -84,6 +86,7 @@ app.use('/api/v1/products', productRoutes);
 app.use('/api/v1/orders', orderRoutes);
 app.use('/api/v1/reviews', reviewRoutes);
 app.use('/api/v1/cart', cartRoutes);
+app.use('/api/v1/admin', authenticate, authorize('admin'), adminRoutes);
 
 // ===== SERVE FRONTEND STATIC FILES =====
 const __filename = fileURLToPath(import.meta.url);
@@ -116,6 +119,8 @@ const start = async () => {
     });
 };
 
-start();
+if (process.env.NODE_ENV !== 'test') {
+    start();
+}
 
 export default app;

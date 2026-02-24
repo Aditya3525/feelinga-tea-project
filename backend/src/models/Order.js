@@ -63,17 +63,16 @@ const orderSchema = new mongoose.Schema({
     timestamps: true,
 });
 
-// Auto-generate order number
-orderSchema.pre('save', async function (next) {
-    if (this.isNew && !this.orderNumber) {
-        const count = await mongoose.model('Order').countDocuments();
-        this.orderNumber = `FLG-${String(count + 100001).slice(-6)}`;
-    }
+// Auto-generate order number before validation so required check passes
+orderSchema.pre('validate', async function (next) {
+    if (!this.isNew || this.orderNumber) return next();
+
+    const count = await mongoose.model('Order').countDocuments();
+    this.orderNumber = `FLG-${String(count + 100001).slice(-6)}`;
     next();
 });
 
 orderSchema.index({ user: 1, createdAt: -1 });
-orderSchema.index({ orderNumber: 1 });
 orderSchema.index({ status: 1 });
 
 const Order = mongoose.model('Order', orderSchema);

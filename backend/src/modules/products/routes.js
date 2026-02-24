@@ -4,6 +4,7 @@ import Product from '../../models/Product.js';
 import { AppError } from '../../middleware/errorHandler.js';
 import { authenticate, authorize } from '../../middleware/auth.js';
 import { validate } from '../../middleware/validate.js';
+import { logAdminAction } from '../../utils/auditLog.js';
 
 const router = Router();
 
@@ -24,6 +25,15 @@ const createProductSchema = z.object({
     caffeine: z.enum(['none', 'low', 'medium', 'high']).optional(),
     tastingNotes: z.array(z.string()).optional(),
     images: z.array(z.string()).optional(),
+});
+
+const bulkStockSchema = z.object({
+    productIds: z.array(z.string()).min(1),
+    stock: z.number().int().min(0),
+});
+
+const bulkDeleteSchema = z.object({
+    productIds: z.array(z.string()).min(1),
 });
 
 // GET /products — List with filters, sort, pagination
@@ -128,7 +138,65 @@ router.get('/:slug', async (req, res, next) => {
 router.post('/', authenticate, authorize('admin'), validate(createProductSchema), async (req, res, next) => {
     try {
         const product = await Product.create(req.body);
+        await logAdminAction({
+            actor: req.user,
+            action: 'product.create',
+            entityType: 'product',
+            entityId: product._id,
+            summary: `Created product "${product.name}"`,
+            meta: { slug: product.slug, type: product.type },
+        });
         res.status(201).json({ status: 'success', data: product });
+    } catch (err) {
+        next(err);
+    }
+});
+
+// PATCH /products/bulk-stock (admin only)
+router.patch('/bulk-stock', authenticate, authorize('admin'), validate(bulkStockSchema), async (req, res, next) => {
+    try {
+        const { productIds, stock } = req.body;
+        const result = await Product.updateMany(
+            { _id: { $in: productIds } },
+            { $set: { stock, inStock: stock > 0 } },
+        );
+        await logAdminAction({
+            actor: req.user,
+            action: 'product.bulk_stock_update',
+            entityType: 'product',
+            summary: `Bulk updated stock for ${result.modifiedCount} products`,
+            meta: { requested: productIds.length, modified: result.modifiedCount, stock },
+        });
+
+        res.json({
+            status: 'success',
+            data: {
+                matched: result.matchedCount,
+                modified: result.modifiedCount,
+                stock,
+            },
+        });
+    } catch (err) {
+        next(err);
+    }
+});
+
+// DELETE /products/bulk (admin only)
+router.delete('/bulk', authenticate, authorize('admin'), validate(bulkDeleteSchema), async (req, res, next) => {
+    try {
+        const { productIds } = req.body;
+        const result = await Product.deleteMany({ _id: { $in: productIds } });
+        await logAdminAction({
+            actor: req.user,
+            action: 'product.bulk_delete',
+            entityType: 'product',
+            summary: `Bulk deleted ${result.deletedCount} products`,
+            meta: { requested: productIds.length, deleted: result.deletedCount },
+        });
+        res.json({
+            status: 'success',
+            data: { deleted: result.deletedCount },
+        });
     } catch (err) {
         next(err);
     }
@@ -142,6 +210,14 @@ router.patch('/:id', authenticate, authorize('admin'), async (req, res, next) =>
             runValidators: true,
         });
         if (!product) throw new AppError('Product not found', 404);
+        await logAdminAction({
+            actor: req.user,
+            action: 'product.update',
+            entityType: 'product',
+            entityId: product._id,
+            summary: `Updated product "${product.name}"`,
+            meta: { fields: Object.keys(req.body || {}) },
+        });
         res.json({ status: 'success', data: product });
     } catch (err) {
         next(err);
@@ -153,6 +229,14 @@ router.delete('/:id', authenticate, authorize('admin'), async (req, res, next) =
     try {
         const product = await Product.findByIdAndDelete(req.params.id);
         if (!product) throw new AppError('Product not found', 404);
+        await logAdminAction({
+            actor: req.user,
+            action: 'product.delete',
+            entityType: 'product',
+            entityId: product._id,
+            summary: `Deleted product "${product.name}"`,
+            meta: { slug: product.slug },
+        });
         res.status(204).send();
     } catch (err) {
         next(err);
