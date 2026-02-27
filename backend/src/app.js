@@ -91,7 +91,10 @@ app.use('/api/v1/admin', authenticate, authorize('admin'), adminRoutes);
 // ===== SERVE FRONTEND STATIC FILES =====
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+// Serve React production build from frontend/dist, fallback to project root for legacy HTML
+const frontendDistPath = path.resolve(__dirname, '..', '..', 'frontend', 'dist');
 const frontendPath = path.resolve(__dirname, '..', '..');
+app.use(express.static(frontendDistPath));
 app.use(express.static(frontendPath));
 
 // Fallback: serve index.html for non-API routes
