@@ -1,6 +1,7 @@
 'use client';
 import Layout from '../../components/Layout';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Learn() {
     return (
@@ -58,7 +59,7 @@ export default function Learn() {
                             { name: 'White Tea', desc: 'The least processed tea, made from young buds. Subtle, sweet, and incredibly smooth. Highest in antioxidants, lowest in caffeine.', img: '/images/white-tea.png' },
                         ].map((t, i) => (
                             <div className="curated-card" key={i}>
-                                <div className="curated-card__img"><img src={t.img} alt={t.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'var(--radius-md)' }} /></div>
+                                <div className="curated-card__img"><Image src={t.img} alt={t.name} width={400} height={300} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'var(--radius-md)' }} /></div>
                                 <div className="curated-card__body">
                                     <h4>{t.name}</h4>
                                     <p>{t.desc}</p>

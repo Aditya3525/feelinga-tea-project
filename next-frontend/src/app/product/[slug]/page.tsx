@@ -1,6 +1,6 @@
 'use client';
 import Layout from '../../../components/Layout';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
@@ -21,6 +21,9 @@ export default function ProductDetail() {
     const [selectedImage, setSelectedImage] = useState(0);
     const [wishlisted, setWishlisted] = useState(false);
     const [wishlistLoading, setWishlistLoading] = useState(false);
+    const [lightboxOpen, setLightboxOpen] = useState(false);
+    const [lightboxZoom, setLightboxZoom] = useState(false);
+    const touchStartX = useRef(0);
 
     // Reviews state
     const [reviews, setReviews] = useState([]);
@@ -213,6 +216,27 @@ export default function ProductDetail() {
         );
     };
 
+    // Lightbox navigation
+    const imageCount = product?.images?.length || 0;
+    const lightboxNext = useCallback(() => {
+        if (imageCount > 1) setSelectedImage(prev => (prev + 1) % imageCount);
+    }, [imageCount]);
+    const lightboxPrev = useCallback(() => {
+        if (imageCount > 1) setSelectedImage(prev => (prev - 1 + imageCount) % imageCount);
+    }, [imageCount]);
+
+    // Keyboard navigation for lightbox
+    useEffect(() => {
+        if (!lightboxOpen) return;
+        const handler = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') { setLightboxOpen(false); setLightboxZoom(false); }
+            if (e.key === 'ArrowRight') lightboxNext();
+            if (e.key === 'ArrowLeft') lightboxPrev();
+        };
+        window.addEventListener('keydown', handler);
+        return () => window.removeEventListener('keydown', handler);
+    }, [lightboxOpen, lightboxNext, lightboxPrev]);
+
     if (loading) {
         return (
             <Layout>
@@ -259,7 +283,7 @@ export default function ProductDetail() {
                 <div className="section pdp-grid">
                     {/* Image Panel */}
                     <div className="pdp-gallery">
-                        <div className="pdp-media">
+                        <div className="pdp-media" style={{ cursor: 'zoom-in' }} onClick={() => setLightboxOpen(true)}>
                             <Image
                                 src={product.images?.[selectedImage] || product.images?.[0] || '/images/darjeeling-tea.png'}
                                 alt={product.name}
@@ -601,6 +625,99 @@ export default function ProductDetail() {
                         </div>
                     </div>
                 </section>
+            )}
+
+            {/* Lightbox / Image Zoom Modal */}
+            {lightboxOpen && (
+                <div
+                    className="lightbox-overlay"
+                    style={{
+                        position: 'fixed', inset: 0, zIndex: 9999,
+                        background: 'rgba(0,0,0,0.92)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        cursor: lightboxZoom ? 'zoom-out' : 'zoom-in',
+                    }}
+                    onClick={(e) => {
+                        if (e.target === e.currentTarget) { setLightboxOpen(false); setLightboxZoom(false); }
+                    }}
+                    onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
+                    onTouchEnd={(e) => {
+                        const diff = e.changedTouches[0].clientX - touchStartX.current;
+                        if (Math.abs(diff) > 60) {
+                            if (diff > 0) lightboxPrev();
+                            else lightboxNext();
+                        }
+                    }}
+                >
+                    {/* Close button */}
+                    <button
+                        onClick={() => { setLightboxOpen(false); setLightboxZoom(false); }}
+                        aria-label="Close lightbox"
+                        style={{
+                            position: 'absolute', top: 16, right: 16, zIndex: 10001,
+                            background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '50%',
+                            width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            color: '#fff', fontSize: 22, cursor: 'pointer',
+                        }}
+                    >✕</button>
+
+                    {/* Prev button */}
+                    {imageCount > 1 && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); lightboxPrev(); }}
+                            aria-label="Previous image"
+                            style={{
+                                position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', zIndex: 10001,
+                                background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '50%',
+                                width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                color: '#fff', fontSize: 22, cursor: 'pointer',
+                            }}
+                        >‹</button>
+                    )}
+
+                    {/* Next button */}
+                    {imageCount > 1 && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); lightboxNext(); }}
+                            aria-label="Next image"
+                            style={{
+                                position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', zIndex: 10001,
+                                background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '50%',
+                                width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                color: '#fff', fontSize: 22, cursor: 'pointer',
+                            }}
+                        >›</button>
+                    )}
+
+                    {/* Image */}
+                    <div
+                        onClick={() => setLightboxZoom(z => !z)}
+                        style={{
+                            transition: 'transform 0.3s ease',
+                            transform: lightboxZoom ? 'scale(1.8)' : 'scale(1)',
+                            maxWidth: '90vw', maxHeight: '90vh',
+                        }}
+                    >
+                        <Image
+                            src={product.images?.[selectedImage] || product.images?.[0] || '/images/darjeeling-tea.png'}
+                            alt={product.name}
+                            width={800}
+                            height={800}
+                            style={{ objectFit: 'contain', width: '100%', height: 'auto', maxHeight: '85vh' }}
+                            priority
+                        />
+                    </div>
+
+                    {/* Image counter */}
+                    {imageCount > 1 && (
+                        <div style={{
+                            position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)',
+                            color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', zIndex: 10001,
+                        }}>
+                            {selectedImage + 1} / {imageCount}
+                        </div>
+                    )}
+                </div>
             )}
         </Layout>
     );

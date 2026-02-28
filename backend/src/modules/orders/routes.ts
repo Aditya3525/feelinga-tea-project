@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import mongoose from 'mongoose';
+import PDFDocument from 'pdfkit';
 import Order from '../../models/Order.js';
 import Product from '../../models/Product.js';
 import User from '../../models/User.js';
@@ -11,7 +12,7 @@ import { authenticate, authorize } from '../../middleware/auth.js';
 import { validate } from '../../middleware/validate.js';
 import { logAdminAction } from '../../utils/auditLog.js';
 import { escapeRegex } from '../../utils/sanitize.js';
-import { sendOrderConfirmationEmail, sendOrderStatusEmail } from '../../utils/email.js';
+import { sendOrderConfirmationEmail, sendOrderStatusEmail, sendLowStockAlert } from '../../utils/email.js';
 
 const router = Router();
 
@@ -124,6 +125,17 @@ router.post('/', authenticate, validate(createOrderSchema), async (req, res, nex
             if (updated.stock === 0) {
                 await Product.findByIdAndUpdate(updated._id, { inStock: false });
             }
+        }
+
+        // Low stock alert — fire-and-forget email to admin
+        const LOW_STOCK_THRESHOLD = 10;
+        const lowStockProducts = await Product.find(
+            { stock: { $lte: LOW_STOCK_THRESHOLD }, deletedAt: null },
+            { name: 1, slug: 1, stock: 1 },
+        ).lean();
+        if (lowStockProducts.length > 0) {
+            const adminEmail = process.env.ADMIN_EMAIL || 'kailasmane777@gmail.com';
+            sendLowStockAlert(adminEmail, lowStockProducts as any).catch(() => {});
         }
 
         // Retry order creation in case of duplicate orderNumber (counter drift)
@@ -380,6 +392,101 @@ router.patch('/:id/status', authenticate, authorize('admin'), async (req, res, n
         }
 
         res.json({ status: 'success', data: order });
+    } catch (err) {
+        next(err);
+    }
+});
+
+// GET /orders/:id/invoice — customer-facing PDF invoice download
+router.get('/:id/invoice', authenticate, async (req, res, next) => {
+    try {
+        const order = await Order.findById(req.params.id).lean();
+        if (!order) throw new AppError('Order not found', 404);
+
+        // Ensure user owns this order (or is admin)
+        if (req.user!.role !== 'admin' && order.user.toString() !== req.user!._id.toString()) {
+            throw new AppError('You are not authorized to access this invoice', 403);
+        }
+
+        const user = await User.findById(order.user, 'name email phone').lean();
+        const addr = order.shippingAddress as any;
+
+        const doc = new PDFDocument({ size: 'A4', margin: 50 });
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=invoice-${order.orderNumber}.pdf`);
+        doc.pipe(res);
+
+        // Header
+        doc.fontSize(22).font('Helvetica-Bold').text('Feelinga', 50, 50);
+        doc.fontSize(9).font('Helvetica').fillColor('#888').text('happiness is here', 50, 75);
+        doc.fillColor('#000');
+
+        // Invoice title
+        doc.fontSize(16).font('Helvetica-Bold').text('TAX INVOICE', 400, 50, { align: 'right' });
+        doc.fontSize(10).font('Helvetica')
+            .text(`Invoice #: ${order.orderNumber}`, 400, 72, { align: 'right' })
+            .text(`Date: ${new Date(order.createdAt).toLocaleDateString('en-IN')}`, 400, 86, { align: 'right' });
+
+        doc.moveTo(50, 110).lineTo(545, 110).stroke('#ddd');
+
+        // Customer info
+        let y = 125;
+        doc.fontSize(11).font('Helvetica-Bold').text('Bill To:', 50, y);
+        y += 16;
+        doc.fontSize(10).font('Helvetica')
+            .text(`${addr?.firstName || ''} ${addr?.lastName || ''}`, 50, y)
+            .text([addr?.line1, addr?.line2, addr?.city, addr?.state, addr?.pincode].filter(Boolean).join(', '), 50, y + 14)
+            .text(`Phone: ${addr?.phone || 'N/A'}`, 50, y + 28)
+            .text(`Email: ${(user as any)?.email || 'N/A'}`, 50, y + 42);
+
+        // Items table
+        y = 220;
+        doc.moveTo(50, y).lineTo(545, y).stroke('#ddd');
+        y += 8;
+        doc.fontSize(9).font('Helvetica-Bold');
+        doc.text('Item', 50, y, { width: 200 });
+        doc.text('Size', 260, y, { width: 60 });
+        doc.text('Qty', 330, y, { width: 40, align: 'center' });
+        doc.text('Price', 380, y, { width: 70, align: 'right' });
+        doc.text('Total', 460, y, { width: 85, align: 'right' });
+        y += 16;
+        doc.moveTo(50, y).lineTo(545, y).stroke('#ddd');
+        y += 8;
+
+        doc.font('Helvetica').fontSize(9);
+        for (const item of (order.items || []) as any[]) {
+            doc.text(item.name, 50, y, { width: 200 });
+            doc.text(item.size, 260, y, { width: 60 });
+            doc.text(String(item.qty), 330, y, { width: 40, align: 'center' });
+            doc.text(`₹${item.price}`, 380, y, { width: 70, align: 'right' });
+            doc.text(`₹${(item.price * item.qty).toLocaleString('en-IN')}`, 460, y, { width: 85, align: 'right' });
+            y += 18;
+        }
+
+        // Totals
+        y += 8;
+        doc.moveTo(350, y).lineTo(545, y).stroke('#ddd');
+        y += 10;
+        doc.text('Subtotal', 380, y).text(`₹${order.subtotal?.toLocaleString('en-IN')}`, 460, y, { width: 85, align: 'right' });
+        y += 16;
+        doc.text('Shipping', 380, y).text(order.shipping === 0 ? 'FREE' : `₹${order.shipping}`, 460, y, { width: 85, align: 'right' });
+        y += 16;
+        doc.text('Tax (GST 5%)', 380, y).text(`₹${order.tax}`, 460, y, { width: 85, align: 'right' });
+        y += 18;
+        doc.moveTo(350, y).lineTo(545, y).stroke('#ddd');
+        y += 10;
+        doc.font('Helvetica-Bold').fontSize(11)
+            .text('Total', 380, y).text(`₹${order.total?.toLocaleString('en-IN')}`, 460, y, { width: 85, align: 'right' });
+
+        // Payment info
+        y += 30;
+        doc.font('Helvetica').fontSize(9).fillColor('#666')
+            .text(`Payment: ${order.paymentMethod?.toUpperCase()} · Status: ${order.paymentStatus}`, 50, y);
+
+        // Footer
+        doc.fontSize(8).fillColor('#aaa').text('Feelinga — happiness is here · www.feelinga.in', 50, 770, { align: 'center' });
+
+        doc.end();
     } catch (err) {
         next(err);
     }

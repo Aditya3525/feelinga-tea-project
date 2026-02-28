@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import Layout from '../../../../components/Layout';
 import { useAuth } from '../../../../context/AuthContext';
 import { apiRequest } from '../../../../utils/api';
@@ -120,9 +121,9 @@ export default function OrderDetail() {
                         </span>
                     </div>
 
-                    {/* Cancel Order Button */}
-                    {canCancel && (
-                        <div style={{ marginBottom: 'var(--space-lg)' }}>
+                    {/* Action Buttons */}
+                    <div style={{ display: 'flex', gap: 'var(--space-md)', marginBottom: 'var(--space-lg)', flexWrap: 'wrap' }}>
+                        {canCancel && (
                             <button
                                 className="btn btn--ghost btn--sm"
                                 style={{ color: 'var(--color-error)', borderColor: 'var(--color-error)' }}
@@ -131,8 +132,31 @@ export default function OrderDetail() {
                             >
                                 {cancelLoading ? '⏳ Cancelling...' : '✕ Cancel Order'}
                             </button>
-                        </div>
-                    )}
+                        )}
+                        <button
+                            className="btn btn--ghost btn--sm"
+                            onClick={async () => {
+                                try {
+                                    const token = localStorage.getItem('feelinga_token');
+                                    const res = await fetch(`/api/v1/orders/${id}/invoice`, {
+                                        headers: token ? { Authorization: `Bearer ${token}` } : {},
+                                    });
+                                    if (!res.ok) throw new Error('Failed to download invoice');
+                                    const blob = await res.blob();
+                                    const url = URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.href = url;
+                                    a.download = `invoice-${order.orderNumber}.pdf`;
+                                    a.click();
+                                    URL.revokeObjectURL(url);
+                                } catch {
+                                    alert('Failed to download invoice');
+                                }
+                            }}
+                        >
+                            📄 Download Invoice
+                        </button>
+                    </div>
 
                     {/* Tracking Info */}
                     {order.trackingNumber && (
@@ -159,7 +183,7 @@ export default function OrderDetail() {
                                 borderBottom: i < order.items.length - 1 ? '1px solid var(--color-border)' : 'none',
                             }}>
                                 {item.image && (
-                                    <img src={item.image} alt={item.name} style={{ width: 60, height: 60, objectFit: 'contain', borderRadius: 'var(--radius-sm)', background: 'var(--color-bg)' }} />
+                                    <Image src={item.image} alt={item.name} width={60} height={60} style={{ objectFit: 'contain', borderRadius: 'var(--radius-sm)', background: 'var(--color-bg)' }} />
                                 )}
                                 <div style={{ flex: 1 }}>
                                     <div style={{ fontWeight: 600 }}>{item.name}</div>

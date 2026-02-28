@@ -115,7 +115,7 @@ export default function Layout({ children }) {
                     ) : (
                         cart.map((item, i) => (
                             <div className="cart-item" key={item.key}>
-                                <div className="cart-item__img">{item.img ? <img src={item.img} alt={item.name} className="cart-item__img-el" /> : '🍵'}</div>
+                                <div className="cart-item__img">{item.img ? <Image src={item.img} alt={item.name} width={60} height={60} className="cart-item__img-el" style={{ objectFit: 'cover' }} /> : '🍵'}</div>
                                 <div className="cart-item__details">
                                     <div className="cart-item__name">{item.name}</div>
                                     <div className="cart-item__price">₹{item.price} × {item.qty} · {item.size || '100g'}</div>

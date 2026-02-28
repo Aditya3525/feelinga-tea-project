@@ -10,6 +10,7 @@ import PDFDocument from 'pdfkit';
 import { validate } from '../../middleware/validate.js';
 import { escapeRegex } from '../../utils/sanitize.js';
 import { logAdminAction } from '../../utils/auditLog.js';
+import { cache, TTL } from '../../utils/cache.js';
 
 const router = Router();
 
@@ -50,6 +51,9 @@ const trackingSchema = z.object({
 // GET /admin/dashboard
 router.get('/dashboard', async (_req, res, next) => {
     try {
+        const cached = cache.get('admin:dashboard');
+        if (cached) return res.json(cached);
+
         const [totalUsers, totalProducts, totalOrders, revenueResult, statusAgg, recentOrders, monthlyRevenue, recentActivity] = await Promise.all([
             User.countDocuments(),
             Product.countDocuments(),
@@ -101,7 +105,7 @@ router.get('/dashboard', async (_req, res, next) => {
             return acc;
         }, {});
 
-        res.json({
+        const response = {
             status: 'success',
             data: {
                 totals: {
@@ -115,7 +119,10 @@ router.get('/dashboard', async (_req, res, next) => {
                 monthlyRevenue,
                 recentActivity,
             },
-        });
+        };
+
+        cache.set('admin:dashboard', response, TTL.DASHBOARD);
+        res.json(response);
     } catch (err) {
         next(err);
     }

@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { useAuth } from '../../context/AuthContext';
 import { apiRequest } from '../../utils/api';
 import '../../styles/admin.css';
@@ -520,7 +521,7 @@ export default function Admin() {
         return (
             <div className="admin-gate" id="adminGate">
                 <div className="admin-gate__card" style={{ textAlign: 'center' }}>
-                    <img src="/images/logo.png" alt="Feelinga" style={{ width: 72, height: 72, borderRadius: '50%', margin: '0 auto var(--space-md)', display: 'block', objectFit: 'cover' }} />
+                    <Image src="/images/logo.png" alt="Feelinga" width={72} height={72} style={{ borderRadius: '50%', margin: '0 auto var(--space-md)', display: 'block', objectFit: 'cover' }} />
                     <p style={{ color: 'var(--color-text-muted)' }}>Verifying session…</p>
                 </div>
             </div>
@@ -532,7 +533,7 @@ export default function Admin() {
         return (
             <div className="admin-gate" id="adminGate">
                 <div className="admin-gate__card">
-                    <img src="/images/logo.png" alt="Feelinga" style={{ width: 72, height: 72, borderRadius: '50%', margin: '0 auto var(--space-md)', display: 'block', objectFit: 'cover' }} />
+                    <Image src="/images/logo.png" alt="Feelinga" width={72} height={72} style={{ borderRadius: '50%', margin: '0 auto var(--space-md)', display: 'block', objectFit: 'cover' }} />
                     <h1>🔐 Admin Access</h1>
                     <p>Sign in with your admin credentials</p>
                     {gateError && <div className="admin-gate__error" id="gateError">{gateError}</div>}
@@ -564,7 +565,7 @@ export default function Admin() {
             <aside className="admin__sidebar" id="adminSidebar">
                 <div className="admin__sidebar-header">
                     <div className="admin__logo">
-                        <img src="/images/logo.png" alt="" className="admin__logo-img" />
+                        <Image src="/images/logo.png" alt="" width={32} height={32} className="admin__logo-img" />
                         <span>Feelinga<span style={{ color: 'var(--color-accent)' }}>.</span> admin</span>
                     </div>
                 </div>
@@ -764,7 +765,7 @@ export default function Admin() {
                                                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 'var(--space-sm)' }}>
                                                         {productForm.images.map((url, i) => (
                                                             <div key={i} style={{ position: 'relative', width: 72, height: 72, borderRadius: 'var(--radius-sm)', overflow: 'hidden', border: '1px solid var(--color-border)' }}>
-                                                                <img src={url} alt={`Product ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                                <Image src={url} alt={`Product ${i + 1}`} width={72} height={72} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                                 <button type="button" onClick={() => removeImage(i)} style={{ position: 'absolute', top: 2, right: 2, width: 20, height: 20, borderRadius: '50%', background: 'rgba(0,0,0,0.6)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>✕</button>
                                                             </div>
                                                         ))}

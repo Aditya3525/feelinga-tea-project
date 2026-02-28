@@ -1,6 +1,7 @@
 'use client';
 import Layout from '../../components/Layout';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function About() {
     return (
@@ -26,7 +27,7 @@ export default function About() {
                             <p>"I wanted people to experience tea the way it's meant to be — not just a drink, but a daily dose of happiness." — <em>Kailas Ishwar Mane, Founder & Managing Director</em></p>
                         </div>
                         <div className="about-visual" style={{ display: 'flex', justifyContent: 'center' }}>
-                            <img src="/images/founder.jpg" alt="Kailas Ishwar Mane — Founder of Feelinga" style={{ width: '100%', maxWidth: '320px', borderRadius: 'var(--radius-lg)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }} />
+                            <Image src="/images/founder.jpg" alt="Kailas Ishwar Mane — Founder of Feelinga" width={320} height={400} style={{ width: '100%', maxWidth: '320px', height: 'auto', borderRadius: 'var(--radius-lg)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }} />
                         </div>
                     </div>
                 </div>

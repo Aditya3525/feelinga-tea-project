@@ -5,6 +5,8 @@ import { AppError } from '../../middleware/errorHandler.js';
 import { authenticate, authorize } from '../../middleware/auth.js';
 import { validate } from '../../middleware/validate.js';
 import { logAdminAction } from '../../utils/auditLog.js';
+import { cache, TTL } from '../../utils/cache.js';
+import { escapeRegex } from '../../utils/sanitize.js';
 
 const router = Router();
 
@@ -39,6 +41,10 @@ const bulkDeleteSchema = z.object({
 // GET /products — List with filters, sort, pagination
 router.get('/', async (req, res, next) => {
     try {
+        const cacheKey = `products:${JSON.stringify(req.query)}`;
+        const cached = cache.get(cacheKey);
+        if (cached) return res.json(cached);
+
         const { type, mood, caffeine, minPrice, maxPrice,
             sort = '-createdAt', page = 1, limit = 12, q } = req.query;
 
@@ -79,7 +85,7 @@ router.get('/', async (req, res, next) => {
             Product.countDocuments(filter),
         ]);
 
-        res.json({
+        const response = {
             status: 'success',
             results: products.length,
             pagination: {
@@ -89,13 +95,16 @@ router.get('/', async (req, res, next) => {
                 total,
             },
             data: products,
-        });
+        };
+
+        cache.set(cacheKey, response, TTL.PRODUCTS_LIST);
+        res.json(response);
     } catch (err) {
         next(err);
     }
 });
 
-// GET /products/search?q=green
+// GET /products/search?q=green — improved full-text + regex fallback
 router.get('/search', async (req, res, next) => {
     try {
         const { q } = req.query;
@@ -103,20 +112,59 @@ router.get('/search', async (req, res, next) => {
             throw new AppError('Search query must be at least 2 characters', 400);
         }
 
-        const regex = new RegExp(String(q).trim(), 'i');
-        const products = await Product.find({
-            $or: [
-                { name: regex },
-                { type: regex },
-                { description: regex },
-                { tags: regex },
-            ],
-        }).limit(20);
+        const term = String(q).trim();
+        let products: any[];
+
+        // Try full-text search first (better relevance ranking)
+        const textResults = await Product.find(
+            { $text: { $search: term } },
+            { score: { $meta: 'textScore' } },
+        )
+            .sort({ score: { $meta: 'textScore' } })
+            .limit(20);
+
+        if (textResults.length > 0) {
+            products = textResults;
+        } else {
+            // Fallback to regex for partial matches
+            const regex = new RegExp(escapeRegex(term), 'i');
+            products = await Product.find({
+                $or: [
+                    { name: regex },
+                    { type: regex },
+                    { description: regex },
+                    { tags: regex },
+                ],
+            }).limit(20);
+        }
 
         res.json({
             status: 'success',
             results: products.length,
             data: products,
+        });
+    } catch (err) {
+        next(err);
+    }
+});
+
+// GET /products/autocomplete?q=dar — lightweight suggestions for search overlay
+router.get('/autocomplete', async (req, res, next) => {
+    try {
+        const { q } = req.query;
+        if (!q || String(q).trim().length < 1) {
+            return res.json({ status: 'success', data: [] });
+        }
+
+        const regex = new RegExp('^' + escapeRegex(String(q).trim()), 'i');
+        const suggestions = await Product.find(
+            { name: regex },
+            { name: 1, slug: 1, type: 1, 'prices.100g': 1, images: { $slice: 1 } },
+        ).limit(6).lean();
+
+        res.json({
+            status: 'success',
+            data: suggestions,
         });
     } catch (err) {
         next(err);
@@ -140,6 +188,7 @@ router.get('/:slug', async (req, res, next) => {
 router.post('/', authenticate, authorize('admin'), validate(createProductSchema), async (req, res, next) => {
     try {
         const product = await Product.create(req.body);
+        cache.invalidate('products:');
         await logAdminAction({
             actor: req.user!,
             action: 'product.create',
@@ -162,6 +211,7 @@ router.patch('/bulk-stock', authenticate, authorize('admin'), validate(bulkStock
             { _id: { $in: productIds } },
             { $set: { stock, inStock: stock > 0 } },
         );
+        cache.invalidate('products:');
         await logAdminAction({
             actor: req.user!,
             action: 'product.bulk_stock_update',
@@ -188,6 +238,7 @@ router.delete('/bulk', authenticate, authorize('admin'), validate(bulkDeleteSche
     try {
         const { productIds } = req.body;
         const result = await Product.deleteMany({ _id: { $in: productIds } });
+        cache.invalidate('products:');
         await logAdminAction({
             actor: req.user!,
             action: 'product.bulk_delete',
@@ -231,11 +282,16 @@ const updateProductSchema = z.object({
 // PATCH /products/:id (admin only) — validated
 router.patch('/:id', authenticate, authorize('admin'), validate(updateProductSchema), async (req, res, next) => {
     try {
+        // Auto-enable inStock when stock is set above 0
+        if (req.body.stock !== undefined && req.body.stock > 0 && req.body.inStock === undefined) {
+            req.body.inStock = true;
+        }
         const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
             new: true,
             runValidators: true,
         });
         if (!product) throw new AppError('Product not found', 404);
+        cache.invalidate('products:');
         await logAdminAction({
             actor: req.user!,
             action: 'product.update',
@@ -255,6 +311,7 @@ router.delete('/:id', authenticate, authorize('admin'), async (req, res, next) =
     try {
         const product = await Product.findByIdAndUpdate(req.params.id, { deletedAt: new Date() }, { new: true });
         if (!product) throw new AppError('Product not found', 404);
+        cache.invalidate('products:');
         await logAdminAction({
             actor: req.user!,
             action: 'product.delete',

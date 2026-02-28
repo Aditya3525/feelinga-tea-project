@@ -127,6 +127,17 @@ export async function sendOrderStatusEmail(email: string, order: any, newStatus:
 
     const msg = statusMessages[newStatus] || `Your order status has been updated to: ${newStatus}`;
 
+    // Include tracking info for shipped orders
+    let trackingHtml = '';
+    if (newStatus === 'shipped' && order.trackingNumber) {
+        trackingHtml = `
+            <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:16px;margin:16px 0">
+                <strong>📦 Tracking Information</strong><br/>
+                <p style="margin:8px 0 0">Tracking Number: <strong>${order.trackingNumber}</strong></p>
+                ${order.trackingUrl ? `<p style="margin:8px 0 0"><a href="${order.trackingUrl}" style="color:#8b6f47;font-weight:600">Track Your Shipment →</a></p>` : ''}
+            </div>`;
+    }
+
     await sendEmail({
         to: email,
         subject: `Order ${order.orderNumber} — ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}`,
@@ -134,9 +145,39 @@ export async function sendOrderStatusEmail(email: string, order: any, newStatus:
         <div style="font-family:system-ui,sans-serif;max-width:520px;margin:auto;padding:32px;border:1px solid #e5e1d8;border-radius:12px">
             <h2 style="color:#8b6f47;margin-top:0">Order Update</h2>
             <p>${msg}</p>
+            ${trackingHtml}
             <p><strong>Order:</strong> ${order.orderNumber}<br><strong>Status:</strong> ${newStatus}</p>
             <hr style="border:none;border-top:1px solid #e5e1d8;margin:24px 0"/>
             <p style="font-size:0.8rem;color:#aaa;margin:0">Feelinga — happiness is here 🍵</p>
+        </div>`,
+    });
+}
+
+// Low stock alert to admin
+export async function sendLowStockAlert(adminEmail: string, products: Array<{ name: string; slug: string; stock: number }>) {
+    const rows = products.map(p =>
+        `<tr>
+            <td style="padding:8px;border-bottom:1px solid #eee">${p.name}</td>
+            <td style="padding:8px;border-bottom:1px solid #eee;text-align:center;color:${p.stock === 0 ? '#e74c3c' : '#f39c12'};font-weight:600">${p.stock}</td>
+        </tr>`
+    ).join('');
+
+    await sendEmail({
+        to: adminEmail,
+        subject: `⚠️ Low Stock Alert — ${products.length} product(s)`,
+        html: `
+        <div style="font-family:system-ui,sans-serif;max-width:520px;margin:auto;padding:32px;border:1px solid #e5e1d8;border-radius:12px">
+            <h2 style="color:#e74c3c;margin-top:0">⚠️ Low Stock Alert</h2>
+            <p>The following products are running low or out of stock:</p>
+            <table style="width:100%;border-collapse:collapse;margin:16px 0">
+                <thead>
+                    <tr style="background:#f9f6f0"><th style="padding:8px;text-align:left">Product</th><th style="padding:8px;text-align:center">Stock</th></tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+            <p>Please restock these items from the admin dashboard.</p>
+            <hr style="border:none;border-top:1px solid #e5e1d8;margin:24px 0"/>
+            <p style="font-size:0.8rem;color:#aaa;margin:0">Feelinga Admin — automated inventory alert</p>
         </div>`,
     });
 }

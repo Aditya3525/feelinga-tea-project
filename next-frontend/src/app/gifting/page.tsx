@@ -1,6 +1,7 @@
 'use client';
 import Layout from '../../components/Layout';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useToast } from '../../components/Toast';
 
 const giftSets = [
@@ -35,7 +36,7 @@ export default function Gifting() {
                         {giftSets.map((g, i) => (
                             <div className="product-card" key={i}>
                                 <span className="product-card__badge" style={{ background: 'var(--color-success)' }}>Gift Set</span>
-                                <div className="product-card__img"><img src={g.img} alt={g.name} /></div>
+                                <div className="product-card__img"><Image src={g.img} alt={g.name} width={280} height={280} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
                                 <div className="product-card__body">
                                     <div className="product-card__type">Gift Collection</div>
                                     <div className="product-card__name">{g.name}</div>
@@ -72,7 +73,7 @@ export default function Gifting() {
                             </div>
                         </div>
                         <div className="story__visual">
-                            <img src="/images/gift-box.png" alt="Corporate tea gift boxes" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 'var(--radius-lg)' }} />
+                            <Image src="/images/gift-box.png" alt="Corporate tea gift boxes" width={500} height={400} style={{ width: '100%', height: 'auto', objectFit: 'contain', borderRadius: 'var(--radius-lg)' }} />
                         </div>
                     </div>
                 </div>
