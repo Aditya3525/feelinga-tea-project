@@ -161,11 +161,11 @@ export default function Checkout() {
 
             <div className="container section">
                 {/* Progress */}
-                <div style={{ display: 'flex', justifyContent: 'center', gap: 'var(--space-xl)', marginBottom: 'var(--space-3xl)' }}>
+                <div className="checkout-stepper">
                     {['Shipping', 'Payment', 'Review', 'Confirm'].map((s, i) => (
-                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', opacity: step >= i + 1 ? 1 : 0.4 }}>
-                            <div style={{ width: 32, height: 32, borderRadius: '50%', background: step >= i + 1 ? 'var(--color-primary)' : 'var(--color-border)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600 }}>{i + 1}</div>
-                            <span style={{ fontWeight: step === i + 1 ? 700 : 400 }}>{s}</span>
+                        <div key={i} className={`checkout-stepper__step ${step >= i + 1 ? 'checkout-stepper__step--active' : ''}`}>
+                            <div className={`checkout-stepper__circle ${step >= i + 1 ? 'checkout-stepper__circle--active' : ''}`}>{i + 1}</div>
+                            <span className={`checkout-stepper__label ${step === i + 1 ? 'checkout-stepper__label--current' : ''}`}>{s}</span>
                         </div>
                     ))}
                 </div>

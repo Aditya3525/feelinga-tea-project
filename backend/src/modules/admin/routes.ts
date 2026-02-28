@@ -4,6 +4,7 @@ import Product from '../../models/Product.js';
 import User from '../../models/User.js';
 import AuditLog from '../../models/AuditLog.js';
 import Coupon from '../../models/Coupon.js';
+import Testimonial from '../../models/Testimonial.js';
 import PDFDocument from 'pdfkit';
 
 const router = Router();
@@ -465,6 +466,68 @@ router.get('/invoice/:orderId', async (req, res, next) => {
         doc.fontSize(8).fillColor('#aaa').text('Feelinga — happiness is here · www.feelinga.in', 50, 770, { align: 'center' });
 
         doc.end();
+    } catch (err) {
+        next(err);
+    }
+});
+
+// ===== TESTIMONIAL MANAGEMENT =====
+
+// GET /admin/testimonials — all testimonials (including unapproved)
+router.get('/testimonials', async (req, res, next) => {
+    try {
+        const testimonials = await Testimonial.find()
+            .sort({ order: 1, createdAt: -1 })
+            .lean();
+        res.json({ status: 'success', data: testimonials });
+    } catch (err) {
+        next(err);
+    }
+});
+
+// POST /admin/testimonials — create testimonial
+router.post('/testimonials', async (req, res, next) => {
+    try {
+        const { author, role, text, rating, approved, featured, order } = req.body;
+        if (!author || !text) {
+            return res.status(400).json({ status: 'error', message: 'Author and text are required' });
+        }
+        const testimonial = await Testimonial.create({
+            author: author.trim(),
+            role: role?.trim() || 'Customer',
+            text: text.trim(),
+            rating: rating || 5,
+            approved: approved !== undefined ? approved : false,
+            featured: featured || false,
+            order: order || 0,
+        });
+        res.status(201).json({ status: 'success', data: testimonial });
+    } catch (err) {
+        next(err);
+    }
+});
+
+// PATCH /admin/testimonials/:id — update testimonial (edit, approve/reject, feature)
+router.patch('/testimonials/:id', async (req, res, next) => {
+    try {
+        const testimonial = await Testimonial.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true, runValidators: true },
+        );
+        if (!testimonial) return res.status(404).json({ status: 'error', message: 'Testimonial not found' });
+        res.json({ status: 'success', data: testimonial });
+    } catch (err) {
+        next(err);
+    }
+});
+
+// DELETE /admin/testimonials/:id
+router.delete('/testimonials/:id', async (req, res, next) => {
+    try {
+        const testimonial = await Testimonial.findByIdAndDelete(req.params.id);
+        if (!testimonial) return res.status(404).json({ status: 'error', message: 'Testimonial not found' });
+        res.status(204).send();
     } catch (err) {
         next(err);
     }

@@ -17,6 +17,15 @@ export default function Home() {
     const [bestSellers, setBestSellers] = useState([]);
     const [loadingProducts, setLoadingProducts] = useState(true);
 
+    // Testimonials from API
+    const [testimonials, setTestimonials] = useState([]);
+    const fallbackTestimonials = [
+        { _id: '1', text: 'The Darjeeling First Flush is absolutely divine. It\'s like sipping on liquid sunshine — delicate, fragrant, and utterly refreshing. Best tea I\'ve had in years.', author: 'Priya Sharma', role: 'Tea Enthusiast, Mumbai', rating: 5 },
+        { _id: '2', text: 'I ordered the Wellness Ritual gift box for my mother and she was overjoyed. The packaging is gorgeous and the teas are exceptionally fresh. Will order again!', author: 'Arjun Mehta', role: 'Repeat Customer, Delhi', rating: 5 },
+        { _id: '3', text: 'Their Heritage Spiced Chai has replaced my morning coffee entirely. The blend of spices is perfectly balanced — warm but never overwhelming. An everyday essential.', author: 'Kavya Nair', role: 'Wellness Coach, Bangalore', rating: 5 },
+        { _id: '4', text: 'As a café owner, I switched to Feelinga for our premium tea menu. Our customers immediately noticed the quality difference. Exceptional sourcing and consistency.', author: 'Rohan Desai', role: 'Café Owner, Pune', rating: 5 },
+    ];
+
     // Animated counter hook
     const useCounter = (target: number, suffix = '') => {
         const [count, setCount] = useState(0);
@@ -89,6 +98,24 @@ export default function Home() {
             }
         }
         fetchProducts();
+    }, []);
+
+    // Fetch approved testimonials
+    useEffect(() => {
+        async function fetchTestimonials() {
+            try {
+                const res = await fetch('/api/v1/testimonials');
+                const data = await res.json();
+                if (data.data && data.data.length > 0) {
+                    setTestimonials(data.data);
+                } else {
+                    setTestimonials(fallbackTestimonials);
+                }
+            } catch {
+                setTestimonials(fallbackTestimonials);
+            }
+        }
+        fetchTestimonials();
     }, []);
 
     const handleAddToCart = (p) => {
@@ -315,20 +342,19 @@ export default function Home() {
                         <p className="overline">Reviews</p>
                         <h2>What Our Sippers Say</h2>
                     </div>
-                    <div className="testimonials-track blur-in">
-                        {[
-                            { text: '"The Darjeeling First Flush is absolutely divine. It\'s like sipping on liquid sunshine — delicate, fragrant, and utterly refreshing. Best tea I\'ve had in years."', author: 'Priya Sharma', role: 'Tea Enthusiast, Mumbai' },
-                            { text: '"I ordered the Wellness Ritual gift box for my mother and she was overjoyed. The packaging is gorgeous and the teas are exceptionally fresh. Will order again!"', author: 'Arjun Mehta', role: 'Repeat Customer, Delhi' },
-                            { text: '"Their Heritage Spiced Chai has replaced my morning coffee entirely. The blend of spices is perfectly balanced — warm but never overwhelming. An everyday essential."', author: 'Kavya Nair', role: 'Wellness Coach, Bangalore' },
-                            { text: '"As a café owner, I switched to Feelinga for our premium tea menu. Our customers immediately noticed the quality difference. Exceptional sourcing and consistency."', author: 'Rohan Desai', role: 'Café Owner, Pune' },
-                        ].map((t, i) => (
-                            <div className="testimonial-card" key={i}>
-                                <div className="testimonial-card__stars">★★★★★</div>
-                                <div className="testimonial-card__text">{t.text}</div>
-                                <div className="testimonial-card__author">{t.author}</div>
-                                <div className="testimonial-card__role">{t.role}</div>
-                            </div>
-                        ))}
+                    <div className="testimonials-wrapper">
+                        <button className="testimonials-arrow testimonials-arrow--left" aria-label="Scroll left" onClick={() => { const track = document.querySelector('.testimonials-track'); if (track) track.scrollBy({ left: -400, behavior: 'smooth' }); }}>&#8249;</button>
+                        <div className="testimonials-track blur-in">
+                            {(testimonials.length > 0 ? testimonials : fallbackTestimonials).map((t, i) => (
+                                <div className="testimonial-card" key={t._id || i}>
+                                    <div className="testimonial-card__stars">{'★'.repeat(t.rating || 5)}{'☆'.repeat(5 - (t.rating || 5))}</div>
+                                    <div className="testimonial-card__text">"{t.text}"</div>
+                                    <div className="testimonial-card__author">{t.author}</div>
+                                    <div className="testimonial-card__role">{t.role}</div>
+                                </div>
+                            ))}
+                        </div>
+                        <button className="testimonials-arrow testimonials-arrow--right" aria-label="Scroll right" onClick={() => { const track = document.querySelector('.testimonials-track'); if (track) track.scrollBy({ left: 400, behavior: 'smooth' }); }}>&#8250;</button>
                     </div>
                     <div className="testimonials__summary fade-in"><strong>4.8 / 5</strong> from 500+ reviews · Trusted since 2019</div>
                 </div>

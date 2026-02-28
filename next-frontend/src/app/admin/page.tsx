@@ -44,6 +44,14 @@ export default function Admin() {
     const emptyCoupon = { code: '', discountType: 'percentage', discountValue: '', minOrderAmount: '', maxDiscount: '', usageLimit: '', perUserLimit: '', validFrom: '', validTo: '', active: true };
     const [couponForm, setCouponForm] = useState(emptyCoupon);
 
+    // Testimonials
+    const [testimonials, setTestimonials] = useState([]);
+    const [testimonialsLoading, setTestimonialsLoading] = useState(false);
+    const [showTestimonialForm, setShowTestimonialForm] = useState(false);
+    const [editingTestimonial, setEditingTestimonial] = useState(null);
+    const emptyTestimonial = { author: '', role: '', text: '', rating: 5, approved: false, featured: false, order: 0 };
+    const [testimonialForm, setTestimonialForm] = useState(emptyTestimonial);
+
     // Product form state
     const [showProductForm, setShowProductForm] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
@@ -107,6 +115,8 @@ export default function Admin() {
         else if (activeSection === 'messages') loadMessages();
         else if (activeSection === 'newsletter') loadSubscribers();
         else if (activeSection === 'coupons') loadCoupons();
+        else if (activeSection === 'testimonials') loadTestimonials();
+        else if (activeSection === 'testimonials') loadTestimonials();
     }, [activeSection, currentUser]);
 
     const loadOverview = async () => {
@@ -182,6 +192,81 @@ export default function Admin() {
             setCoupons(data.data || []);
         } catch (err) { console.error(err); }
         finally { setCouponsLoading(false); }
+    };
+
+    const loadTestimonials = async () => {
+        setTestimonialsLoading(true);
+        try {
+            const data = await adminApi('/admin/testimonials');
+            setTestimonials(data.data || []);
+        } catch (err) { console.error(err); }
+        finally { setTestimonialsLoading(false); }
+    };
+
+    const handleTestimonialSubmit = async (e) => {
+        e.preventDefault();
+        const body = {
+            author: testimonialForm.author.trim(),
+            role: testimonialForm.role.trim() || 'Customer',
+            text: testimonialForm.text.trim(),
+            rating: Number(testimonialForm.rating),
+            approved: testimonialForm.approved,
+            featured: testimonialForm.featured,
+            order: Number(testimonialForm.order) || 0,
+        };
+        try {
+            if (editingTestimonial) {
+                await adminApi(`/admin/testimonials/${editingTestimonial._id}`, { method: 'PATCH', body: JSON.stringify(body) });
+            } else {
+                await adminApi('/admin/testimonials', { method: 'POST', body: JSON.stringify(body) });
+            }
+            setShowTestimonialForm(false);
+            setEditingTestimonial(null);
+            setTestimonialForm(emptyTestimonial);
+            loadTestimonials();
+        } catch (err) { alert(err.message); }
+    };
+
+    const deleteTestimonial = async (id) => {
+        if (!confirm('Delete this testimonial?')) return;
+        try {
+            await adminApi(`/admin/testimonials/${id}`, { method: 'DELETE' });
+            loadTestimonials();
+        } catch (err) { alert(err.message); }
+    };
+
+    const toggleTestimonialApproval = async (testimonial) => {
+        try {
+            await adminApi(`/admin/testimonials/${testimonial._id}`, {
+                method: 'PATCH',
+                body: JSON.stringify({ approved: !testimonial.approved }),
+            });
+            loadTestimonials();
+        } catch (err) { alert(err.message); }
+    };
+
+    const toggleTestimonialFeatured = async (testimonial) => {
+        try {
+            await adminApi(`/admin/testimonials/${testimonial._id}`, {
+                method: 'PATCH',
+                body: JSON.stringify({ featured: !testimonial.featured }),
+            });
+            loadTestimonials();
+        } catch (err) { alert(err.message); }
+    };
+
+    const openEditTestimonial = (t) => {
+        setEditingTestimonial(t);
+        setTestimonialForm({
+            author: t.author || '',
+            role: t.role || '',
+            text: t.text || '',
+            rating: t.rating || 5,
+            approved: t.approved || false,
+            featured: t.featured || false,
+            order: t.order || 0,
+        });
+        setShowTestimonialForm(true);
     };
 
     const handleCouponSubmit = async (e) => {
@@ -467,6 +552,7 @@ export default function Admin() {
         { key: 'orders', icon: '📦', label: 'Orders' },
         { key: 'users', icon: '👥', label: 'Users' },
         { key: 'coupons', icon: '🎟️', label: 'Coupons' },
+        { key: 'testimonials', icon: '⭐', label: 'Reviews' },
         { key: 'messages', icon: '💬', label: 'Messages' },
         { key: 'newsletter', icon: '📧', label: 'Newsletter' },
         { key: 'activity', icon: '📋', label: 'Activity' },
@@ -1054,6 +1140,84 @@ export default function Admin() {
                                         ))}
                                     </tbody>
                                 </table>
+                            )}
+                        </div>
+                    )}
+
+                    {/* TESTIMONIALS / REVIEWS */}
+                    {activeSection === 'testimonials' && (
+                        <div className="admin__section active">
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
+                                <h3>{testimonials.length} Review{testimonials.length !== 1 ? 's' : ''} · {testimonials.filter(t => t.approved).length} Approved</h3>
+                                <button className="btn btn--primary btn--sm" onClick={() => { setEditingTestimonial(null); setTestimonialForm(emptyTestimonial); setShowTestimonialForm(true); }}>+ Add Review</button>
+                            </div>
+
+                            {/* Testimonial Form Modal */}
+                            {showTestimonialForm && (
+                                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} onClick={(e) => { if (e.target === e.currentTarget) setShowTestimonialForm(false); }}>
+                                    <div style={{ background: 'var(--color-bg)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-xl)', width: '100%', maxWidth: 560, maxHeight: '90vh', overflowY: 'auto' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
+                                            <h2>{editingTestimonial ? 'Edit Review' : 'Add Review'}</h2>
+                                            <button onClick={() => setShowTestimonialForm(false)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
+                                        </div>
+                                        <form onSubmit={handleTestimonialSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-md)' }}>
+                                            <div><label>Author Name *</label><input type="text" required value={testimonialForm.author} onChange={e => setTestimonialForm(f => ({ ...f, author: e.target.value }))} placeholder="e.g. Priya Sharma" style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
+                                            <div><label>Role / Location</label><input type="text" value={testimonialForm.role} onChange={e => setTestimonialForm(f => ({ ...f, role: e.target.value }))} placeholder="e.g. Tea Enthusiast, Mumbai" style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
+                                            <div style={{ gridColumn: '1 / -1' }}><label>Review Text *</label><textarea required rows={4} value={testimonialForm.text} onChange={e => setTestimonialForm(f => ({ ...f, text: e.target.value }))} placeholder="Write the customer's review text..." style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', resize: 'vertical' }} /></div>
+                                            <div>
+                                                <label>Rating</label>
+                                                <select value={testimonialForm.rating} onChange={e => setTestimonialForm(f => ({ ...f, rating: Number(e.target.value) }))} style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }}>
+                                                    <option value={5}>★★★★★ (5)</option>
+                                                    <option value={4}>★★★★☆ (4)</option>
+                                                    <option value={3}>★★★☆☆ (3)</option>
+                                                    <option value={2}>★★☆☆☆ (2)</option>
+                                                    <option value={1}>★☆☆☆☆ (1)</option>
+                                                </select>
+                                            </div>
+                                            <div><label>Display Order</label><input type="number" min={0} value={testimonialForm.order} onChange={e => setTestimonialForm(f => ({ ...f, order: Number(e.target.value) || 0 }))} placeholder="0" style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
+                                            <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 'var(--space-lg)' }}>
+                                                <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}><input type="checkbox" checked={testimonialForm.approved} onChange={e => setTestimonialForm(f => ({ ...f, approved: e.target.checked }))} /> Approved (visible on homepage)</label>
+                                                <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}><input type="checkbox" checked={testimonialForm.featured} onChange={e => setTestimonialForm(f => ({ ...f, featured: e.target.checked }))} /> Featured (shown first)</label>
+                                            </div>
+                                            <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 'var(--space-sm)', marginTop: 'var(--space-md)' }}>
+                                                <button type="submit" className="btn btn--primary">{editingTestimonial ? 'Update Review' : 'Add Review'}</button>
+                                                <button type="button" className="btn btn--ghost" onClick={() => setShowTestimonialForm(false)}>Cancel</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            )}
+
+                            {testimonialsLoading ? (
+                                <p style={{ color: 'var(--color-text-muted)' }}>Loading reviews...</p>
+                            ) : testimonials.length === 0 ? (
+                                <p style={{ color: 'var(--color-text-muted)' }}>No reviews yet. Add customer reviews to display on the homepage!</p>
+                            ) : (
+                                <div style={{ display: 'grid', gap: 'var(--space-md)' }}>
+                                    {testimonials.map(t => (
+                                        <div key={t._id} style={{ padding: 'var(--space-lg)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', background: t.approved ? 'var(--color-bg)' : 'var(--color-bg-alt, var(--color-bg))', opacity: t.approved ? 1 : 0.7, position: 'relative' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--space-sm)' }}>
+                                                <div>
+                                                    <strong style={{ fontSize: '1.05rem' }}>{t.author}</strong>
+                                                    <span style={{ marginLeft: 10, fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{t.role}</span>
+                                                    {t.featured && <span style={{ marginLeft: 8, padding: '1px 8px', borderRadius: 8, fontSize: '0.75rem', fontWeight: 600, background: '#f59e0b', color: '#fff' }}>Featured</span>}
+                                                </div>
+                                                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                                                    <span style={{ padding: '2px 10px', borderRadius: 12, fontSize: '0.8rem', fontWeight: 600, background: t.approved ? '#10b981' : '#ef4444', color: '#fff' }}>{t.approved ? 'Approved' : 'Pending'}</span>
+                                                </div>
+                                            </div>
+                                            <div style={{ color: '#f59e0b', marginBottom: 'var(--space-xs)', fontSize: '0.95rem' }}>{'★'.repeat(t.rating)}{'☆'.repeat(5 - t.rating)}</div>
+                                            <p style={{ color: 'var(--color-text-muted)', lineHeight: 1.7, marginBottom: 'var(--space-md)', fontStyle: 'italic' }}>"{t.text}"</p>
+                                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                                                <button className="btn btn--ghost btn--sm" style={{ color: t.approved ? 'var(--color-error)' : '#10b981', fontWeight: 600 }} onClick={() => toggleTestimonialApproval(t)}>{t.approved ? '✕ Reject' : '✓ Approve'}</button>
+                                                <button className="btn btn--ghost btn--sm" style={{ color: t.featured ? 'var(--color-text-muted)' : '#f59e0b' }} onClick={() => toggleTestimonialFeatured(t)}>{t.featured ? 'Unfeature' : '★ Feature'}</button>
+                                                <button className="btn btn--ghost btn--sm" onClick={() => openEditTestimonial(t)}>Edit</button>
+                                                <button className="btn btn--ghost btn--sm" style={{ color: 'var(--color-error)' }} onClick={() => deleteTestimonial(t._id)}>Delete</button>
+                                                <span style={{ marginLeft: 'auto', fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Order: {t.order} · {new Date(t.createdAt).toLocaleDateString('en-IN')}</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             )}
                         </div>
                     )}

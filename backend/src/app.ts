@@ -19,6 +19,7 @@ import cartRoutes from './modules/cart/routes.js';
 import adminRoutes from './modules/admin/routes.js';
 import contactRoutes from './modules/contact/routes.js';
 import uploadRoutes from './modules/upload/routes.js';
+import testimonialRoutes from './modules/testimonials/routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -113,6 +114,7 @@ app.use('/api/v1/reviews', reviewRoutes);
 app.use('/api/v1/cart', cartRoutes);
 app.use('/api/v1/admin', authenticate, authorize('admin'), adminRoutes);
 app.use('/api/v1/upload', authenticate, authorize('admin'), uploadRoutes);
+app.use('/api/v1/testimonials', testimonialRoutes);
 app.use('/api/v1', contactRoutes);
 
 // Public coupon validation endpoint
