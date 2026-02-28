@@ -81,7 +81,7 @@ router.post('/newsletter', validate(newsletterSubscribeSchema), async (req: Requ
         );
         res.status(201).json({
             status: 'success',
-            message: 'You\'re subscribed! Welcome to the feelinga community.',
+            message: 'You\'re subscribed! Welcome to the Feelinga community.',
         });
     } catch (err) {
         next(err);

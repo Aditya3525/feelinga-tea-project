@@ -81,7 +81,7 @@ export default function Contact() {
                                 <div className="contact-info__icon">👤</div>
                                 <div className="contact-info__text">
                                     <h4>Kailas Ishwar Mane</h4>
-                                    <p>Founder &amp; Managing Director, feelinga</p>
+                                    <p>Founder &amp; Managing Director, Feelinga</p>
                                 </div>
                             </div>
                             <div className="contact-info__item">

@@ -16,7 +16,7 @@ export default function Terms() {
 
                 <h2 style={{ marginBottom: 'var(--space-md)' }}>1. Acceptance of Terms</h2>
                 <p style={{ lineHeight: 1.8, marginBottom: 'var(--space-lg)' }}>
-                    By accessing or using the feelinga website and services, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.
+                    By accessing or using the Feelinga website and services, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.
                 </p>
 
                 <h2 style={{ marginBottom: 'var(--space-md)' }}>2. Products & Orders</h2>
@@ -41,12 +41,12 @@ export default function Terms() {
 
                 <h2 style={{ marginBottom: 'var(--space-md)' }}>6. Intellectual Property</h2>
                 <p style={{ lineHeight: 1.8, marginBottom: 'var(--space-lg)' }}>
-                    All content on this website — including text, images, logos, and graphics — is the property of feelinga and protected by intellectual property laws. You may not reproduce, distribute, or create derivative works without our written permission.
+                    All content on this website — including text, images, logos, and graphics — is the property of Feelinga and protected by intellectual property laws. You may not reproduce, distribute, or create derivative works without our written permission.
                 </p>
 
                 <h2 style={{ marginBottom: 'var(--space-md)' }}>7. Limitation of Liability</h2>
                 <p style={{ lineHeight: 1.8, marginBottom: 'var(--space-lg)' }}>
-                    feelinga shall not be liable for any indirect, incidental, special, or consequential damages arising from the use of our services. Our total liability shall not exceed the amount paid for the specific product or service in question.
+                    Feelinga shall not be liable for any indirect, incidental, special, or consequential damages arising from the use of our services. Our total liability shall not exceed the amount paid for the specific product or service in question.
                 </p>
 
                 <h2 style={{ marginBottom: 'var(--space-md)' }}>8. Contact</h2>

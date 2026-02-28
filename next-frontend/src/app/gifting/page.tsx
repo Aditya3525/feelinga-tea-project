@@ -1,7 +1,7 @@
 'use client';
 import Layout from '../../components/Layout';
 import Link from 'next/link';
-import { useCart } from '../../context/CartContext';
+import { useToast } from '../../components/Toast';
 
 const giftSets = [
     { name: 'Spring Festival Tea Box', desc: '5 curated teas in a premium gift box', price: 1499, img: '/images/gift-box.png' },
@@ -11,7 +11,7 @@ const giftSets = [
 ];
 
 export default function Gifting() {
-    const { addToCart } = useCart();
+    const { showToast } = useToast();
 
     return (
         <Layout>
@@ -44,7 +44,7 @@ export default function Gifting() {
                                         <div className="product-card__price">₹{g.price.toLocaleString()}</div>
                                         <div className="product-card__rating">★★★★★</div>
                                     </div>
-                                    <button className="btn btn--primary btn--sm" style={{ width: '100%', marginTop: '12px' }} onClick={() => addToCart({ id: `gift-${i}`, slug: g.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'), name: g.name, price: g.price, size: 'Gift Set', img: g.img })}>Add to Cart</button>
+                                    <Link href="/contact" className="btn btn--primary btn--sm" style={{ width: '100%', marginTop: '12px', textAlign: 'center' }} onClick={() => showToast('Contact us to order this gift set!', 'info')}>Enquire Now</Link>
                                 </div>
                             </div>
                         ))}

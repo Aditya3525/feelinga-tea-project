@@ -37,7 +37,7 @@ export default function ProductDetail() {
     // Dynamic document title & JSON-LD structured data
     useEffect(() => {
         if (!product) return;
-        document.title = `${product.name} — Premium ${product.type} | feelinga`;
+        document.title = `${product.name} — Premium ${product.type} | Feelinga`;
         const meta = document.querySelector('meta[name="description"]');
         const desc = product.shortDescription || (product.description ? product.description.substring(0, 160) : '');
         if (meta) meta.setAttribute('content', desc);
@@ -56,7 +56,7 @@ export default function ProductDetail() {
             description: product.shortDescription || product.description,
             image: product.images?.[0] || '',
             sku: product.slug,
-            brand: { '@type': 'Brand', name: 'feelinga' },
+            brand: { '@type': 'Brand', name: 'Feelinga' },
             offers: {
                 '@type': 'Offer',
                 priceCurrency: 'INR',
@@ -82,7 +82,7 @@ export default function ProductDetail() {
         script.textContent = JSON.stringify(jsonLd);
 
         return () => {
-            document.title = 'feelinga — happiness is here';
+            document.title = 'Feelinga — happiness is here';
             const el = document.getElementById('product-jsonld');
             if (el) el.remove();
         };
@@ -391,7 +391,7 @@ export default function ProductDetail() {
                         <div style={{ marginTop: 'var(--space-lg)', display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', flexWrap: 'wrap' }}>
                             <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-text-muted)' }}>Share:</span>
                             <button
-                                onClick={() => window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(`Check out ${product.name} on feelinga! ${window.location.href}`)}`, '_blank')}
+                                onClick={() => window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(`Check out ${product.name} on Feelinga! ${window.location.href}`)}`, '_blank')}
                                 style={{ padding: '6px 12px', borderRadius: 20, border: '1px solid #25d366', background: '#25d366', color: '#fff', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
                                 aria-label="Share on WhatsApp"
                             >WhatsApp</button>
@@ -401,7 +401,7 @@ export default function ProductDetail() {
                                 aria-label="Share on Facebook"
                             >Facebook</button>
                             <button
-                                onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${product.name} — premium tea from feelinga 🍵`)}&url=${encodeURIComponent(window.location.href)}`, '_blank', 'width=600,height=400')}
+                                onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${product.name} — premium tea from Feelinga 🍵`)}&url=${encodeURIComponent(window.location.href)}`, '_blank', 'width=600,height=400')}
                                 style={{ padding: '6px 12px', borderRadius: 20, border: '1px solid #000', background: '#000', color: '#fff', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
                                 aria-label="Share on X (Twitter)"
                             >𝕏 Post</button>

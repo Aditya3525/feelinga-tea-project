@@ -1,6 +1,6 @@
 export const metadata = {
     title: 'My Wishlist',
-    description: 'Your saved favourite teas from feelinga. View and manage your wishlist.',
+    description: 'Your saved favourite teas from Feelinga. View and manage your wishlist.',
 };
 
 export default function WishlistLayout({ children }) {

@@ -8,6 +8,7 @@ export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
+    const [authReady, setAuthReady] = useState(false);
     const [showAuthModal, setShowAuthModal] = useState(false);
 
     useEffect(() => {
@@ -34,7 +35,9 @@ export function AuthProvider({ children }) {
                 setUser(null);
                 setIsAuthenticated(false);
                 setIsAdmin(false);
-            });
+            }).finally(() => setAuthReady(true));
+        } else {
+            setAuthReady(true);
         }
     }, []);
 
@@ -86,7 +89,7 @@ export function AuthProvider({ children }) {
     const closeAuthModal = () => setShowAuthModal(false);
 
     return (
-        <AuthContext.Provider value={{ user, setUser, isAuthenticated, isAdmin, login, register, googleLogin, logout, updateProfile, showAuthModal, openAuthModal, closeAuthModal }}>
+        <AuthContext.Provider value={{ user, setUser, isAuthenticated, isAdmin, authReady, login, register, googleLogin, logout, updateProfile, showAuthModal, openAuthModal, closeAuthModal }}>
             {children}
         </AuthContext.Provider>
     );

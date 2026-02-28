@@ -100,7 +100,7 @@ const authLimiter = rateLimit({
 app.get('/api/v1/health', (req, res) => {
     res.json({
         status: 'success',
-        message: 'feelinga API is running',
+        message: 'Feelinga API is running',
         timestamp: new Date().toISOString(),
         environment: process.env.NODE_ENV,
     });
@@ -179,7 +179,7 @@ app.use(errorHandler);
 const start = async () => {
     await connectDB();
     app.listen(PORT, () => {
-        console.log(`\n✓ feelinga API running on http://localhost:${PORT}`);
+        console.log(`\n✓ Feelinga API running on http://localhost:${PORT}`);
         console.log(`  Environment: ${process.env.NODE_ENV}`);
         console.log(`  Health: http://localhost:${PORT}/api/v1/health\n`);
     });

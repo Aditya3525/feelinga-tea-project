@@ -21,12 +21,12 @@ export default function About() {
                         <div>
                             <p className="overline">The Beginning</p>
                             <h2>A Founder's Journey</h2>
-                            <p>feelinga was born when our founder & managing director, Kailas Ishwar Mane, decided to share his passion for premium Indian teas with the world. A B.Sc. Agriculture graduate from VNMKV, Parbhani, Kailas brings a deep understanding of cultivation, soil science, and sustainable farming to every cup of tea we offer.</p>
+                            <p>Feelinga was born when our founder & managing director, Kailas Ishwar Mane, decided to share his passion for premium Indian teas with the world. A B.Sc. Agriculture graduate from VNMKV, Parbhani, Kailas brings a deep understanding of cultivation, soil science, and sustainable farming to every cup of tea we offer.</p>
                             <p>Growing up in Pandharpur, Maharashtra, he developed a deep appreciation for authentic flavours and the simple joy that a perfect cup of tea can bring. Driven by the belief that happiness can be found in everyday moments, Kailas set out to build a brand that celebrates the art of tea — fresh, honest, and crafted to bring a smile to every sip.</p>
                             <p>"I wanted people to experience tea the way it's meant to be — not just a drink, but a daily dose of happiness." — <em>Kailas Ishwar Mane, Founder & Managing Director</em></p>
                         </div>
                         <div className="about-visual">
-                            <img src="/images/founder.jpg" alt="Kailas Ishwar Mane — Founder of feelinga" style={{ width: '100%', maxWidth: '320px', borderRadius: 'var(--radius-lg)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }} />
+                            <img src="/images/founder.jpg" alt="Kailas Ishwar Mane — Founder of Feelinga" style={{ width: '100%', maxWidth: '320px', borderRadius: 'var(--radius-lg)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }} />
                         </div>
                     </div>
                 </div>
@@ -79,7 +79,7 @@ export default function About() {
                     </div>
                     <div className="timeline fade-in">
                         {[
-                            { year: '2019', text: 'feelinga founded in Darjeeling. First collection of 12 single-origin teas launched online.' },
+                            { year: '2019', text: 'Feelinga founded in Darjeeling. First collection of 12 single-origin teas launched online.' },
                             { year: '2020', text: 'Expanded to 30+ varieties. Launched wellness blends and herbal infusion line.' },
                             { year: '2021', text: 'Reached 5,000 customers. Featured in Vogue India and Elle Decor.' },
                             { year: '2022', text: 'Partnered with 15 estates. Launched gifting collection and corporate program.' },

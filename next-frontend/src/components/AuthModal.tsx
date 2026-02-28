@@ -126,7 +126,7 @@ export default function AuthModal() {
         setLoading(true);
         try {
             await register(e.target.name.value, e.target.email.value, e.target.password.value);
-            showToast('Account created! Welcome to feelinga 🍵', 'success');
+            showToast('Account created! Welcome to Feelinga 🍵', 'success');
             closeAuthModal();
         } catch (err) { setError(err.message); } finally { setLoading(false); }
     };
@@ -200,7 +200,7 @@ export default function AuthModal() {
                                 {activeTab === 'login' ? 'Welcome Back' : 'Create Account'}
                             </h2>
                             <p className="auth-modal__subtitle">
-                                {activeTab === 'login' ? 'Sign in to your feelinga account' : 'Join the tea community'}
+                                {activeTab === 'login' ? 'Sign in to your Feelinga account' : 'Join the tea community'}
                             </p>
                         </div>
                         <div className="auth-modal__tabs" role="tablist">

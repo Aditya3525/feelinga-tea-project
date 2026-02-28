@@ -5,8 +5,7 @@ import { apiRequest } from '../../utils/api';
 import '../../styles/admin.css';
 
 export default function Admin() {
-    const { isAuthenticated, isAdmin, user } = useAuth();
-    const [token, setToken] = useState(() => typeof window !== 'undefined' ? localStorage.getItem('feelinga_token') : null);
+    const { isAuthenticated, isAdmin, user, authReady, login: authLogin } = useAuth();
     const [currentUser, setCurrentUser] = useState(null);
     const [gateError, setGateError] = useState('');
     const [activeSection, setActiveSection] = useState('overview');
@@ -67,29 +66,24 @@ export default function Admin() {
         return apiRequest(path, options);
     }, []);
 
-    const checkAuth = useCallback(async () => {
-        const tkn = localStorage.getItem('feelinga_token');
-        if (!tkn) { setCurrentUser(null); return; }
-        try {
-            const data = await adminApi('/auth/me');
-            if (data.data.user.role !== 'admin') throw new Error('Admin access required');
-            setCurrentUser(data.data.user);
-        } catch {
+    // Sync admin currentUser with AuthContext — single source of truth
+    // Wait for authReady so we don't fire API calls with a stale/expired token
+    useEffect(() => {
+        if (!authReady) return;
+        if (isAdmin && user) {
+            setCurrentUser(user);
+        } else {
+            // Not authenticated OR not admin — show login gate
             setCurrentUser(null);
         }
-    }, [adminApi]);
-
-    useEffect(() => { checkAuth(); }, [checkAuth]);
+    }, [authReady, isAuthenticated, isAdmin, user]);
 
     const handleAdminLogin = async (e) => {
         e.preventDefault();
         setGateError('');
         try {
-            const data = await adminApi('/auth/login', { method: 'POST', body: JSON.stringify({ email: loginEmail, password: loginPassword }) });
+            const data = await authLogin(loginEmail, loginPassword);
             if (data.data.user.role !== 'admin') throw new Error('Admin access required');
-            localStorage.setItem('feelinga_token', data.data.accessToken);
-            localStorage.setItem('feelinga_refresh', data.data.refreshToken);
-            localStorage.setItem('feelinga_user', JSON.stringify(data.data.user));
             setCurrentUser(data.data.user);
         } catch (err) {
             setGateError(err.message);
@@ -436,11 +430,24 @@ export default function Admin() {
     const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
     const statusColors = { pending: '#f59e0b', confirmed: '#3b82f6', processing: '#8b5cf6', shipped: '#6366f1', delivered: '#10b981', cancelled: '#ef4444' };
 
+    // Loading while verifying session
+    if (!authReady) {
+        return (
+            <div className="admin-gate" id="adminGate">
+                <div className="admin-gate__card" style={{ textAlign: 'center' }}>
+                    <img src="/images/logo.png" alt="Feelinga" style={{ width: 64, height: 64, borderRadius: '50%', margin: '0 auto var(--space-md)', display: 'block', objectFit: 'cover' }} />
+                    <p style={{ color: 'var(--color-text-muted)' }}>Verifying session…</p>
+                </div>
+            </div>
+        );
+    }
+
     // Auth Gate
     if (!currentUser) {
         return (
             <div className="admin-gate" id="adminGate">
                 <div className="admin-gate__card">
+                    <img src="/images/logo.png" alt="Feelinga" style={{ width: 64, height: 64, borderRadius: '50%', margin: '0 auto var(--space-md)', display: 'block', objectFit: 'cover' }} />
                     <h1>🔐 Admin Access</h1>
                     <p>Sign in with your admin credentials</p>
                     {gateError && <div className="admin-gate__error" id="gateError">{gateError}</div>}
@@ -470,7 +477,10 @@ export default function Admin() {
             {/* Sidebar */}
             <aside className="admin__sidebar" id="adminSidebar">
                 <div className="admin__sidebar-header">
-                    <div className="admin__logo">feelinga<span>.</span> admin</div>
+                    <div className="admin__logo" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <img src="/images/logo.png" alt="" style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover' }} />
+                        <span>Feelinga<span style={{ color: 'var(--color-accent)' }}>.</span> admin</span>
+                    </div>
                     <div className="admin__user-info">
                         <div className="admin__user-name">{currentUser.name}</div>
                         <div className="admin__user-role">Administrator</div>
@@ -755,11 +765,12 @@ export default function Admin() {
                                 </div>
                             </div>
                             <table className="admin__table">
-                                <thead><tr><th>Order #</th><th>Customer</th><th>Total</th><th>Status</th><th>Tracking</th><th>Actions</th></tr></thead>
+                                <thead><tr><th>Order #</th><th>Date & Time</th><th>Customer</th><th>Total</th><th>Status</th><th>Tracking</th><th>Actions</th></tr></thead>
                                 <tbody>
                                     {orders.map(order => (
                                         <tr key={order._id}>
                                             <td>{order.orderNumber}</td>
+                                            <td style={{ fontSize: '0.82rem', whiteSpace: 'nowrap', color: 'var(--color-text-muted)' }}>{order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}<br/>{order.createdAt ? new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }) : ''}</td>
                                             <td>{order.user?.name || order.user?.email || 'N/A'}</td>
                                             <td>₹{order.total}</td>
                                             <td><span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '0.8rem', background: statusColors[order.status] || '#888', color: '#fff' }}>{order.status}</span></td>

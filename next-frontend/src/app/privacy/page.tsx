@@ -16,7 +16,7 @@ export default function Privacy() {
 
                 <h2 style={{ marginBottom: 'var(--space-md)' }}>1. Information We Collect</h2>
                 <p style={{ lineHeight: 1.8, marginBottom: 'var(--space-lg)' }}>
-                    When you use feelinga, we collect information you provide directly — such as your name, email address, phone number, shipping address, and payment details when placing an order. We also collect usage data including pages visited, browser type, and device information to improve our services.
+                    When you use Feelinga, we collect information you provide directly — such as your name, email address, phone number, shipping address, and payment details when placing an order. We also collect usage data including pages visited, browser type, and device information to improve our services.
                 </p>
 
                 <h2 style={{ marginBottom: 'var(--space-md)' }}>2. How We Use Your Information</h2>

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
+import mongoose from 'mongoose';
 import Order from '../../models/Order.js';
 import Product from '../../models/Product.js';
 import User from '../../models/User.js';
@@ -124,20 +125,45 @@ router.post('/', authenticate, validate(createOrderSchema), async (req, res, nex
             }
         }
 
-        const order = await Order.create({
-            user: req.user!._id,
-            items: orderItems,
-            shippingAddress,
-            subtotal,
-            shipping,
-            tax,
-            discount,
-            couponCode: appliedCoupon,
-            total,
-            paymentMethod,
-            paymentStatus: paymentMethod === 'cod' ? 'pending' : 'pending',
-            notes,
-        });
+        // Retry order creation in case of duplicate orderNumber (counter drift)
+        let order;
+        for (let attempt = 0; attempt < 5; attempt++) {
+            try {
+                order = await Order.create({
+                    user: req.user!._id,
+                    items: orderItems,
+                    shippingAddress,
+                    subtotal,
+                    shipping,
+                    tax,
+                    discount,
+                    couponCode: appliedCoupon,
+                    total,
+                    paymentMethod,
+                    paymentStatus: paymentMethod === 'cod' ? 'pending' : 'pending',
+                    notes,
+                });
+                break; // success
+            } catch (createErr: any) {
+                if (createErr.code === 11000 && createErr.keyPattern?.orderNumber) {
+                    // Counter out of sync — bump it and retry
+                    const highest = await Order.findOne({}, { orderNumber: 1 }).sort({ orderNumber: -1 }).lean();
+                    if (highest?.orderNumber) {
+                        const m = highest.orderNumber.match(/FLG-(\d+)/);
+                        if (m) {
+                            const correctSeq = parseInt(m[1]) - 100000;
+                            await mongoose.connection.db!.collection('counters').updateOne(
+                                { _id: 'orderNumber' as any },
+                                { $set: { seq: correctSeq } },
+                            );
+                        }
+                    }
+                    continue;
+                }
+                throw createErr;
+            }
+        }
+        if (!order) throw new AppError('Failed to create order — please try again', 500);
 
         // Increment coupon usage
         if (appliedCoupon) {

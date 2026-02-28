@@ -72,9 +72,18 @@ export default function Checkout() {
 
     const handlePlaceOrder = async () => {
         if (!isAuthenticated) { openAuthModal(); return; }
+        // Filter out non-orderable items (e.g. gift sets with placeholder IDs)
+        const orderableItems = cart.filter(item => item.id && /^[a-f0-9]{24}$/i.test(item.id));
+        if (orderableItems.length === 0) {
+            showToast('Your cart has no orderable products. Gift sets require a custom enquiry — please contact us.', 'error');
+            return;
+        }
+        if (orderableItems.length < cart.length) {
+            showToast(`${cart.length - orderableItems.length} gift set(s) removed — contact us to order those separately.`, 'info');
+        }
         setLoading(true);
         try {
-            const items = cart.map(item => ({
+            const items = orderableItems.map(item => ({
                 productId: item.id,
                 size: item.size || '100g',
                 qty: item.qty,
@@ -83,13 +92,13 @@ export default function Checkout() {
                 method: 'POST',
                 body: JSON.stringify({ items, shippingAddress: address, paymentMethod, notes, couponCode: couponApplied?.code || undefined }),
             });
+            const orderNumber = result.data?.orderNumber || '';
+            const uniqueItems = cart.reduce((n, i) => n + i.qty, 0);
             clearCart();
             showToast('Order placed! 🎉', 'success');
-            const orderId = result.data?._id ? `#${result.data._id.slice(-6).toUpperCase()}` : '';
-            const uniqueItems = cart.reduce((n, i) => n + i.qty, 0);
-            router.push(`/order-confirm?order=${orderId}&items=${uniqueItems}&total=${total}`);
-        } catch (err) {
-            showToast(err.message, 'error');
+            router.push(`/order-confirm?order=${encodeURIComponent(orderNumber)}&items=${uniqueItems}&total=${total}`);
+        } catch (err: any) {
+            showToast(err?.message || 'Failed to place order', 'error');
         } finally {
             setLoading(false);
         }
@@ -102,6 +111,40 @@ export default function Checkout() {
                     <h2>Your cart is empty</h2>
                     <p style={{ marginTop: 'var(--space-md)', marginBottom: 'var(--space-xl)' }}>Add some teas to get started!</p>
                     <Link href="/shop" className="btn btn--primary">Shop Teas</Link>
+                </div>
+            </Layout>
+        );
+    }
+
+    if (!isAuthenticated) {
+        return (
+            <Layout>
+                <div className="page-hero">
+                    <div className="container">
+                        <nav className="breadcrumb" aria-label="Breadcrumb"><Link href="/">Home</Link> <span>/</span> <span>Checkout</span></nav>
+                        <h1>Checkout</h1>
+                    </div>
+                </div>
+                <div className="container section" style={{ maxWidth: 480, margin: '0 auto', textAlign: 'center', padding: 'var(--space-4xl) var(--space-lg)' }}>
+                    <div style={{ fontSize: '3.5rem', marginBottom: 'var(--space-lg)' }}>🔒</div>
+                    <h2 style={{ marginBottom: 'var(--space-md)' }}>Sign in to continue</h2>
+                    <p style={{ color: 'var(--color-text-muted)', lineHeight: 1.7, marginBottom: 'var(--space-xl)' }}>
+                        Please log in or create an account to complete your purchase. This helps us track your order and send you updates.
+                    </p>
+                    <div style={{ display: 'flex', gap: 'var(--space-md)', justifyContent: 'center', flexWrap: 'wrap' }}>
+                        <button className="btn btn--primary" onClick={openAuthModal} style={{ minWidth: 180 }}>
+                            Log In / Sign Up
+                        </button>
+                        <Link href="/shop" className="btn btn--ghost" style={{ minWidth: 180 }}>
+                            Continue Shopping
+                        </Link>
+                    </div>
+                    <div style={{ marginTop: 'var(--space-2xl)', padding: 'var(--space-lg)', background: 'var(--color-bg-alt)', borderRadius: 'var(--radius-lg)', textAlign: 'left' }}>
+                        <p style={{ fontWeight: 600, marginBottom: 'var(--space-sm)' }}>Your cart is safe 🛒</p>
+                        <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', lineHeight: 1.6 }}>
+                            You have {cart.reduce((sum, i) => sum + i.qty, 0)} item{cart.reduce((sum, i) => sum + i.qty, 0) !== 1 ? 's' : ''} worth ₹{subtotal.toLocaleString()} in your cart. They&apos;ll be waiting for you after you sign in.
+                        </p>
+                    </div>
                 </div>
             </Layout>
         );

@@ -1,6 +1,6 @@
 export const metadata = {
     title: 'Admin Dashboard',
-    description: 'feelinga admin dashboard — manage products, orders, users, and more.',
+    description: 'Feelinga admin dashboard — manage products, orders, users, and more.',
     robots: { index: false, follow: false },
 };
 

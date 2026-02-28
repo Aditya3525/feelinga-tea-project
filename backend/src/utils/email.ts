@@ -31,7 +31,7 @@ async function getTransporter() {
     return transporter;
 }
 
-const FROM = process.env.EMAIL_FROM || '"feelinga Tea" <noreply@feelinga.in>';
+const FROM = process.env.EMAIL_FROM || '"Feelinga Tea" <noreply@feelinga.in>';
 
 // ────────────────────────────── helpers ──────────────────────────────
 
@@ -58,20 +58,20 @@ export async function sendEmail({ to, subject, html, text }: SendOpts) {
 export async function sendPasswordResetEmail(email: string, resetUrl: string) {
     await sendEmail({
         to: email,
-        subject: 'Reset your feelinga password',
+        subject: 'Reset your Feelinga password',
         html: `
         <div style="font-family:system-ui,sans-serif;max-width:520px;margin:auto;padding:32px;border:1px solid #e5e1d8;border-radius:12px">
             <h2 style="color:#8b6f47;margin-top:0">Reset Your Password</h2>
-            <p>You requested a password reset for your <strong>feelinga</strong> account.</p>
+            <p>You requested a password reset for your <strong>Feelinga</strong> account.</p>
             <p>Click the button below — the link expires in <strong>10 minutes</strong>.</p>
             <a href="${resetUrl}" style="display:inline-block;padding:12px 28px;background:#8b6f47;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;margin:16px 0">
                 Reset Password
             </a>
             <p style="font-size:0.85rem;color:#888">If you didn't request this, you can safely ignore this email.</p>
             <hr style="border:none;border-top:1px solid #e5e1d8;margin:24px 0"/>
-            <p style="font-size:0.8rem;color:#aaa;margin:0">feelinga — happiness is here 🍵</p>
+            <p style="font-size:0.8rem;color:#aaa;margin:0">Feelinga — happiness is here 🍵</p>
         </div>`,
-        text: `Reset your feelinga password: ${resetUrl}\n\nThis link expires in 10 minutes.`,
+        text: `Reset your Feelinga password: ${resetUrl}\n\nThis link expires in 10 minutes.`,
     });
 }
 
@@ -111,7 +111,7 @@ export async function sendOrderConfirmationEmail(email: string, order: any) {
             <p><strong>Payment:</strong> ${order.paymentMethod?.toUpperCase()}</p>
             <p><strong>Deliver to:</strong><br>${address}</p>
             <hr style="border:none;border-top:1px solid #e5e1d8;margin:24px 0"/>
-            <p style="font-size:0.8rem;color:#aaa;margin:0">feelinga — happiness is here 🍵</p>
+            <p style="font-size:0.8rem;color:#aaa;margin:0">Feelinga — happiness is here 🍵</p>
         </div>`,
     });
 }
@@ -136,7 +136,7 @@ export async function sendOrderStatusEmail(email: string, order: any, newStatus:
             <p>${msg}</p>
             <p><strong>Order:</strong> ${order.orderNumber}<br><strong>Status:</strong> ${newStatus}</p>
             <hr style="border:none;border-top:1px solid #e5e1d8;margin:24px 0"/>
-            <p style="font-size:0.8rem;color:#aaa;margin:0">feelinga — happiness is here 🍵</p>
+            <p style="font-size:0.8rem;color:#aaa;margin:0">Feelinga — happiness is here 🍵</p>
         </div>`,
     });
 }

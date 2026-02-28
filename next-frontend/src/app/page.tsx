@@ -237,7 +237,7 @@ export default function Home() {
                         <div className="story__content">
                             <p className="overline">Our Story</p>
                             <h2>Born from a Love of Ritual</h2>
-                            <p>feelinga began with a simple belief: that a cup of tea can be a moment of mindfulness in a busy world. We partner directly with small-estate growers across Darjeeling, Assam, and the Nilgiris to bring you teas that are as kind to the earth as they are to your senses.</p>
+                            <p>Feelinga began with a simple belief: that a cup of tea can be a moment of mindfulness in a busy world. We partner directly with small-estate growers across Darjeeling, Assam, and the Nilgiris to bring you teas that are as kind to the earth as they are to your senses.</p>
                             <div className="story__stats">
                                 <div><div className="story__stat-value">15+</div><div className="story__stat-label">Partner Estates</div></div>
                                 <div><div className="story__stat-value">50+</div><div className="story__stat-label">Tea Varieties</div></div>
@@ -291,7 +291,7 @@ export default function Home() {
                             { text: '"The Darjeeling First Flush is absolutely divine. It\'s like sipping on liquid sunshine — delicate, fragrant, and utterly refreshing. Best tea I\'ve had in years."', author: 'Priya Sharma', role: 'Tea Enthusiast, Mumbai' },
                             { text: '"I ordered the Wellness Ritual gift box for my mother and she was overjoyed. The packaging is gorgeous and the teas are exceptionally fresh. Will order again!"', author: 'Arjun Mehta', role: 'Repeat Customer, Delhi' },
                             { text: '"Their Heritage Spiced Chai has replaced my morning coffee entirely. The blend of spices is perfectly balanced — warm but never overwhelming. An everyday essential."', author: 'Kavya Nair', role: 'Wellness Coach, Bangalore' },
-                            { text: '"As a café owner, I switched to feelinga for our premium tea menu. Our customers immediately noticed the quality difference. Exceptional sourcing and consistency."', author: 'Rohan Desai', role: 'Café Owner, Pune' },
+                            { text: '"As a café owner, I switched to Feelinga for our premium tea menu. Our customers immediately noticed the quality difference. Exceptional sourcing and consistency."', author: 'Rohan Desai', role: 'Café Owner, Pune' },
                         ].map((t, i) => (
                             <div className="testimonial-card" key={i}>
                                 <div className="testimonial-card__stars">★★★★★</div>

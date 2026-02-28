@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -41,7 +42,10 @@ export default function Layout({ children }) {
             {/* HEADER */}
             <header className="header" id="header">
                 <div className="header__inner">
-                    <Link href="/" className="header__logo" aria-label="feelinga Home">feelinga<span>.</span></Link>
+                    <Link href="/" className="header__logo" aria-label="Feelinga Home">
+                        <Image src="/images/logo.png" alt="" width={36} height={36} className="header__logo-img" priority />
+                        <span className="header__logo-text">Feelinga<span>.</span></span>
+                    </Link>
                     <nav className="header__nav" aria-label="Main navigation">
                         {navLinks.map(l => (
                             <Link key={l.href} href={l.href} className={pathname === l.href ? 'active' : ''}>{l.label}</Link>
@@ -133,7 +137,10 @@ export default function Layout({ children }) {
                 <div className="container">
                     <div className="footer__grid">
                         <div className="footer__brand">
-                            <Link href="/" className="header__logo" style={{ color: '#fff' }}>feelinga<span>.</span></Link>
+                            <Link href="/" className="header__logo footer__logo-link" style={{ color: '#fff' }}>
+                                <Image src="/images/logo.png" alt="" width={32} height={32} className="header__logo-img footer__logo-img" />
+                                <span className="header__logo-text">Feelinga<span>.</span></span>
+                            </Link>
                             <p>happiness is here. Sourced with care from India&apos;s finest estates, delivered fresh to your doorstep.</p>
                             <div className="footer__social"><a href="https://instagram.com/feelinga.tea" target="_blank" rel="noopener noreferrer" aria-label="Instagram">IG</a><a href="https://facebook.com/feelinga.tea" target="_blank" rel="noopener noreferrer" aria-label="Facebook">FB</a><a href="https://twitter.com/feelinga_tea" target="_blank" rel="noopener noreferrer" aria-label="Twitter">TW</a><a href="https://pinterest.com/feelingatea" target="_blank" rel="noopener noreferrer" aria-label="Pinterest">PI</a></div>
                         </div>
@@ -151,7 +158,7 @@ export default function Layout({ children }) {
                         </div>
                     </div>
                     <div className="footer__bottom">
-                        <span>© 2026 feelinga. All rights reserved.</span>
+                        <span>© 2026 Feelinga. All rights reserved.</span>
                         <span>Made with 🍃 in India</span>
                         <Link href="/admin" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>Admin Access</Link>
                     </div>

@@ -66,8 +66,8 @@ router.post('/register', validate(registerSchema), async (req, res, next) => {
         const verifyUrl = `${clientUrl}/verify-email?token=${verifyToken}`;
         sendEmail({
             to: email,
-            subject: 'Verify your email — feelinga',
-            html: `<p>Hi ${name},</p><p>Welcome to feelinga! Please verify your email by clicking the link below:</p><p><a href="${verifyUrl}" style="padding:10px 20px;background:#8b6f47;color:#fff;text-decoration:none;border-radius:6px;">Verify Email</a></p><p>This link expires in 24 hours.</p>`,
+            subject: 'Verify your email — Feelinga',
+            html: `<p>Hi ${name},</p><p>Welcome to Feelinga! Please verify your email by clicking the link below:</p><p><a href="${verifyUrl}" style="padding:10px 20px;background:#8b6f47;color:#fff;text-decoration:none;border-radius:6px;">Verify Email</a></p><p>This link expires in 24 hours.</p>`,
         }).catch(err => console.error('Verify email error:', err.message));
 
         res.status(201).json({

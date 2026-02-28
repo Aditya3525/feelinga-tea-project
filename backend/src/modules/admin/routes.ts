@@ -394,7 +394,7 @@ router.get('/invoice/:orderId', async (req, res, next) => {
         const addr = order.shippingAddress as any;
 
         // Header
-        doc.fontSize(22).font('Helvetica-Bold').text('feelinga', 50, 50);
+        doc.fontSize(22).font('Helvetica-Bold').text('Feelinga', 50, 50);
         doc.fontSize(9).font('Helvetica').fillColor('#888').text('happiness is here', 50, 75);
         doc.fillColor('#000');
 
@@ -462,7 +462,7 @@ router.get('/invoice/:orderId', async (req, res, next) => {
             .text(`Payment: ${order.paymentMethod?.toUpperCase()} · Status: ${order.paymentStatus}`, 50, y);
 
         // Footer
-        doc.fontSize(8).fillColor('#aaa').text('feelinga — happiness is here · www.feelinga.in', 50, 770, { align: 'center' });
+        doc.fontSize(8).fillColor('#aaa').text('Feelinga — happiness is here · www.feelinga.in', 50, 770, { align: 'center' });
 
         doc.end();
     } catch (err) {

@@ -28,7 +28,7 @@ function OrderConfirmInner() {
 
                 <h1 style={{ fontSize: '2.2rem', marginBottom: 'var(--space-md)' }}>Order Placed!</h1>
                 <p style={{ color: 'var(--color-text-muted)', fontSize: '1.1rem', lineHeight: 1.7, marginBottom: 'var(--space-xl)' }}>
-                    Thank you for choosing feelinga. Your teas are on their way!
+                    Thank you for choosing Feelinga. Your teas are on their way!
                 </p>
 
                 {/* Order details card */}

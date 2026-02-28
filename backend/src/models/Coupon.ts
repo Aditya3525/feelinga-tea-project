@@ -29,27 +29,27 @@ const couponSchema = new mongoose.Schema({
     },
     usageLimit: {
         type: Number,
-        default: null, // null = unlimited
+        default: null,
+    },
+    perUserLimit: {
+        type: Number,
+        default: null,
     },
     usedCount: {
         type: Number,
         default: 0,
     },
-    perUserLimit: {
-        type: Number,
-        default: 1,
+    active: {
+        type: Boolean,
+        default: true,
     },
     validFrom: {
         type: Date,
-        default: Date.now,
+        required: true,
     },
     validTo: {
         type: Date,
         required: true,
-    },
-    active: {
-        type: Boolean,
-        default: true,
     },
 }, {
     timestamps: true,
