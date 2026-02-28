@@ -72,7 +72,16 @@ router.delete('/images', (req: Request, res: Response, next: NextFunction) => {
 
         // Only allow deleting files in our uploads directory
         const filename = path.basename(url);
-        const filePath = path.join(uploadsDir, filename);
+        const filePath = path.resolve(uploadsDir, filename);
+
+        // Path traversal protection: ensure resolved path is within uploadsDir
+        if (!filePath.startsWith(uploadsDir)) {
+            return res.status(400).json({ status: 'error', message: 'Invalid file path' });
+        }
+        // Block filenames with suspicious patterns
+        if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+            return res.status(400).json({ status: 'error', message: 'Invalid filename' });
+        }
 
         if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath);

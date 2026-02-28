@@ -6,9 +6,11 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import mongoose from 'mongoose';
 import connectDB from './config/db.js';
 import errorHandler from './middleware/errorHandler.js';
 import { authenticate, authorize } from './middleware/auth.js';
+import logger from './utils/logger.js';
 
 // Route modules
 import authRoutes from './modules/auth/routes.js';
@@ -29,13 +31,12 @@ const requiredEnvVars = ['MONGODB_URI', 'JWT_SECRET', 'JWT_REFRESH_SECRET'];
 const optionalEnvVars = ['GOOGLE_CLIENT_ID', 'CLIENT_URL'];
 const missing = requiredEnvVars.filter(v => !process.env[v]);
 if (missing.length > 0) {
-    console.error(`\n✗ Missing required environment variables:\n  ${missing.join('\n  ')}\n`);
-    console.error('  Create a .env file in the backend directory with these values.');
+    logger.fatal({ missing }, 'Missing required environment variables');
     process.exit(1);
 }
 const unset = optionalEnvVars.filter(v => !process.env[v]);
 if (unset.length > 0) {
-    console.warn(`⚠ Optional env vars not set: ${unset.join(', ')} — some features may be disabled.`);
+    logger.warn({ vars: unset }, 'Optional env vars not set — some features may be disabled');
 }
 
 // ===== GLOBAL MIDDLEWARE =====
@@ -72,6 +73,16 @@ if (process.env.NODE_ENV !== 'test') {
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Request timeout (30 seconds)
+app.use((req, res, next) => {
+    req.setTimeout(30000, () => {
+        if (!res.headersSent) {
+            res.status(408).json({ status: 'error', message: 'Request timeout' });
+        }
+    });
+    next();
+});
+
 // Cache headers middleware (#18)
 app.use('/api/v1/products', (req, res, next) => {
     if (req.method === 'GET') {
@@ -99,11 +110,14 @@ const authLimiter = rateLimit({
 // ===== API ROUTES =====
 
 app.get('/api/v1/health', (req, res) => {
+    const dbState = mongoose.connection.readyState;
+    const dbStates: Record<number, string> = { 0: 'disconnected', 1: 'connected', 2: 'connecting', 3: 'disconnecting' };
     res.json({
-        status: 'success',
+        status: dbState === 1 ? 'success' : 'degraded',
         message: 'Feelinga API is running',
         timestamp: new Date().toISOString(),
         environment: process.env.NODE_ENV,
+        database: dbStates[dbState] || 'unknown',
     });
 });
 
@@ -155,22 +169,12 @@ const __dirname = path.dirname(__filename);
 const uploadsPath = path.resolve(__dirname, '..', 'uploads');
 app.use('/uploads', express.static(uploadsPath));
 
-// ===== SERVE FRONTEND STATIC FILES =====
-// Serve React production build from frontend/dist, fallback to project root for legacy HTML
-const frontendDistPath = path.resolve(__dirname, '..', '..', 'frontend', 'dist');
-const frontendPath = path.resolve(__dirname, '..', '..');
-app.use(express.static(frontendDistPath));
-app.use(express.static(frontendPath));
-
-// Fallback: serve index.html for non-API routes
-app.get('*', (req, res, next) => {
-    if (req.path.startsWith('/api')) {
-        return res.status(404).json({
-            status: 'error',
-            message: `Route ${req.method} ${req.url} not found`,
-        });
-    }
-    res.sendFile(path.join(frontendPath, 'index.html'));
+// ===== 404 HANDLER FOR UNMATCHED API ROUTES =====
+app.all('/api/*', (req, res) => {
+    res.status(404).json({
+        status: 'error',
+        message: `Route ${req.method} ${req.url} not found`,
+    });
 });
 
 // Global error handler
@@ -181,14 +185,35 @@ app.use(errorHandler);
 const start = async () => {
     await connectDB();
     app.listen(PORT, () => {
-        console.log(`\n✓ Feelinga API running on http://localhost:${PORT}`);
-        console.log(`  Environment: ${process.env.NODE_ENV}`);
-        console.log(`  Health: http://localhost:${PORT}/api/v1/health\n`);
+        logger.info({ port: PORT, env: process.env.NODE_ENV }, `Feelinga API running on http://localhost:${PORT}`);
     });
 };
 
 if (process.env.NODE_ENV !== 'test') {
     start();
 }
+
+// ===== GRACEFUL SHUTDOWN & PROCESS SAFETY =====
+process.on('unhandledRejection', (reason: any) => {
+    logger.fatal({ err: reason }, 'Unhandled Promise Rejection');
+    if (process.env.NODE_ENV === 'production') {
+        process.exit(1);
+    }
+});
+
+process.on('uncaughtException', (err) => {
+    logger.fatal({ err }, 'Uncaught Exception');
+    process.exit(1);
+});
+
+process.on('SIGTERM', () => {
+    logger.info('SIGTERM received. Shutting down gracefully...');
+    mongoose.connection.close().then(() => process.exit(0));
+});
+
+process.on('SIGINT', () => {
+    logger.info('SIGINT received. Shutting down...');
+    mongoose.connection.close().then(() => process.exit(0));
+});
 
 export default app;

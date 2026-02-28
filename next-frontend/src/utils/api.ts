@@ -21,7 +21,9 @@ async function doRefresh(): Promise<{ accessToken: string; refreshToken: string 
             localStorage.setItem('feelinga_refresh', data.data.refreshToken);
             return data.data;
         }
-    } catch { /* ignore */ }
+    } catch (err) {
+        console.warn('[Auth] Token refresh failed:', err instanceof Error ? err.message : 'Network error');
+    }
     // Refresh failed — clear dead tokens so login gate / AuthContext can react
     localStorage.removeItem('feelinga_token');
     localStorage.removeItem('feelinga_refresh');
@@ -38,7 +40,12 @@ export async function apiRequest(path: string, options: any = {}) {
         ...options.headers,
     };
 
-    let res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+    let res: Response;
+    try {
+        res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+    } catch (networkError) {
+        throw new Error('Network error — please check your connection and try again.');
+    }
 
     // Auto-refresh on 401 (mutex prevents duplicate refresh calls)
     if (res.status === 401 && token) {
@@ -48,11 +55,15 @@ export async function apiRequest(path: string, options: any = {}) {
         const tokens = await refreshPromise;
         if (tokens) {
             headers.Authorization = `Bearer ${tokens.accessToken}`;
-            res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+            try {
+                res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+            } catch (networkError) {
+                throw new Error('Network error — please check your connection and try again.');
+            }
         }
     }
 
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.message || 'Request failed');
+    if (!res.ok) throw new Error(data.message || `Request failed (${res.status})`);
     return data;
 }

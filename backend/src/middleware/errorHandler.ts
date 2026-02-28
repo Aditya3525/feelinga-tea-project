@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import logger from '../utils/logger.js';
 
 export class AppError extends Error {
     statusCode: number;
@@ -46,9 +47,10 @@ const errorHandler = (err: any, req: Request, res: Response, _next: NextFunction
         message = 'Token expired';
     }
 
-    console.error(`[ERROR] ${statusCode} ${req.method} ${req.url} — ${message}`);
-    if (process.env.NODE_ENV === 'development' && !err.isOperational) {
-        console.error(err.stack);
+    if (statusCode >= 500) {
+        logger.error({ err, statusCode, method: req.method, url: req.url }, message);
+    } else {
+        logger.warn({ statusCode, method: req.method, url: req.url }, message);
     }
 
     res.status(statusCode).json({

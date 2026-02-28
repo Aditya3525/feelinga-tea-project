@@ -10,6 +10,7 @@ import { AppError } from '../../middleware/errorHandler.js';
 import { authenticate, authorize } from '../../middleware/auth.js';
 import { validate } from '../../middleware/validate.js';
 import { logAdminAction } from '../../utils/auditLog.js';
+import { escapeRegex } from '../../utils/sanitize.js';
 import { sendOrderConfirmationEmail, sendOrderStatusEmail } from '../../utils/email.js';
 
 const router = Router();
@@ -199,7 +200,7 @@ router.get('/', authenticate, async (req, res, next) => {
 
         const search = typeof q === 'string' ? q.trim() : '';
         if (search) {
-            const regex = new RegExp(search, 'i');
+            const regex = new RegExp(escapeRegex(search), 'i');
 
             if (req.user!.role === 'admin') {
                 const matchingUsers = await User.find(

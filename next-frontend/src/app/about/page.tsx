@@ -96,6 +96,15 @@ export default function About() {
                 </div>
             </section>
 
+            {/* Careers */}
+            <section id="careers" className="section">
+                <div className="container text-center fade-in">
+                    <h2>Join Our Team</h2>
+                    <p style={{ margin: 'var(--space-md) auto var(--space-xl)', maxWidth: '600px' }}>We&apos;re always looking for passionate tea lovers to join the Feelinga family. Reach out to learn about current opportunities.</p>
+                    <Link href="/contact" className="btn btn--secondary">Get in Touch</Link>
+                </div>
+            </section>
+
             {/* CTA */}
             <section className="section">
                 <div className="container text-center fade-in">

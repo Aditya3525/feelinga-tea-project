@@ -54,7 +54,7 @@ export default function FAQ() {
             <section className="section">
                 <div className="container" style={{ maxWidth: '800px' }}>
                     {faqData.map((section, si) => (
-                        <div key={si} style={{ marginBottom: 'var(--space-2xl)' }}>
+                        <div key={si} id={section.category.toLowerCase().replace(/\s+/g, '-')} style={{ marginBottom: 'var(--space-2xl)' }}>
                             <h2 style={{ marginBottom: 'var(--space-md)' }}>{section.category}</h2>
                             {section.items.map((item, qi) => {
                                 const key = `${si}-${qi}`;

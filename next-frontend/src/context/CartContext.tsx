@@ -26,7 +26,10 @@ export function CartProvider({ children }) {
                     setCart(parsed);
                 }
             }
-        } catch { /* ignore corrupt data */ }
+        } catch (err) {
+            console.warn('[Cart] Failed to parse stored cart:', err instanceof Error ? err.message : err);
+            localStorage.removeItem('feelinga_cart');
+        }
         initializedRef.current = true;
     }, []);
 
@@ -63,7 +66,8 @@ export function CartProvider({ children }) {
                 cartItemId: item.id,
             }));
             setCart(serverItems);
-        } catch {
+        } catch (err) {
+            console.warn('[Cart] Failed to fetch server cart:', err instanceof Error ? err.message : err);
             // Silently fail — keep local cart
         }
     }, []);
@@ -88,7 +92,8 @@ export function CartProvider({ children }) {
                 });
             }
             await fetchServerCart();
-        } catch {
+        } catch (err) {
+            console.warn('[Cart] Failed to sync cart on login:', err instanceof Error ? err.message : err);
             // Keep local cart as fallback
         } finally {
             setSyncing(false);

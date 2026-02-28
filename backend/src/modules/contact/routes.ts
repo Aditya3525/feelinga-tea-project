@@ -1,6 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import mongoose from 'mongoose';
+import crypto from 'crypto';
 import { validate } from '../../middleware/validate.js';
 import { authenticate, authorize } from '../../middleware/auth.js';
 
@@ -22,6 +23,7 @@ const newsletterSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true, trim: true, lowercase: true },
     subscribedAt: { type: Date, default: Date.now },
     active: { type: Boolean, default: true },
+    unsubscribeToken: { type: String, unique: true, sparse: true },
 }, { timestamps: true });
 
 const NewsletterSubscriber = mongoose.model('NewsletterSubscriber', newsletterSchema);
@@ -73,10 +75,11 @@ router.get('/contact', authenticate, authorize('admin'), async (req: Request, re
 router.post('/newsletter', validate(newsletterSubscribeSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { email } = req.body;
+        const unsubscribeToken = crypto.randomBytes(24).toString('hex');
         // Upsert: reactivate if already exists
         await NewsletterSubscriber.findOneAndUpdate(
             { email },
-            { email, active: true, subscribedAt: new Date() },
+            { email, active: true, subscribedAt: new Date(), unsubscribeToken },
             { upsert: true, new: true },
         );
         res.status(201).json({
@@ -88,11 +91,23 @@ router.post('/newsletter', validate(newsletterSubscribeSchema), async (req: Requ
     }
 });
 
-// DELETE /newsletter — Unsubscribe
+// DELETE /newsletter — Unsubscribe (requires token for security)
 router.delete('/newsletter', async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { email } = req.body;
-        await NewsletterSubscriber.findOneAndUpdate({ email }, { active: false });
+        const { token, email } = req.body;
+        if (token) {
+            // Token-based unsubscribe (from email link)
+            const sub = await NewsletterSubscriber.findOneAndUpdate(
+                { unsubscribeToken: token },
+                { active: false },
+            );
+            if (!sub) return res.status(404).json({ status: 'error', message: 'Invalid unsubscribe token' });
+        } else if (email) {
+            // Email-based unsubscribe (legacy / authenticated admin)
+            await NewsletterSubscriber.findOneAndUpdate({ email }, { active: false });
+        } else {
+            return res.status(400).json({ status: 'error', message: 'Token or email required' });
+        }
         res.json({ status: 'success', message: 'You\'ve been unsubscribed.' });
     } catch (err) {
         next(err);

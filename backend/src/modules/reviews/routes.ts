@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import Review from '../../models/Review.js';
 import { AppError } from '../../middleware/errorHandler.js';
-import { authenticate, optionalAuth } from '../../middleware/auth.js';
+import { authenticate } from '../../middleware/auth.js';
 import { validate } from '../../middleware/validate.js';
 
 const router = Router();

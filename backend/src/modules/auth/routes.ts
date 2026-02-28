@@ -4,6 +4,9 @@ import { z } from 'zod';
 import { OAuth2Client } from 'google-auth-library';
 import crypto from 'crypto';
 import User from '../../models/User.js';
+import Order from '../../models/Order.js';
+import Cart from '../../models/Cart.js';
+import Review from '../../models/Review.js';
 import { AppError } from '../../middleware/errorHandler.js';
 import { authenticate } from '../../middleware/auth.js';
 import { validate } from '../../middleware/validate.js';
@@ -13,6 +16,9 @@ import { sendPasswordResetEmail, sendEmail } from '../../utils/email.js';
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const router = Router();
+
+// Helper: hash a token for secure DB storage
+const hashToken = (token: string) => crypto.createHash('sha256').update(token).digest('hex');
 
 // Validation schemas
 const registerSchema = z.object({
@@ -53,12 +59,13 @@ router.post('/register', validate(registerSchema), async (req, res, next) => {
         const accessToken = signAccessToken(user);
         const refreshToken = signRefreshToken(user);
 
-        // Save refresh token
-        user.refreshToken = refreshToken;
+        // Save hashed refresh token
+        user.refreshToken = hashToken(refreshToken);
 
         // Generate email verification token (#17)
         const verifyToken = crypto.randomBytes(32).toString('hex');
-        user.emailVerifyToken = crypto.createHash('sha256').update(verifyToken).digest('hex');
+        user.emailVerifyToken = hashToken(verifyToken);
+        user.emailVerifyExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
         await user.save({ validateBeforeSave: false });
 
         // Send verification email (fire-and-forget)
@@ -84,15 +91,38 @@ router.post('/login', validate(loginSchema), async (req, res, next) => {
     try {
         const { email, password } = req.body;
 
-        const user = await User.findOne({ email }).select('+password');
+        const user = await User.findOne({ email }).select('+password +loginAttempts +lockUntil');
+
+        // Check account lockout
+        if (user?.lockUntil && user.lockUntil > new Date()) {
+            const minutesLeft = Math.ceil((user.lockUntil.getTime() - Date.now()) / 60000);
+            throw new AppError(`Account temporarily locked. Try again in ${minutesLeft} minute(s).`, 423);
+        }
+
         if (!user || !(await (user as any).comparePassword(password))) {
+            // Increment failed login attempts
+            if (user) {
+                const attempts = (user.loginAttempts || 0) + 1;
+                const update: any = { loginAttempts: attempts };
+                // Lock after 5 failed attempts for 15 minutes
+                if (attempts >= 5) {
+                    update.lockUntil = new Date(Date.now() + 15 * 60 * 1000);
+                    update.loginAttempts = 0;
+                }
+                await User.findByIdAndUpdate(user._id, update);
+            }
             throw new AppError('Invalid email or password', 401);
+        }
+
+        // Reset login attempts on successful login
+        if (user.loginAttempts > 0 || user.lockUntil) {
+            await User.findByIdAndUpdate(user._id, { loginAttempts: 0, $unset: { lockUntil: 1 } });
         }
 
         const accessToken = signAccessToken(user);
         const refreshToken = signRefreshToken(user);
 
-        user.refreshToken = refreshToken;
+        user.refreshToken = hashToken(refreshToken);
         await user.save({ validateBeforeSave: false });
 
         res.json({
@@ -113,14 +143,14 @@ router.post('/refresh', async (req, res, next) => {
         const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET as string) as any;
         const user = await User.findById(decoded.id).select('+refreshToken');
 
-        if (!user || user.refreshToken !== refreshToken) {
+        if (!user || user.refreshToken !== hashToken(refreshToken)) {
             throw new AppError('Invalid refresh token', 401);
         }
 
         // Rotate tokens
         const newAccessToken = signAccessToken(user);
         const newRefreshToken = signRefreshToken(user);
-        user.refreshToken = newRefreshToken;
+        user.refreshToken = hashToken(newRefreshToken);
         await user.save({ validateBeforeSave: false });
 
         res.json({
@@ -153,14 +183,23 @@ const updateProfileSchema = z.object({
     name: z.string().min(2).max(80).optional(),
     email: z.string().email().optional(),
     phone: z.string().max(15).optional(),
+    currentPassword: z.string().min(1).optional(), // Required when changing email
 });
 
 router.patch('/me', authenticate, validate(updateProfileSchema), async (req, res, next) => {
     try {
-        const { name, email, phone } = req.body;
+        const { name, email, phone, currentPassword } = req.body;
         const user = req.user!;
 
         if (email && email !== user.email) {
+            // Require password confirmation for email changes
+            if (!currentPassword) {
+                throw new AppError('Current password is required to change email', 400);
+            }
+            const userWithPw = await User.findById(user._id).select('+password');
+            if (!userWithPw || !(await (userWithPw as any).comparePassword(currentPassword))) {
+                throw new AppError('Current password is incorrect', 401);
+            }
             const existing = await User.findOne({ email });
             if (existing) throw new AppError('Email already in use', 409);
             user.email = email;
@@ -284,7 +323,7 @@ router.post('/google', async (req, res, next) => {
 
         const accessToken = signAccessToken(user);
         const refreshToken = signRefreshToken(user);
-        user.refreshToken = refreshToken;
+        user.refreshToken = hashToken(refreshToken);
         await user.save({ validateBeforeSave: false });
 
         res.json({
@@ -307,7 +346,7 @@ router.post('/forgot-password', async (req, res, next) => {
         const user = await User.findOne({ email });
         if (user) {
             const resetToken = crypto.randomBytes(32).toString('hex');
-            user.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+            user.passwordResetToken = hashToken(resetToken);
             user.passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
             await user.save({ validateBeforeSave: false });
 
@@ -328,7 +367,7 @@ router.post('/reset-password', async (req, res, next) => {
         if (!token || !password) throw new AppError('Token and new password are required', 400);
         if (password.length < 8) throw new AppError('Password must be at least 8 characters', 400);
 
-        const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+        const hashedToken = hashToken(token);
         const user = await User.findOne({
             passwordResetToken: hashedToken,
             passwordResetExpires: { $gt: new Date() },
@@ -353,12 +392,16 @@ router.post('/verify-email', async (req, res, next) => {
         const { token } = req.body;
         if (!token) throw new AppError('Verification token required', 400);
 
-        const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
-        const user = await User.findOne({ emailVerifyToken: hashedToken }).select('+emailVerifyToken');
+        const hashedToken = hashToken(token);
+        const user = await User.findOne({
+            emailVerifyToken: hashedToken,
+            emailVerifyExpires: { $gt: new Date() },
+        }).select('+emailVerifyToken');
         if (!user) throw new AppError('Invalid or expired verification token', 400);
 
         user.emailVerified = true;
         user.emailVerifyToken = undefined as any;
+        user.emailVerifyExpires = undefined as any;
         await user.save({ validateBeforeSave: false });
 
         res.json({ status: 'success', message: 'Email verified successfully!' });
@@ -394,6 +437,72 @@ router.post('/wishlist/:productId', authenticate, async (req, res, next) => {
         }
         await user.save({ validateBeforeSave: false });
         res.json({ status: 'success', action, wishlist: user.wishlist });
+    } catch (err) {
+        next(err);
+    }
+});
+
+// ===== PRIVACY / DSAR ENDPOINTS =====
+
+// GET /auth/me/data-export — Download all personal data (DSAR compliance)
+router.get('/me/data-export', authenticate, async (req, res, next) => {
+    try {
+        const userId = req.user!._id;
+        const [user, orders, reviews, cart] = await Promise.all([
+            User.findById(userId).select('name email phone role addresses wishlist emailVerified createdAt updatedAt').lean(),
+            Order.find({ user: userId }).select('-__v').sort({ createdAt: -1 }).lean(),
+            Review.find({ user: userId }).select('-__v').sort({ createdAt: -1 }).lean(),
+            Cart.findOne({ user: userId }).select('-__v').lean(),
+        ]);
+
+        res.json({
+            status: 'success',
+            data: {
+                profile: user,
+                orders,
+                reviews,
+                cart: cart?.items || [],
+                exportedAt: new Date().toISOString(),
+            },
+        });
+    } catch (err) {
+        next(err);
+    }
+});
+
+// DELETE /auth/me — Delete account and anonymize data (right to erasure)
+router.delete('/me', authenticate, validate(z.object({ currentPassword: z.string().min(1) })), async (req, res, next) => {
+    try {
+        const { currentPassword } = req.body;
+        const user = await User.findById(req.user!._id).select('+password');
+        if (!user) throw new AppError('User not found', 404);
+
+        if (!(await (user as any).comparePassword(currentPassword))) {
+            throw new AppError('Current password is incorrect', 401);
+        }
+
+        // Anonymize orders (keep for accounting, remove PII)
+        await Order.updateMany(
+            { user: user._id },
+            {
+                $set: {
+                    'shippingAddress.firstName': 'Deleted',
+                    'shippingAddress.lastName': 'User',
+                    'shippingAddress.phone': '0000000000',
+                    'shippingAddress.line1': 'Account deleted',
+                    'shippingAddress.line2': '',
+                },
+            },
+        );
+
+        // Delete reviews, cart, and user
+        await Promise.all([
+            Review.deleteMany({ user: user._id }),
+            Cart.findOneAndDelete({ user: user._id }),
+            User.findByIdAndDelete(user._id),
+        ]);
+
+        res.json({ status: 'success', message: 'Your account and personal data have been deleted.' });
     } catch (err) {
         next(err);
     }

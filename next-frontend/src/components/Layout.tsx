@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
 import SearchOverlay from './SearchOverlay';
+import CookieConsent from './CookieConsent';
 
 export default function Layout({ children }) {
     const { isAuthenticated, openAuthModal, user } = useAuth();
@@ -142,7 +143,7 @@ export default function Layout({ children }) {
                                 <span className="header__logo-text">Feelinga<span>.</span></span>
                             </Link>
                             <p>happiness is here. Sourced with care from India&apos;s finest estates, delivered fresh to your doorstep.</p>
-                            <div className="footer__social"><a href="https://instagram.com/feelinga.tea" target="_blank" rel="noopener noreferrer" aria-label="Instagram">IG</a><a href="https://facebook.com/feelinga.tea" target="_blank" rel="noopener noreferrer" aria-label="Facebook">FB</a><a href="https://twitter.com/feelinga_tea" target="_blank" rel="noopener noreferrer" aria-label="Twitter">TW</a><a href="https://pinterest.com/feelingatea" target="_blank" rel="noopener noreferrer" aria-label="Pinterest">PI</a></div>
+                            <div className="footer__social"><a href="https://instagram.com/feelinga.tea" target="_blank" rel="noopener noreferrer" aria-label="Instagram">IG</a><a href="https://facebook.com/feelinga.tea" target="_blank" rel="noopener noreferrer" aria-label="Facebook">FB</a><a href="https://x.com/feelinga_tea" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">X</a><a href="https://pinterest.com/feelingatea" target="_blank" rel="noopener noreferrer" aria-label="Pinterest">PI</a></div>
                         </div>
                         <div>
                             <h4 className="footer__heading">Shop</h4>
@@ -175,6 +176,9 @@ export default function Layout({ children }) {
             <button className={`back-to-top ${showBackToTop ? 'visible' : ''}`} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Back to top">
                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6" /></svg>
             </button>
+
+            {/* COOKIE CONSENT */}
+            <CookieConsent />
         </>
     );
 }

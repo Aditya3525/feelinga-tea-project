@@ -54,6 +54,10 @@ const userSchema = new mongoose.Schema({
     passwordResetExpires: Date,
     emailVerified: { type: Boolean, default: false },
     emailVerifyToken: { type: String, select: false },
+    emailVerifyExpires: { type: Date },
+    googleId: { type: String, sparse: true },
+    loginAttempts: { type: Number, default: 0, select: false },
+    lockUntil: { type: Date, select: false },
 }, {
     timestamps: true,
 });
@@ -77,6 +81,9 @@ userSchema.methods.toJSON = function () {
     delete obj.refreshToken;
     delete obj.passwordResetToken;
     delete obj.passwordResetExpires;
+    delete obj.emailVerifyToken;
+    delete obj.loginAttempts;
+    delete obj.lockUntil;
     delete obj.__v;
     return obj;
 };

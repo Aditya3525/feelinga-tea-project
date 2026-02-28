@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import Order from '../../models/Order.js';
 import Product from '../../models/Product.js';
 import User from '../../models/User.js';
@@ -6,8 +7,45 @@ import AuditLog from '../../models/AuditLog.js';
 import Coupon from '../../models/Coupon.js';
 import Testimonial from '../../models/Testimonial.js';
 import PDFDocument from 'pdfkit';
+import { validate } from '../../middleware/validate.js';
+import { escapeRegex } from '../../utils/sanitize.js';
+import { logAdminAction } from '../../utils/auditLog.js';
 
 const router = Router();
+
+// ===== VALIDATION SCHEMAS =====
+const couponSchema = z.object({
+    code: z.string().min(2).max(30),
+    discountType: z.enum(['percentage', 'fixed']),
+    discountValue: z.number().positive(),
+    minOrderAmount: z.number().min(0).default(0),
+    maxDiscount: z.number().min(0).optional(),
+    usageLimit: z.number().int().min(0).optional(),
+    perUserLimit: z.number().int().min(0).optional(),
+    validFrom: z.string().or(z.date()),
+    validTo: z.string().or(z.date()),
+    active: z.boolean().default(true),
+    description: z.string().max(200).optional(),
+});
+
+const couponUpdateSchema = couponSchema.partial();
+
+const testimonialSchema = z.object({
+    author: z.string().min(1).max(100),
+    role: z.string().max(100).optional(),
+    text: z.string().min(1).max(2000),
+    rating: z.number().int().min(1).max(5).default(5),
+    approved: z.boolean().default(false),
+    featured: z.boolean().default(false),
+    order: z.number().int().min(0).default(0),
+});
+
+const testimonialUpdateSchema = testimonialSchema.partial();
+
+const trackingSchema = z.object({
+    trackingNumber: z.string().max(100).optional(),
+    trackingUrl: z.string().url().max(500).optional().or(z.literal('')),
+});
 
 // GET /admin/dashboard
 router.get('/dashboard', async (_req, res, next) => {
@@ -128,7 +166,7 @@ router.get('/users', async (req, res, next) => {
 
         const search = typeof q === 'string' ? q.trim() : '';
         if (search) {
-            const regex = new RegExp(search, 'i');
+            const regex = new RegExp(escapeRegex(search), 'i');
             filter.$or = [{ name: regex }, { email: regex }, { phone: regex }];
         }
 
@@ -222,6 +260,13 @@ router.get('/low-stock', async (req, res, next) => {
 // GET /admin/export/orders — CSV download
 router.get('/export/orders', async (req, res, next) => {
     try {
+        await logAdminAction({
+            actor: (req as any).user,
+            action: 'export.orders',
+            entityType: 'order',
+            summary: 'Exported orders CSV',
+            meta: { filters: { status: req.query.status, from: req.query.from, to: req.query.to } },
+        });
         const { status, from, to } = req.query;
         const filter: Record<string, any> = {};
         if (status) filter.status = status;
@@ -267,6 +312,12 @@ router.get('/export/orders', async (req, res, next) => {
 // GET /admin/export/products — CSV download
 router.get('/export/products', async (req, res, next) => {
     try {
+        await logAdminAction({
+            actor: (req as any).user,
+            action: 'export.products',
+            entityType: 'product',
+            summary: 'Exported products CSV',
+        });
         const products = await Product.find().sort({ createdAt: -1 }).lean();
 
         const header = 'Name,Slug,Type,Origin,Price 50g,Price 100g,Price 200g,Stock,In Stock,Caffeine,Moods,Rating,Review Count,Created\n';
@@ -298,6 +349,12 @@ router.get('/export/products', async (req, res, next) => {
 // GET /admin/export/users — CSV download
 router.get('/export/users', async (req, res, next) => {
     try {
+        await logAdminAction({
+            actor: (req as any).user,
+            action: 'export.users',
+            entityType: 'user',
+            summary: 'Exported users CSV (contains PII)',
+        });
         const users = await User.find().select('name email role phone createdAt').sort({ createdAt: -1 }).lean();
 
         const header = 'Name,Email,Role,Phone,Created\n';
@@ -330,7 +387,7 @@ router.get('/coupons', async (req, res, next) => {
 });
 
 // POST /admin/coupons
-router.post('/coupons', async (req, res, next) => {
+router.post('/coupons', validate(couponSchema), async (req, res, next) => {
     try {
         const coupon = await Coupon.create(req.body);
         res.status(201).json({ status: 'success', data: coupon });
@@ -340,9 +397,9 @@ router.post('/coupons', async (req, res, next) => {
 });
 
 // PATCH /admin/coupons/:id
-router.patch('/coupons/:id', async (req, res, next) => {
+router.patch('/coupons/:id', validate(couponUpdateSchema), async (req, res, next) => {
     try {
-        const coupon = await Coupon.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const coupon = await Coupon.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
         if (!coupon) return res.status(404).json({ status: 'error', message: 'Coupon not found' });
         res.json({ status: 'success', data: coupon });
     } catch (err) {
@@ -363,7 +420,7 @@ router.delete('/coupons/:id', async (req, res, next) => {
 // ===== TRACKING NUMBER (#13) =====
 
 // PATCH /admin/orders/:id/tracking
-router.patch('/orders/:id/tracking', async (req, res, next) => {
+router.patch('/orders/:id/tracking', validate(trackingSchema), async (req, res, next) => {
     try {
         const { trackingNumber, trackingUrl } = req.body;
         const order = await Order.findByIdAndUpdate(
@@ -486,7 +543,7 @@ router.get('/testimonials', async (req, res, next) => {
 });
 
 // POST /admin/testimonials — create testimonial
-router.post('/testimonials', async (req, res, next) => {
+router.post('/testimonials', validate(testimonialSchema), async (req, res, next) => {
     try {
         const { author, role, text, rating, approved, featured, order } = req.body;
         if (!author || !text) {
@@ -508,7 +565,7 @@ router.post('/testimonials', async (req, res, next) => {
 });
 
 // PATCH /admin/testimonials/:id — update testimonial (edit, approve/reject, feature)
-router.patch('/testimonials/:id', async (req, res, next) => {
+router.patch('/testimonials/:id', validate(testimonialUpdateSchema), async (req, res, next) => {
     try {
         const testimonial = await Testimonial.findByIdAndUpdate(
             req.params.id,
