@@ -216,23 +216,26 @@ router.get('/users/:id', async (req, res, next) => {
     }
 });
 
-// PATCH /admin/users/:id/role — change user role (with self-demotion protection #8)
+// Primary admin email — this account can never be demoted
+const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || 'kailasmane777@gmail.com').toLowerCase();
+
+// PATCH /admin/users/:id/role — change user role (any admin can promote/demote, but primary admin is protected)
 router.patch('/users/:id/role', async (req, res, next) => {
     try {
         const { role } = req.body;
         if (!['customer', 'admin'].includes(role)) {
             return res.status(400).json({ status: 'error', message: 'Role must be customer or admin' });
         }
-        // Prevent last admin from demoting themselves
-        if (role === 'customer') {
-            const adminCount = await User.countDocuments({ role: 'admin' });
-            const targetUser = await User.findById(req.params.id);
-            if (targetUser?.role === 'admin' && adminCount <= 1) {
-                return res.status(400).json({ status: 'error', message: 'Cannot demote the last admin. Promote another user first.' });
-            }
+
+        const targetUser = await User.findById(req.params.id);
+        if (!targetUser) return res.status(404).json({ status: 'error', message: 'User not found' });
+
+        // Prevent demoting the primary admin
+        if (role === 'customer' && targetUser.email.toLowerCase() === ADMIN_EMAIL) {
+            return res.status(400).json({ status: 'error', message: 'Cannot demote the primary admin account' });
         }
+
         const user = await User.findByIdAndUpdate(req.params.id, { role }, { new: true }).select('name email role');
-        if (!user) return res.status(404).json({ status: 'error', message: 'User not found' });
         res.json({ status: 'success', data: user });
     } catch (err) {
         next(err);

@@ -211,8 +211,8 @@ const products = [
 ];
 
 const adminUser = {
-    name: 'Serené Admin',
-    email: 'admin@serenetea.com',
+    name: 'Kailas Mane',
+    email: 'kailasmane777@gmail.com',
     password: 'Admin@123456',
     role: 'admin',
 };

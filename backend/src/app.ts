@@ -11,6 +11,7 @@ import connectDB from './config/db.js';
 import errorHandler from './middleware/errorHandler.js';
 import { authenticate, authorize } from './middleware/auth.js';
 import logger from './utils/logger.js';
+import User from './models/User.js';
 
 // Route modules
 import authRoutes from './modules/auth/routes.js';
@@ -184,6 +185,22 @@ app.use(errorHandler);
 
 const start = async () => {
     await connectDB();
+
+    // Ensure primary admin account has admin role on every startup
+    const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || 'kailasmane777@gmail.com').toLowerCase();
+    try {
+        const result = await User.findOneAndUpdate(
+            { email: ADMIN_EMAIL },
+            { $set: { role: 'admin' } },
+            { new: true }
+        );
+        if (result) {
+            logger.info({ email: ADMIN_EMAIL }, 'Primary admin role confirmed');
+        }
+    } catch (err) {
+        logger.warn({ err }, 'Could not enforce admin role at startup');
+    }
+
     app.listen(PORT, () => {
         logger.info({ port: PORT, env: process.env.NODE_ENV }, `Feelinga API running on http://localhost:${PORT}`);
     });

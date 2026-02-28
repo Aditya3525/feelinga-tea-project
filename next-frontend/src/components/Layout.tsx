@@ -10,7 +10,7 @@ import SearchOverlay from './SearchOverlay';
 import CookieConsent from './CookieConsent';
 
 export default function Layout({ children }) {
-    const { isAuthenticated, openAuthModal, user } = useAuth();
+    const { isAuthenticated, isAdmin, openAuthModal, user } = useAuth();
     const { cart, cartOpen, setCartOpen, removeFromCart, updateQty, itemCount, subtotal } = useCart();
     const { theme, toggleTheme } = useTheme();
     const pathname = usePathname();
@@ -53,6 +53,12 @@ export default function Layout({ children }) {
                         ))}
                     </nav>
                     <div className="header__actions">
+                        {mounted && isAdmin && (
+                            <Link href="/admin" aria-label="Admin Dashboard" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-accent)', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+                                <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                                <span className="admin-link-text">Admin</span>
+                            </Link>
+                        )}
                         <button aria-label="Search" onClick={() => setSearchOpen(true)}>
                             <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>
                         </button>
@@ -89,6 +95,9 @@ export default function Layout({ children }) {
                     <Link key={l.href} href={l.href} onClick={() => setMobileNav(false)}>{l.label}</Link>
                 ))}
                 <Link href="/faq" onClick={() => setMobileNav(false)}>FAQ</Link>
+                {mounted && isAdmin && (
+                    <Link href="/admin" onClick={() => setMobileNav(false)} style={{ color: 'var(--color-accent)', fontWeight: 600 }}>📊 Admin Dashboard</Link>
+                )}
             </nav>
 
             {/* CART DRAWER */}

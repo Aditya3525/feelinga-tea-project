@@ -2,12 +2,13 @@
 import Layout from '../../components/Layout';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
 import { apiRequest } from '../../utils/api';
 import '../../styles/profile.css';
 
 export default function Profile() {
-    const { user, isAuthenticated, openAuthModal, logout, updateProfile, setUser } = useAuth();
+    const { user, isAuthenticated, isAdmin, openAuthModal, logout, updateProfile, setUser } = useAuth();
     const router = useRouter();
     const [activeTab, setActiveTab] = useState('info');
     const [profileMsg, setProfileMsg] = useState({ text: '', type: '' });
@@ -135,6 +136,9 @@ export default function Profile() {
                                 {tab === 'info' ? '👤 Profile' : tab === 'password' ? '🔒 Password' : tab === 'addresses' ? '📍 Addresses' : '📦 Orders'}
                             </button>
                         ))}
+                        {isAdmin && (
+                            <Link href="/admin" className="profile__nav-item" style={{ color: 'var(--color-accent)', fontWeight: 600, textDecoration: 'none', display: 'block' }}>📊 Admin Dashboard</Link>
+                        )}
                         <button className="profile__nav-item" onClick={handleLogout} id="profileLogout">🚪 Logout</button>
                     </nav>
 
