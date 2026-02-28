@@ -8,33 +8,44 @@ export function CartProvider({ children }) {
     const [cartOpen, setCartOpen] = useState(false);
 
     useEffect(() => {
-        const stored = localStorage.getItem('feelinga_cart');
-        if (stored) setCart(JSON.parse(stored));
+        try {
+            const stored = localStorage.getItem('feelinga_cart');
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                // Validate new format (must have id field); clear old-format carts
+                if (Array.isArray(parsed) && parsed.length > 0 && !parsed[0].id) {
+                    localStorage.removeItem('feelinga_cart');
+                } else {
+                    setCart(parsed);
+                }
+            }
+        } catch { /* ignore corrupt data */ }
     }, []);
 
     useEffect(() => {
         localStorage.setItem('feelinga_cart', JSON.stringify(cart));
     }, [cart]);
 
-    const addToCart = (name, price, img) => {
+    const addToCart = ({ id, slug, name, price, size = '100g', img }) => {
+        const key = `${id}_${size}`;
         setCart(prev => {
-            const existing = prev.find(i => i.name === name);
-            if (existing) return prev.map(i => i.name === name ? { ...i, qty: i.qty + 1 } : i);
-            return [...prev, { name, price, img, qty: 1 }];
+            const existing = prev.find(i => i.key === key);
+            if (existing) return prev.map(i => i.key === key ? { ...i, qty: i.qty + 1 } : i);
+            return [...prev, { key, id, slug, name, price, size, img, qty: 1 }];
         });
         setCartOpen(true);
     };
 
-    const removeFromCart = (name) => setCart(prev => prev.filter(i => i.name !== name));
-    const updateQty = (name, qty) => {
-        if (qty <= 0) return removeFromCart(name);
-        setCart(prev => prev.map(i => i.name === name ? { ...i, qty } : i));
+    const removeFromCart = (key) => setCart(prev => prev.filter(i => i.key !== key));
+    const updateQty = (key, qty) => {
+        if (qty <= 0) return removeFromCart(key);
+        setCart(prev => prev.map(i => i.key === key ? { ...i, qty } : i));
     };
     const clearCart = () => setCart([]);
 
     const itemCount = cart.reduce((sum, i) => sum + i.qty, 0);
     const subtotal = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
-    const shipping = subtotal >= 999 ? 0 : 49;
+    const shipping = subtotal >= 999 ? 0 : 79;
 
     return (
         <CartContext.Provider value={{ cart, cartOpen, setCartOpen, addToCart, removeFromCart, updateQty, clearCart, itemCount, subtotal, shipping }}>

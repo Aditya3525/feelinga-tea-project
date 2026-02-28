@@ -27,17 +27,19 @@ export default function Checkout() {
         setLoading(true);
         try {
             const items = cart.map(item => ({
-                productId: item.name, // Backend resolves by name in sync
-                size: '100g',
+                productId: item.id,
+                size: item.size || '100g',
                 qty: item.qty,
             }));
-            await apiRequest('/orders', {
+            const result = await apiRequest('/orders', {
                 method: 'POST',
                 body: JSON.stringify({ items, shippingAddress: address, paymentMethod, notes }),
             });
             clearCart();
-            showToast('Order placed successfully!', 'success');
-            setStep(4);
+            showToast('Order placed! 🎉', 'success');
+            const orderId = result.data?._id ? `#${result.data._id.slice(-6).toUpperCase()}` : '';
+            const uniqueItems = cart.reduce((n, i) => n + i.qty, 0);
+            router.push(`/order-confirm?order=${orderId}&items=${uniqueItems}&total=${total}`);
         } catch (err) {
             showToast(err.message, 'error');
         } finally {
@@ -47,11 +49,13 @@ export default function Checkout() {
 
     if (cart.length === 0 && step < 4) {
         return (
-            <div className="container section" style={{ textAlign: 'center', padding: 'var(--space-4xl) 0' }}>
-                <h2>Your cart is empty</h2>
-                <p style={{ marginTop: 'var(--space-md)', marginBottom: 'var(--space-xl)' }}>Add some teas to get started!</p>
-                <Link href="/shop" className="btn btn--primary">Shop Teas</Link>
-            </div>
+            <Layout>
+                <div className="container section" style={{ textAlign: 'center', padding: 'var(--space-4xl) 0' }}>
+                    <h2>Your cart is empty</h2>
+                    <p style={{ marginTop: 'var(--space-md)', marginBottom: 'var(--space-xl)' }}>Add some teas to get started!</p>
+                    <Link href="/shop" className="btn btn--primary">Shop Teas</Link>
+                </div>
+            </Layout>
         );
     }
 
@@ -138,8 +142,8 @@ export default function Checkout() {
                             <div style={{ textAlign: 'center', padding: 'var(--space-3xl) 0' }}>
                                 <div style={{ fontSize: '4rem', marginBottom: 'var(--space-lg)' }}>🎉</div>
                                 <h2>Order Placed!</h2>
-                                <p style={{ marginTop: 'var(--space-md)', color: 'var(--color-text-muted)' }}>Thank you for your order. We'll send you a confirmation email shortly.</p>
-                                <Link href="/shop" className="btn btn--primary" style={{ marginTop: 'var(--space-xl)' }}>Continue Shopping</Link>
+                                <p style={{ marginTop: 'var(--space-md)', color: 'var(--color-text-muted)' }}>Thank you for your order. We&apos;ll send you a confirmation email shortly.</p>
+                                <Link href="/shop" className="btn btn--primary" style={{ marginTop: 'var(--space-xl)', display: 'inline-block' }}>Continue Shopping</Link>
                             </div>
                         )}
                     </div>
@@ -148,9 +152,9 @@ export default function Checkout() {
                     {step < 4 && (
                         <div style={{ background: 'var(--color-bg-alt)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-xl)', position: 'sticky', top: 100 }}>
                             <h3 style={{ marginBottom: 'var(--space-lg)' }}>Order Summary</h3>
-                            {cart.map((item, i) => (
-                                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--space-sm)' }}>
-                                    <span>{item.name} × {item.qty}</span>
+                            {cart.map((item) => (
+                                <div key={item.key} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--space-sm)' }}>
+                                    <span>{item.name} · {item.size} × {item.qty}</span>
                                     <span>₹{item.price * item.qty}</span>
                                 </div>
                             ))}
@@ -168,6 +172,3 @@ export default function Checkout() {
         </Layout>
     );
 }
-
-
-

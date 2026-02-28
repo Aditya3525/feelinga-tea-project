@@ -69,6 +69,8 @@ router.get('/', async (req, res, next) => {
             'name': { name: 1 },
             'newest': { createdAt: -1 },
             '-createdAt': { createdAt: -1 },
+            '-reviewCount': { reviewCount: -1 },
+            '-rating': { rating: -1 },
         };
         const sortObj = sortMap[sort] || { createdAt: -1 };
 

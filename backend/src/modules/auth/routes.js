@@ -283,4 +283,56 @@ router.post('/google', async (req, res, next) => {
     }
 });
 
+// POST /auth/forgot-password
+router.post('/forgot-password', async (req, res, next) => {
+    try {
+        const { email } = req.body;
+        if (!email) throw new AppError('Email is required', 400);
+        // Find user (don't reveal if not found — security best practice)
+        const user = await User.findOne({ email });
+        if (user) {
+            // In production: generate token, save hash to user, send email
+            // For now: just acknowledge silently (email service not configured)
+            const resetToken = crypto.randomBytes(32).toString('hex');
+            user.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+            user.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 mins
+            await user.save({ validateBeforeSave: false });
+        }
+        res.json({ status: 'success', message: 'If that email exists, a reset link has been sent.' });
+    } catch (err) {
+        next(err);
+    }
+});
+
+// GET /auth/wishlist — get current user's wishlist
+router.get('/wishlist', authenticate, async (req, res, next) => {
+    try {
+        const user = await User.findById(req.user._id).populate('wishlist', 'name slug images prices type rating reviewCount');
+        res.json({ status: 'success', data: user.wishlist || [] });
+    } catch (err) {
+        next(err);
+    }
+});
+
+// POST /auth/wishlist/:productId — add to wishlist (toggle)
+router.post('/wishlist/:productId', authenticate, async (req, res, next) => {
+    try {
+        const user = await User.findById(req.user._id);
+        const productId = req.params.productId;
+        const idx = user.wishlist.indexOf(productId);
+        let action;
+        if (idx === -1) {
+            user.wishlist.push(productId);
+            action = 'added';
+        } else {
+            user.wishlist.splice(idx, 1);
+            action = 'removed';
+        }
+        await user.save({ validateBeforeSave: false });
+        res.json({ status: 'success', action, wishlist: user.wishlist });
+    } catch (err) {
+        next(err);
+    }
+});
+
 export default router;

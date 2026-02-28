@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Layout from '../components/Layout';
 import { useCart } from '../context/CartContext';
@@ -7,6 +7,93 @@ import { useCart } from '../context/CartContext';
 export default function Home() {
     const [activeTab, setActiveTab] = useState('new');
     const { addToCart } = useCart();
+
+    const [newArrivals, setNewArrivals] = useState([]);
+    const [bestSellers, setBestSellers] = useState([]);
+    const [loadingProducts, setLoadingProducts] = useState(true);
+
+    useEffect(() => {
+        async function fetchProducts() {
+            try {
+                const [newRes, bestRes] = await Promise.all([
+                    fetch('/api/v1/products?limit=4&sort=-createdAt'),
+                    fetch('/api/v1/products?limit=4&sort=-reviewCount'),
+                ]);
+                const newData = await newRes.json();
+                const bestData = await bestRes.json();
+
+                const mapProduct = (p) => ({
+                    id: p._id,
+                    slug: p.slug,
+                    name: p.name,
+                    type: p.type,
+                    price: p.prices?.['100g'] || 0,
+                    img: p.images?.[0] || '/images/darjeeling-tea.png',
+                    note: p.shortDescription || (p.description ? p.description.substring(0, 60) + '...' : ''),
+                    reviews: p.reviewCount || 0,
+                    stars: Math.round(p.rating || 0) || 5,
+                    inStock: p.inStock,
+                });
+
+                if (newData.data) setNewArrivals(newData.data.map(mapProduct));
+                if (bestData.data) setBestSellers(bestData.data.map(mapProduct));
+            } catch (err) {
+                console.error('Failed to load homepage products:', err);
+            } finally {
+                setLoadingProducts(false);
+            }
+        }
+        fetchProducts();
+    }, []);
+
+    const handleAddToCart = (p) => {
+        addToCart({ id: p.id, slug: p.slug, name: p.name, price: p.price, size: '100g', img: p.img });
+    };
+
+    const renderStars = (count) => '★'.repeat(count) + (count < 5 ? '☆'.repeat(5 - count) : '');
+
+    const ProductCard = ({ p, badge, badgeStyle }) => (
+        <div className="product-card">
+            {badge && <span className="product-card__badge" style={badgeStyle}>{badge}</span>}
+            <Link href={`/product/${p.slug}`}>
+                <div className="product-card__img"><img src={p.img} alt={`${p.name} tea`} /></div>
+            </Link>
+            <div className="product-card__body">
+                <div className="product-card__type">{p.type}</div>
+                <Link href={`/product/${p.slug}`} className="product-card__name">{p.name}</Link>
+                <div className="product-card__note">{p.note}</div>
+                <div className="product-card__bottom">
+                    <div className="product-card__price">₹{p.price.toLocaleString()}</div>
+                    <div className="product-card__rating">{renderStars(p.stars)} <span>({p.reviews})</span></div>
+                </div>
+                <button className="btn btn--primary btn--sm" style={{ width: '100%', marginTop: '12px' }} onClick={() => handleAddToCart(p)} disabled={!p.inStock}>
+                    {p.inStock ? 'Add to Cart' : 'Sold Out'}
+                </button>
+            </div>
+        </div>
+    );
+
+    const seasonalGifts = [
+        { name: 'Spring Festival Tea Box', type: 'Gift Collection', price: 1499, img: '/images/gift-box.png', note: '5 curated teas in a premium gift box', reviews: 45, stars: 5 },
+        { name: 'Wellness Ritual Box', type: 'Gift Collection', price: 999, img: '/images/gift-box.png', note: '3 wellness blends with infuser', reviews: 67, stars: 5 },
+        { name: "Connoisseur's Collection", type: 'Luxury Hamper', price: 3999, img: '/images/gift-box.png', note: '8 rare teas with teaware in wooden chest', reviews: 28, stars: 5 },
+        { name: 'Tea & Honey Pairing Set', type: 'Gift Collection', price: 799, img: '/images/herbal-tea.png', note: '2 teas paired with artisanal honey', reviews: 34, stars: 4 },
+    ];
+
+    const LoadingSkeleton = () => (
+        <div className="product-grid">
+            {[1, 2, 3, 4].map(i => (
+                <div key={i} className="product-card" style={{ background: 'var(--color-bg-alt)', minHeight: 320, overflow: 'hidden' }}>
+                    <div style={{ height: 220, background: 'linear-gradient(90deg, var(--color-border) 25%, var(--color-bg) 50%, var(--color-border) 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.4s infinite', borderRadius: 'var(--radius-md)', margin: 'var(--space-md)' }} />
+                    <div style={{ padding: 'var(--space-md)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        <div style={{ height: 12, background: 'var(--color-border)', borderRadius: 4, width: '40%', animation: 'shimmer 1.4s infinite', animationDelay: '0.1s' }} />
+                        <div style={{ height: 18, background: 'var(--color-border)', borderRadius: 4, width: '80%', animation: 'shimmer 1.4s infinite', animationDelay: '0.2s' }} />
+                        <div style={{ height: 12, background: 'var(--color-border)', borderRadius: 4, width: '60%', animation: 'shimmer 1.4s infinite', animationDelay: '0.3s' }} />
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
 
     return (
         <Layout>
@@ -41,8 +128,8 @@ export default function Home() {
                     </div>
                     <div className="mood-grid fade-in">
                         {[
-                            { mood: 'energize', icon: '⚡', title: 'Energize', desc: 'Start your day with vibrant, uplifting blends.' },
-                            { mood: 'relax', icon: '🌿', title: 'Relax', desc: 'Soothing teas that melt away the day\'s stress.' },
+                            { mood: 'energize', icon: '⚡', title: 'Energize', desc: "Start your day with vibrant, uplifting blends." },
+                            { mood: 'relax', icon: '🌿', title: 'Relax', desc: "Soothing teas that melt away the day's stress." },
                             { mood: 'focus', icon: '🧠', title: 'Focus', desc: 'Sharpen your clarity and stay centered.' },
                             { mood: 'detox', icon: '💧', title: 'Detox', desc: 'Light, detoxifying infusions for renewal.' },
                             { mood: 'glow', icon: '✨', title: 'Glow', desc: 'Nourish your skin and radiate from within.' },
@@ -71,73 +158,37 @@ export default function Home() {
                         ))}
                     </div>
 
-                    {/* New Arrivals */}
-                    <div className="product-grid fade-in" style={{ display: activeTab === 'new' ? '' : 'none' }}>
-                        {[
-                            { name: 'Moonlight White Peony', type: 'White Tea', price: 899, reviews: 24, img: '/images/white-tea.png', badge: 'New', note: 'Delicate floral with honey sweetness' },
-                            { name: 'Rose Chamomile Dream', type: 'Herbal Infusion', price: 649, reviews: 18, img: '/images/herbal-tea.png', badge: 'New', note: 'Soothing blend of rose petals & chamomile' },
-                            { name: 'Spring Flush Sencha', type: 'Green Tea', price: 749, reviews: 31, img: '/images/green-tea.png', badge: 'New', note: 'Bright, grassy with umami finish', halfStar: true },
-                            { name: 'Darjeeling Muscatel Oolong', type: 'Oolong', price: 1199, reviews: 12, img: '/images/oolong-tea.png', badge: 'New', note: 'Rich muscatel grape with malty depth' },
-                        ].map((p, i) => (
-                            <div className="product-card" key={i}>
-                                <span className="product-card__badge">{p.badge}</span>
-                                <div className="product-card__img"><img src={p.img} alt={`${p.name} tea`} /></div>
-                                <div className="product-card__body">
-                                    <div className="product-card__type">{p.type}</div>
-                                    <div className="product-card__name">{p.name}</div>
-                                    <div className="product-card__note">{p.note}</div>
-                                    <div className="product-card__bottom">
-                                        <div className="product-card__price">₹{p.price.toLocaleString()}</div>
-                                        <div className="product-card__rating">{p.halfStar ? '★★★★☆' : '★★★★★'} <span>({p.reviews})</span></div>
-                                    </div>
-                                </div>
+                    {loadingProducts ? (
+                        <LoadingSkeleton />
+                    ) : (
+                        <>
+                            {/* New Arrivals */}
+                            <div className="product-grid fade-in" style={{ display: activeTab === 'new' ? '' : 'none' }}>
+                                {newArrivals.map(p => <ProductCard key={p.id} p={p} badge="New" />)}
                             </div>
-                        ))}
-                    </div>
 
-                    {/* Best Sellers */}
-                    <div className="product-grid" style={{ display: activeTab === 'best' ? '' : 'none' }}>
-                        {[
-                            { name: 'Classic Assam Breakfast', type: 'Black Tea', price: 499, reviews: 156, img: '/images/darjeeling-tea.png', note: 'Bold, malty with rich amber liquor' },
-                            { name: 'Himalayan Green Reserve', type: 'Green Tea', price: 599, reviews: 203, img: '/images/green-tea.png', note: 'Light, refreshing with vegetal notes' },
-                            { name: 'Heritage Spiced Chai', type: 'Masala Chai', price: 399, reviews: 312, img: '/images/masala-chai.png', note: 'Warm spices with CTC tea base' },
-                            { name: 'Turmeric Golden Glow', type: 'Herbal', price: 549, reviews: 89, img: '/images/herbal-tea.png', note: 'Anti-inflammatory wellness blend' },
-                        ].map((p, i) => (
-                            <div className="product-card" key={i}>
-                                <span className="product-card__badge" style={{ background: 'var(--color-gold)' }}>Best Seller</span>
-                                <div className="product-card__img"><img src={p.img} alt={`${p.name} tea`} /></div>
-                                <div className="product-card__body">
-                                    <div className="product-card__type">{p.type}</div>
-                                    <div className="product-card__name">{p.name}</div>
-                                    <div className="product-card__note">{p.note}</div>
-                                    <div className="product-card__bottom">
-                                        <div className="product-card__price">₹{p.price.toLocaleString()}</div>
-                                        <div className="product-card__rating">★★★★★ <span>({p.reviews})</span></div>
-                                    </div>
-                                </div>
+                            {/* Best Sellers */}
+                            <div className="product-grid" style={{ display: activeTab === 'best' ? '' : 'none' }}>
+                                {bestSellers.map(p => <ProductCard key={p.id} p={p} badge="Best Seller" badgeStyle={{ background: 'var(--color-gold)' }} />)}
                             </div>
-                        ))}
-                    </div>
+                        </>
+                    )}
 
-                    {/* Seasonal Gifts */}
+                    {/* Seasonal Gifts — static */}
                     <div className="product-grid" style={{ display: activeTab === 'seasonal' ? '' : 'none' }}>
-                        {[
-                            { name: 'Spring Festival Tea Box', type: 'Gift Collection', price: 1499, reviews: 45, note: '5 curated teas in a premium gift box' },
-                            { name: 'Wellness Ritual Box', type: 'Gift Collection', price: 999, reviews: 67, note: '3 wellness blends with infuser' },
-                            { name: "Connoisseur's Collection", type: 'Luxury Hamper', price: 3999, reviews: 28, note: '8 rare teas with teaware in wooden chest' },
-                            { name: 'Tea & Honey Pairing Set', type: 'Gift Collection', price: 799, reviews: 34, note: '2 teas paired with artisanal honey', halfStar: true },
-                        ].map((p, i) => (
+                        {seasonalGifts.map((p, i) => (
                             <div className="product-card" key={i}>
                                 <span className="product-card__badge" style={{ background: 'var(--color-success)' }}>Gift Set</span>
-                                <div className="product-card__img"><img src={i < 3 ? '/images/gift-box.png' : '/images/herbal-tea.png'} alt={p.name} /></div>
+                                <div className="product-card__img"><img src={p.img} alt={p.name} /></div>
                                 <div className="product-card__body">
                                     <div className="product-card__type">{p.type}</div>
                                     <div className="product-card__name">{p.name}</div>
                                     <div className="product-card__note">{p.note}</div>
                                     <div className="product-card__bottom">
                                         <div className="product-card__price">₹{p.price.toLocaleString()}</div>
-                                        <div className="product-card__rating">{p.halfStar ? '★★★★☆' : '★★★★★'} <span>({p.reviews})</span></div>
+                                        <div className="product-card__rating">{renderStars(p.stars)} <span>({p.reviews})</span></div>
                                     </div>
+                                    <Link href="/gifting" className="btn btn--ghost btn--sm" style={{ width: '100%', marginTop: '12px', textAlign: 'center' }}>View Gift Sets</Link>
                                 </div>
                             </div>
                         ))}
@@ -159,9 +210,9 @@ export default function Home() {
                     </div>
                     <div className="curated-grid fade-in">
                         {[
-                            { name: 'First Flush Darjeeling', img: '/images/darjeeling-tea.png', desc: '"The champagne of teas — this spring harvest delivers an exquisite muscatel aroma with a light, floral body."', meta: '₹1,299 · Limited Edition' },
-                            { name: 'Silver Needle White', img: '/images/white-tea.png', desc: '"Rare, hand-plucked buds with the most delicate sweetness. Best enjoyed in quiet afternoon solitude."', meta: '₹1,899 · Single Estate' },
-                            { name: 'Aged Pu-erh Reserve', img: '/images/oolong-tea.png', desc: '"Deep, earthy complexity with a smooth, velvety finish. A meditative tea for the true connoisseur."', meta: '₹2,499 · Rare Find' },
+                            { name: 'First Flush Darjeeling', img: '/images/darjeeling-tea.png', desc: '"The champagne of teas — this spring harvest delivers an exquisite muscatel aroma with a light, floral body."', meta: '₹1,299 · Limited Edition', slug: 'darjeeling-first-flush' },
+                            { name: 'Silver Needle White', img: '/images/white-tea.png', desc: '"Rare, hand-plucked buds with the most delicate sweetness. Best enjoyed in quiet afternoon solitude."', meta: '₹1,899 · Single Estate', slug: 'silver-needle-white' },
+                            { name: 'Aged Pu-erh Reserve', img: '/images/oolong-tea.png', desc: '"Deep, earthy complexity with a smooth, velvety finish. A meditative tea for the true connoisseur."', meta: '₹2,499 · Rare Find', slug: null },
                         ].map((c, i) => (
                             <div className="curated-card" key={i}>
                                 <div className="curated-card__img"><img src={c.img} alt={c.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'var(--radius-md)' }} /></div>
@@ -169,6 +220,7 @@ export default function Home() {
                                     <h4>{c.name}</h4>
                                     <p>{c.desc}</p>
                                     <div className="curated-card__meta">{c.meta}</div>
+                                    {c.slug && <Link href={`/product/${c.slug}`} className="btn btn--ghost btn--sm" style={{ marginTop: 'var(--space-sm)' }}>View Details</Link>}
                                 </div>
                             </div>
                         ))}

@@ -15,6 +15,9 @@ export default function Layout({ children }) {
     const [mobileNav, setMobileNav] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
     const [showBackToTop, setShowBackToTop] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => { setMounted(true); }, []);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -55,18 +58,18 @@ export default function Layout({ children }) {
                                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
                             )}
                         </button>
-                        {isAuthenticated ? (
+                        {mounted && isAuthenticated ? (
                             <Link href="/profile" aria-label="Account">
                                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                             </Link>
                         ) : (
-                            <button aria-label="Account" onClick={openAuthModal}>
+                            <button aria-label="Account" onClick={mounted ? openAuthModal : undefined}>
                                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                             </button>
                         )}
                         <button aria-label="Cart" id="cartBtn" onClick={() => setCartOpen(true)}>
                             <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
-                            <span className="cart-count" id="cartCount">{itemCount}</span>
+                            {mounted && itemCount > 0 && <span className="cart-count" id="cartCount">{itemCount}</span>}
                         </button>
                         <button className={`hamburger ${mobileNav ? 'active' : ''}`} id="hamburger" aria-label="Menu" onClick={() => setMobileNav(!mobileNav)}>
                             <span></span><span></span><span></span>
@@ -97,17 +100,17 @@ export default function Layout({ children }) {
                         <div className="cart-empty"><div className="icon">🍃</div><p>Your cart is empty</p></div>
                     ) : (
                         cart.map((item, i) => (
-                            <div className="cart-item" key={i}>
+                            <div className="cart-item" key={item.key}>
                                 <div className="cart-item__img">{item.img ? <img src={item.img} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8 }} /> : '🍵'}</div>
                                 <div className="cart-item__details">
                                     <div className="cart-item__name">{item.name}</div>
-                                    <div className="cart-item__price">₹{item.price} × {item.qty}</div>
+                                    <div className="cart-item__price">₹{item.price} × {item.qty} · {item.size || '100g'}</div>
                                     <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-                                        <button onClick={() => updateQty(item.name, item.qty - 1)}>−</button>
+                                        <button onClick={() => updateQty(item.key, item.qty - 1)}>−</button>
                                         <span>{item.qty}</span>
-                                        <button onClick={() => updateQty(item.name, item.qty + 1)}>+</button>
+                                        <button onClick={() => updateQty(item.key, item.qty + 1)}>+</button>
                                     </div>
-                                    <div className="cart-item__remove" onClick={() => removeFromCart(item.name)}>Remove</div>
+                                    <div className="cart-item__remove" onClick={() => removeFromCart(item.key)}>Remove</div>
                                 </div>
                             </div>
                         ))
