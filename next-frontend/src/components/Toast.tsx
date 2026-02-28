@@ -1,7 +1,7 @@
 'use client';
 import { createContext, useContext, useState, useCallback } from 'react';
 
-const ToastContext = createContext();
+const ToastContext = createContext<any>(null);
 
 export function ToastProvider({ children }) {
     const [toasts, setToasts] = useState([]);

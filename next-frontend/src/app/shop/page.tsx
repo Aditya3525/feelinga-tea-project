@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import Layout from '../../components/Layout';
 import { useCart } from '../../context/CartContext';
@@ -16,12 +17,15 @@ function ShopInner() {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [total, setTotal] = useState(0);
+    const [searchQuery, setSearchQuery] = useState('');
     const LIMIT = 12;
 
-    // Sync mood from URL param
+    // Sync mood and search query from URL params
     useEffect(() => {
         const moodParam = searchParams.get('mood');
         if (moodParam) setFilters(prev => ({ ...prev, mood: [moodParam] }));
+        const qParam = searchParams.get('q');
+        if (qParam) setSearchQuery(qParam);
     }, [searchParams]);
 
     // Fetch products from API
@@ -31,8 +35,8 @@ function ShopInner() {
             try {
                 setLoading(true);
                 const params = new URLSearchParams();
-                params.set('limit', LIMIT);
-                params.set('page', page);
+                params.set('limit', String(LIMIT));
+                params.set('page', String(page));
 
                 // Sort
                 const sortMap = { popular: '-reviewCount', newest: '-createdAt', 'price-asc': 'price', 'price-desc': '-price' };
@@ -44,10 +48,11 @@ function ShopInner() {
                     if (typeMap[filters.type[0]]) params.set('type', typeMap[filters.type[0]]);
                 }
                 filters.mood.forEach(m => params.append('mood', m));
+                if (searchQuery) params.set('q', searchQuery);
                 if (filters.price.length === 1) {
-                    if (filters.price[0] === 'under500') params.set('maxPrice', 500);
-                    else if (filters.price[0] === '500-999') { params.set('minPrice', 500); params.set('maxPrice', 999); }
-                    else if (filters.price[0] === '1000-plus') params.set('minPrice', 1000);
+                    if (filters.price[0] === 'under500') params.set('maxPrice', '500');
+                    else if (filters.price[0] === '500-999') { params.set('minPrice', '500'); params.set('maxPrice', '999'); }
+                    else if (filters.price[0] === '1000-plus') params.set('minPrice', '1000');
                 }
 
                 const res = await fetch(`/api/v1/products?${params}`);
@@ -80,7 +85,7 @@ function ShopInner() {
             }
         }
         fetchProducts();
-    }, [filters, sort, page]);
+    }, [filters, sort, page, searchQuery]);
 
     const toggleFilter = (group, value) => {
         setPage(1); // reset to page 1 on filter change
@@ -164,7 +169,7 @@ function ShopInner() {
                                         <div className="product-card" key={p.id}>
                                             {p.badge && <span className="product-card__badge" style={p.badgeColor ? { background: p.badgeColor } : {}}>{p.badge}</span>}
                                             <Link href={`/product/${p.slug}`}>
-                                                <div className="product-card__img"><img src={p.img} alt={p.name} /></div>
+                                                <div className="product-card__img"><Image src={p.img || '/images/placeholder-tea.png'} alt={p.name} width={300} height={300} style={{ objectFit: 'contain', width: '100%', height: 'auto' }} /></div>
                                             </Link>
                                             <div className="product-card__body">
                                                 <div className="product-card__type">{p.typeName}</div>

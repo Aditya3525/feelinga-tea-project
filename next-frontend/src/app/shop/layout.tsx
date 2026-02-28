@@ -1,5 +1,5 @@
 export const metadata = {
-    title: 'Shop All Teas — feelinga',
+    title: 'Shop All Teas',
     description: 'Browse premium loose leaf teas. Filter by mood, origin, and price. Green, black, white, oolong, herbal teas and masala chai from India\'s finest estates.',
     openGraph: {
         title: 'Shop All Teas — feelinga',
@@ -8,6 +8,6 @@ export const metadata = {
     },
 };
 
-export default function ShopLayout({ children }) {
+export default function ShopLayout({ children }: { children: React.ReactNode }) {
     return children;
 }

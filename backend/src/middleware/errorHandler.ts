@@ -1,5 +1,10 @@
+import { Request, Response, NextFunction } from 'express';
+
 export class AppError extends Error {
-    constructor(message, statusCode) {
+    statusCode: number;
+    isOperational: boolean;
+
+    constructor(message: string, statusCode: number) {
         super(message);
         this.statusCode = statusCode;
         this.isOperational = true;
@@ -7,14 +12,14 @@ export class AppError extends Error {
     }
 }
 
-const errorHandler = (err, req, res, _next) => {
+const errorHandler = (err: any, req: Request, res: Response, _next: NextFunction) => {
     let statusCode = err.statusCode || 500;
     let message = err.message || 'Internal Server Error';
 
     // Mongoose validation error
     if (err.name === 'ValidationError') {
         statusCode = 400;
-        const messages = Object.values(err.errors).map(e => e.message);
+        const messages = Object.values(err.errors).map((e: any) => e.message);
         message = messages.join('. ');
     }
 

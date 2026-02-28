@@ -3753,6 +3753,81 @@ textarea:focus-visible {
 
 
 
+/* ===== ADDITIONAL MOBILE RESPONSIVE FIXES ===== */
+
+/* Checkout page 2-column layout → single column on mobile */
+.checkout-layout {
+  display: grid;
+  gap: var(--space-3xl);
+  align-items: start;
+}
+
+@media (min-width: 769px) {
+  .checkout-layout {
+    grid-template-columns: 1fr 380px;
+  }
+}
+
+@media (max-width: 768px) {
+  .checkout-layout {
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+
+  /* Profile layout stacks */
+  .profile-layout {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .profile__nav {
+    flex-direction: row !important;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: var(--space-lg);
+    gap: 0 !important;
+  }
+
+  .profile__nav-item {
+    font-size: 0.85rem;
+    padding: var(--space-sm) var(--space-md) !important;
+  }
+}
+
+/* Checkout shipping form → single column on small screens */
+.checkout-shipping-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+@media (max-width: 600px) {
+  .checkout-shipping-form {
+    grid-template-columns: 1fr;
+  }
+
+  /* Ensure inputs don't overflow */
+  .checkout-shipping-form input,
+  .checkout-shipping-form select,
+  .checkout-shipping-form textarea {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+/* Page hero responsive */
+@media (max-width: 480px) {
+  .page-hero h1 {
+    font-size: 1.75rem;
+  }
+
+  .page-hero {
+    padding: var(--space-2xl) 0 !important;
+  }
+}
+
 /* ===== KEYFRAME ANIMATIONS ===== */
 @keyframes shimmer {
   0% {

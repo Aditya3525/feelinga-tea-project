@@ -1,0 +1,179 @@
+'use client';
+import { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import Layout from '../../../../components/Layout';
+import { useAuth } from '../../../../context/AuthContext';
+import { apiRequest } from '../../../../utils/api';
+
+export default function OrderDetail() {
+    const { id } = useParams();
+    const router = useRouter();
+    const { isAuthenticated } = useAuth();
+    const [order, setOrder] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        if (!isAuthenticated) {
+            router.push('/');
+            return;
+        }
+        async function fetchOrder() {
+            try {
+                const data = await apiRequest(`/orders/${id}`);
+                setOrder(data.data);
+            } catch (err) {
+                setError(err.message || 'Failed to load order');
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchOrder();
+    }, [id, isAuthenticated, router]);
+
+    const statusColor = (status) => {
+        const map = {
+            pending: '#f39c12',
+            confirmed: '#3498db',
+            processing: '#9b59b6',
+            shipped: '#2ecc71',
+            delivered: '#27ae60',
+            cancelled: '#e74c3c',
+        };
+        return map[status] || '#999';
+    };
+
+    if (loading) {
+        return (
+            <Layout>
+                <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <p>Loading order...</p>
+                </div>
+            </Layout>
+        );
+    }
+
+    if (error || !order) {
+        return (
+            <Layout>
+                <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
+                    <p style={{ color: 'var(--color-text-muted)' }}>{error || 'Order not found'}</p>
+                    <Link href="/profile" className="btn btn--ghost">Back to Profile</Link>
+                </div>
+            </Layout>
+        );
+    }
+
+    return (
+        <Layout>
+            <div className="page-hero" style={{ paddingBottom: 'var(--space-md)' }}>
+                <div className="container">
+                    <nav className="breadcrumb" aria-label="Breadcrumb">
+                        <Link href="/">Home</Link> <span>/</span>
+                        <Link href="/profile">My Account</Link> <span>/</span>
+                        <span>Order {order.orderNumber}</span>
+                    </nav>
+                </div>
+            </div>
+
+            <div className="container">
+                <div className="section" style={{ maxWidth: 800, margin: '0 auto' }}>
+                    {/* Order Header */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-xl)', flexWrap: 'wrap', gap: 'var(--space-md)' }}>
+                        <div>
+                            <h1 style={{ fontSize: '1.5rem', marginBottom: 4 }}>Order {order.orderNumber}</h1>
+                            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
+                                Placed on {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
+                            </p>
+                        </div>
+                        <span style={{
+                            background: statusColor(order.status),
+                            color: '#fff',
+                            padding: '6px 16px',
+                            borderRadius: 20,
+                            fontSize: '0.85rem',
+                            fontWeight: 600,
+                            textTransform: 'capitalize',
+                        }}>
+                            {order.status}
+                        </span>
+                    </div>
+
+                    {/* Items */}
+                    <div style={{ background: 'var(--color-bg-alt)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-lg)', marginBottom: 'var(--space-xl)' }}>
+                        <h3 style={{ marginBottom: 'var(--space-md)' }}>Items</h3>
+                        {order.items?.map((item, i) => (
+                            <div key={i} style={{
+                                display: 'flex', alignItems: 'center', gap: 'var(--space-md)',
+                                padding: 'var(--space-md) 0',
+                                borderBottom: i < order.items.length - 1 ? '1px solid var(--color-border)' : 'none',
+                            }}>
+                                {item.image && (
+                                    <img src={item.image} alt={item.name} style={{ width: 60, height: 60, objectFit: 'contain', borderRadius: 'var(--radius-sm)', background: 'var(--color-bg)' }} />
+                                )}
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontWeight: 600 }}>{item.name}</div>
+                                    <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+                                        Size: {item.size} &middot; Qty: {item.qty}
+                                    </div>
+                                </div>
+                                <div style={{ fontWeight: 600 }}>₹{(item.price * item.qty).toLocaleString()}</div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Summary */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-xl)', marginBottom: 'var(--space-xl)' }}>
+                        {/* Shipping Address */}
+                        <div style={{ background: 'var(--color-bg-alt)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-lg)' }}>
+                            <h3 style={{ marginBottom: 'var(--space-md)' }}>Shipping Address</h3>
+                            {order.shippingAddress && (
+                                <div style={{ fontSize: '0.9rem', lineHeight: 1.8 }}>
+                                    <div style={{ fontWeight: 600 }}>{order.shippingAddress.firstName} {order.shippingAddress.lastName}</div>
+                                    <div>{order.shippingAddress.line1}</div>
+                                    {order.shippingAddress.line2 && <div>{order.shippingAddress.line2}</div>}
+                                    <div>{order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.pincode}</div>
+                                    <div>📞 {order.shippingAddress.phone}</div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Payment Summary */}
+                        <div style={{ background: 'var(--color-bg-alt)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-lg)' }}>
+                            <h3 style={{ marginBottom: 'var(--space-md)' }}>Payment Summary</h3>
+                            <div style={{ fontSize: '0.9rem', lineHeight: 2 }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <span>Subtotal</span><span>₹{order.subtotal?.toLocaleString()}</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <span>Shipping</span><span>{order.shipping === 0 ? 'FREE' : `₹${order.shipping}`}</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <span>Tax (GST 5%)</span><span>₹{order.tax?.toLocaleString()}</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, borderTop: '1px solid var(--color-border)', paddingTop: 8, marginTop: 8, fontSize: '1.1rem' }}>
+                                    <span>Total</span><span>₹{order.total?.toLocaleString()}</span>
+                                </div>
+                                <div style={{ marginTop: 8, color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
+                                    Payment: {order.paymentMethod?.toUpperCase()} • {order.paymentStatus === 'paid' ? '✅ Paid' : '⏳ ' + (order.paymentStatus || 'Pending')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {order.notes && (
+                        <div style={{ background: 'var(--color-bg-alt)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-lg)', marginBottom: 'var(--space-xl)' }}>
+                            <h3 style={{ marginBottom: 'var(--space-sm)' }}>Order Notes</h3>
+                            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>{order.notes}</p>
+                        </div>
+                    )}
+
+                    <div style={{ textAlign: 'center' }}>
+                        <Link href="/profile" className="btn btn--ghost">← Back to My Account</Link>
+                    </div>
+                </div>
+            </div>
+        </Layout>
+    );
+}

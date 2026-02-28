@@ -2,7 +2,7 @@
 
 const API_BASE = '/api/v1';
 
-export async function apiRequest(path, options = {}) {
+export async function apiRequest(path: string, options: any = {}) {
     const token = typeof window !== 'undefined' ? localStorage.getItem('feelinga_token') : null;
 
     const headers = {

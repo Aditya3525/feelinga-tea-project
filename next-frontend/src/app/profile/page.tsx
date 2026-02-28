@@ -226,8 +226,11 @@ export default function Profile() {
                                                     <strong>{order.orderNumber}</strong>
                                                     <span className={`badge badge--${order.status}`} style={{ padding: '4px 12px', borderRadius: '12px', fontSize: '0.8rem', textTransform: 'capitalize', background: order.status === 'delivered' ? 'var(--color-success)' : order.status === 'cancelled' ? 'var(--color-error)' : 'var(--color-primary)', color: '#fff' }}>{order.status}</span>
                                                 </div>
-                                                <div style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
-                                                    {order.items?.length || 0} items · ₹{order.total} · {new Date(order.createdAt).toLocaleDateString('en-IN')}
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <div style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
+                                                        {order.items?.length || 0} items · ₹{order.total} · {new Date(order.createdAt).toLocaleDateString('en-IN')}
+                                                    </div>
+                                                    <button className="btn btn--ghost btn--sm" onClick={() => router.push(`/profile/orders/${order._id}`)} style={{ fontSize: '0.85rem' }}>View Details →</button>
                                                 </div>
                                             </div>
                                         ))}

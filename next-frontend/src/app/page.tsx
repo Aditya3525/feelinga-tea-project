@@ -7,6 +7,7 @@ import { useCart } from '../context/CartContext';
 export default function Home() {
     const [activeTab, setActiveTab] = useState('new');
     const { addToCart } = useCart();
+    const [nlStatus, setNlStatus] = useState({ text: '', type: '' });
 
     const [newArrivals, setNewArrivals] = useState([]);
     const [bestSellers, setBestSellers] = useState([]);
@@ -52,7 +53,7 @@ export default function Home() {
 
     const renderStars = (count) => '★'.repeat(count) + (count < 5 ? '☆'.repeat(5 - count) : '');
 
-    const ProductCard = ({ p, badge, badgeStyle }) => (
+    const ProductCard = ({ p, badge, badgeStyle }: { p: any; badge?: any; badgeStyle?: any }) => (
         <div className="product-card">
             {badge && <span className="product-card__badge" style={badgeStyle}>{badge}</span>}
             <Link href={`/product/${p.slug}`}>
@@ -309,10 +310,23 @@ export default function Home() {
                     <div className="newsletter fade-in">
                         <h3>Join the Tea Circle</h3>
                         <p>Get early access to new arrivals, brewing tips, and 10% off your first order.</p>
-                        <form className="newsletter__form" onSubmit={(e) => { e.preventDefault(); alert('Thank you for subscribing!'); }}>
+                        <form className="newsletter__form" onSubmit={async (e) => {
+                            e.preventDefault();
+                            const email = (e.target as any).elements[0].value.trim();
+                            try {
+                                const res = await fetch('/api/v1/newsletter', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
+                                const data = await res.json();
+                                if (!res.ok) throw new Error(data.message);
+                                setNlStatus({ text: data.message || 'Subscribed!', type: 'success' });
+                                (e.target as any).reset();
+                            } catch (err: any) {
+                                setNlStatus({ text: err.message || 'Failed to subscribe', type: 'error' });
+                            }
+                        }}>
                             <input type="email" placeholder="Your email address" required aria-label="Email address" />
                             <button type="submit">Subscribe</button>
                         </form>
+                        {nlStatus.text && <p style={{ marginTop: 'var(--space-sm)', fontSize: '0.9rem', color: nlStatus.type === 'success' ? 'var(--color-success)' : 'var(--color-error)' }}>{nlStatus.text}</p>}
                     </div>
                 </div>
             </section>

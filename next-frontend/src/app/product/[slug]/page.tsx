@@ -2,6 +2,7 @@
 import Layout from '../../../components/Layout';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import { useCart } from '../../../context/CartContext';
 import { useAuth } from '../../../context/AuthContext';
@@ -15,6 +16,7 @@ export default function ProductDetail() {
     const [error, setError] = useState(null);
     const [selectedSize, setSelectedSize] = useState('100g');
     const [qty, setQty] = useState(1);
+    const [selectedImage, setSelectedImage] = useState(0);
     const [wishlisted, setWishlisted] = useState(false);
     const [wishlistLoading, setWishlistLoading] = useState(false);
 
@@ -31,6 +33,60 @@ export default function ProductDetail() {
     const { addToCart } = useCart();
     const { isAuthenticated, openAuthModal } = useAuth();
     const { showToast } = useToast();
+
+    // Dynamic document title & JSON-LD structured data
+    useEffect(() => {
+        if (!product) return;
+        document.title = `${product.name} — Premium ${product.type} | feelinga`;
+        const meta = document.querySelector('meta[name="description"]');
+        const desc = product.shortDescription || (product.description ? product.description.substring(0, 160) : '');
+        if (meta) meta.setAttribute('content', desc);
+        else {
+            const m = document.createElement('meta');
+            m.name = 'description';
+            m.content = desc;
+            document.head.appendChild(m);
+        }
+
+        // JSON-LD Product schema
+        const jsonLd = {
+            '@context': 'https://schema.org',
+            '@type': 'Product',
+            name: product.name,
+            description: product.shortDescription || product.description,
+            image: product.images?.[0] || '',
+            sku: product.slug,
+            brand: { '@type': 'Brand', name: 'feelinga' },
+            offers: {
+                '@type': 'Offer',
+                priceCurrency: 'INR',
+                price: product.prices?.['100g'] || 0,
+                availability: product.inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+                url: typeof window !== 'undefined' ? window.location.href : '',
+            },
+            ...(product.rating && product.reviewCount > 0 ? {
+                aggregateRating: {
+                    '@type': 'AggregateRating',
+                    ratingValue: product.rating,
+                    reviewCount: product.reviewCount,
+                },
+            } : {}),
+        };
+        let script = document.getElementById('product-jsonld') as HTMLScriptElement;
+        if (!script) {
+            script = document.createElement('script');
+            script.id = 'product-jsonld';
+            script.type = 'application/ld+json';
+            document.head.appendChild(script);
+        }
+        script.textContent = JSON.stringify(jsonLd);
+
+        return () => {
+            document.title = 'feelinga — happiness is here';
+            const el = document.getElementById('product-jsonld');
+            if (el) el.remove();
+        };
+    }, [product]);
 
     useEffect(() => {
         async function fetchProduct() {
@@ -141,7 +197,7 @@ export default function ProductDetail() {
         }
     };
 
-    const renderStars = (rating, interactive = false, onChange) => {
+    const renderStars = (rating: number, interactive = false, onChange?: (n: number) => void) => {
         return (
             <span style={{ fontSize: '1.1rem', letterSpacing: 2, cursor: interactive ? 'pointer' : 'default' }}>
                 {[1, 2, 3, 4, 5].map(n => (
@@ -187,8 +243,8 @@ export default function ProductDetail() {
     }
 
     const currentPrice = product.prices?.[selectedSize] || product.prices?.['100g'] || 0;
-    const availableSizes = product.prices ? Object.entries(product.prices).filter(([, v]) => v) : [];
-    const avgRating = reviews.length > 0 ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1) : null;
+    const availableSizes = product.prices ? Object.entries(product.prices).filter(([, v]) => v) as [string, number][] : [];
+    const avgRating = reviews.length > 0 ? (reviews.reduce((s: number, r: any) => s + r.rating, 0) / reviews.length) : null;
 
     return (
         <Layout>
@@ -207,12 +263,13 @@ export default function ProductDetail() {
                     {/* Image Panel */}
                     <div className="pdp-gallery">
                         <div style={{ background: 'var(--color-bg-alt)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-2xl)', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-                            <img
-                                src={product.images?.[0] || '/images/darjeeling-tea.png'}
+                            <Image
+                                src={product.images?.[selectedImage] || product.images?.[0] || '/images/darjeeling-tea.png'}
                                 alt={product.name}
+                                width={420}
+                                height={420}
                                 style={{ maxWidth: '100%', maxHeight: '420px', objectFit: 'contain', transition: 'transform 0.4s ease' }}
-                                onMouseEnter={e => e.target.style.transform = 'scale(1.04)'}
-                                onMouseLeave={e => e.target.style.transform = 'scale(1)'}
+                                priority
                             />
                             {/* Wishlist button */}
                             <button
@@ -225,6 +282,25 @@ export default function ProductDetail() {
                                 {wishlisted ? '❤️' : '🤍'}
                             </button>
                         </div>
+                        {/* Thumbnail gallery */}
+                        {product.images?.length > 1 && (
+                            <div style={{ display: 'flex', gap: 'var(--space-sm)', marginTop: 'var(--space-md)', overflowX: 'auto' }}>
+                                {product.images.map((img, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => setSelectedImage(i)}
+                                        style={{
+                                            width: 64, height: 64, borderRadius: 'var(--radius-md)', overflow: 'hidden',
+                                            border: selectedImage === i ? '2px solid var(--color-accent)' : '2px solid var(--color-border)',
+                                            background: 'var(--color-bg-alt)', cursor: 'pointer', padding: 4, flexShrink: 0,
+                                            opacity: selectedImage === i ? 1 : 0.7, transition: 'all 0.2s ease',
+                                        }}
+                                    >
+                                        <Image src={img} alt={`${product.name} view ${i + 1}`} width={56} height={56} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                         {/* Mood + Stock tags */}
                         <div style={{ display: 'flex', gap: 'var(--space-sm)', marginTop: 'var(--space-md)', flexWrap: 'wrap' }}>
                             {!product.inStock && <span style={{ background: '#e74c3c', color: '#fff', padding: '4px 12px', borderRadius: 20, fontSize: '0.8rem', fontWeight: 600 }}>Out of Stock</span>}
@@ -309,6 +385,31 @@ export default function ProductDetail() {
                             {['Free shipping over ₹999', '100% Natural', 'Garden Fresh'].map(b => (
                                 <span key={b} style={{ fontSize: '0.78rem', padding: '4px 10px', border: '1px solid var(--color-border)', borderRadius: 20, color: 'var(--color-text-muted)' }}>✓ {b}</span>
                             ))}
+                        </div>
+
+                        {/* Social Sharing */}
+                        <div style={{ marginTop: 'var(--space-lg)', display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-text-muted)' }}>Share:</span>
+                            <button
+                                onClick={() => window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(`Check out ${product.name} on feelinga! ${window.location.href}`)}`, '_blank')}
+                                style={{ padding: '6px 12px', borderRadius: 20, border: '1px solid #25d366', background: '#25d366', color: '#fff', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
+                                aria-label="Share on WhatsApp"
+                            >WhatsApp</button>
+                            <button
+                                onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank', 'width=600,height=400')}
+                                style={{ padding: '6px 12px', borderRadius: 20, border: '1px solid #1877f2', background: '#1877f2', color: '#fff', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
+                                aria-label="Share on Facebook"
+                            >Facebook</button>
+                            <button
+                                onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${product.name} — premium tea from feelinga 🍵`)}&url=${encodeURIComponent(window.location.href)}`, '_blank', 'width=600,height=400')}
+                                style={{ padding: '6px 12px', borderRadius: 20, border: '1px solid #000', background: '#000', color: '#fff', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
+                                aria-label="Share on X (Twitter)"
+                            >𝕏 Post</button>
+                            <button
+                                onClick={() => { navigator.clipboard.writeText(window.location.href); }}
+                                style={{ padding: '6px 12px', borderRadius: 20, border: '1px solid var(--color-border)', background: 'var(--color-bg-alt)', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
+                                aria-label="Copy link"
+                            >🔗 Copy Link</button>
                         </div>
                     </div>
                 </div>
@@ -395,8 +496,8 @@ export default function ProductDetail() {
                             {reviews.length > 0 && (
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2xl)', marginBottom: 'var(--space-2xl)', padding: 'var(--space-xl)', background: 'var(--color-bg-alt)', borderRadius: 'var(--radius-lg)' }}>
                                     <div style={{ textAlign: 'center' }}>
-                                        <div style={{ fontSize: '3.5rem', fontWeight: 800, lineHeight: 1 }}>{avgRating}</div>
-                                        <div style={{ marginTop: 'var(--space-xs)' }}>{renderStars(Math.round(avgRating))}</div>
+                                        <div style={{ fontSize: '3.5rem', fontWeight: 800, lineHeight: 1 }}>{avgRating?.toFixed(1)}</div>
+                                        <div style={{ marginTop: 'var(--space-xs)' }}>{renderStars(Math.round(avgRating || 0))}</div>
                                         <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginTop: 4 }}>{reviews.length} reviews</div>
                                     </div>
                                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
@@ -500,7 +601,7 @@ export default function ProductDetail() {
                                 <div className="product-card" key={p._id}>
                                     <Link href={`/product/${p.slug}`}>
                                         <div className="product-card__img">
-                                            <img src={p.images?.[0] || '/images/darjeeling-tea.png'} alt={p.name} />
+                                            <Image src={p.images?.[0] || '/images/darjeeling-tea.png'} alt={p.name} width={300} height={300} style={{ objectFit: 'contain', width: '100%', height: 'auto' }} />
                                         </div>
                                     </Link>
                                     <div className="product-card__body">

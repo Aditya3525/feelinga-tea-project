@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import Counter from './Counter.js';
 
 const orderItemSchema = new mongoose.Schema({
     product: {
@@ -40,6 +41,8 @@ const orderSchema = new mongoose.Schema({
     subtotal: { type: Number, required: true },
     shipping: { type: Number, default: 0 },
     tax: { type: Number, default: 0 },
+    discount: { type: Number, default: 0 },
+    couponCode: { type: String, default: null },
     total: { type: Number, required: true },
     status: {
         type: String,
@@ -58,22 +61,27 @@ const orderSchema = new mongoose.Schema({
     },
     razorpayOrderId: String,
     razorpayPaymentId: String,
+    trackingNumber: { type: String, default: null },
+    trackingUrl: { type: String, default: null },
+    cancelledAt: Date,
+    cancelReason: String,
     notes: String,
 }, {
     timestamps: true,
 });
 
-// Auto-generate order number before validation so required check passes
+// Auto-generate order number using atomic counter
 orderSchema.pre('validate', async function (next) {
     if (!this.isNew || this.orderNumber) return next();
 
-    const count = await mongoose.model('Order').countDocuments();
-    this.orderNumber = `FLG-${String(count + 100001).slice(-6)}`;
+    const seq = await (Counter as any).getNext('orderNumber');
+    this.orderNumber = `FLG-${String(seq + 100000).slice(-6)}`;
     next();
 });
 
 orderSchema.index({ user: 1, createdAt: -1 });
 orderSchema.index({ status: 1 });
+orderSchema.index({ orderNumber: 1 });
 
 const Order = mongoose.model('Order', orderSchema);
 

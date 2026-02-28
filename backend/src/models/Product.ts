@@ -80,8 +80,19 @@ const productSchema = new mongoose.Schema({
         default: true,
     },
     tags: [String],
+    deletedAt: { type: Date, default: null },
 }, {
     timestamps: true,
+});
+
+// Auto-exclude soft-deleted products from queries
+productSchema.pre(/^find/, function (this: any, next) {
+    if (this.getQuery().includeSoftDeleted) {
+        delete this.getQuery().includeSoftDeleted;
+    } else if (!this.getQuery().deletedAt) {
+        this.where({ deletedAt: null });
+    }
+    next();
 });
 
 // Indexes for performance
@@ -89,6 +100,7 @@ productSchema.index({ type: 1 });
 productSchema.index({ moods: 1 });
 productSchema.index({ 'prices.100g': 1 });
 productSchema.index({ name: 'text', type: 'text', description: 'text' });
+productSchema.index({ deletedAt: 1 });
 
 // Virtual for default price
 productSchema.virtual('price').get(function () {

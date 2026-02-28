@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 export default function SearchOverlay({ isOpen, onClose }) {
     const [query, setQuery] = useState('');
     const [results, setResults] = useState([]);
-    const inputRef = useRef();
+    const inputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
 
     useEffect(() => {
@@ -31,6 +31,15 @@ export default function SearchOverlay({ isOpen, onClose }) {
 
     const tags = ['Green Tea', 'Darjeeling', 'Herbal', 'Chai', 'Wellness', 'Gift Sets'];
 
+    const handleTagClick = (tag) => {
+        if (tag === 'Gift Sets') {
+            router.push('/gifting');
+        } else {
+            router.push(`/shop?q=${encodeURIComponent(tag)}`);
+        }
+        onClose();
+    };
+
     if (!isOpen) return null;
 
     return (
@@ -48,7 +57,7 @@ export default function SearchOverlay({ isOpen, onClose }) {
                 </div>
                 <div className="search-overlay__tags">
                     {tags.map(tag => (
-                        <button key={tag} className="search-tag" onClick={() => { router.push(`/shop?q=${encodeURIComponent(tag)}`); onClose(); }}>{tag}</button>
+                        <button key={tag} className="search-tag" onClick={() => handleTagClick(tag)}>{tag}</button>
                     ))}
                 </div>
                 {results.length > 0 && (

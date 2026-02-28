@@ -1,6 +1,15 @@
 import AuditLog from '../models/AuditLog.js';
 
-export async function logAdminAction({ actor, action, entityType, entityId, summary, meta = {} }) {
+interface LogParams {
+    actor: any;
+    action: string;
+    entityType: string;
+    entityId?: any;
+    summary: string;
+    meta?: Record<string, any>;
+}
+
+export async function logAdminAction({ actor, action, entityType, entityId, summary, meta = {} }: LogParams) {
     if (!actor?._id) return;
     try {
         await AuditLog.create({
@@ -13,7 +22,7 @@ export async function logAdminAction({ actor, action, entityType, entityId, summ
             summary,
             meta,
         });
-    } catch (err) {
+    } catch (err: any) {
         console.error('[AUDIT] Failed to write audit log:', err.message);
     }
 }

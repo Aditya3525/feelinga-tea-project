@@ -44,7 +44,7 @@ export default function Gifting() {
                                         <div className="product-card__price">₹{g.price.toLocaleString()}</div>
                                         <div className="product-card__rating">★★★★★</div>
                                     </div>
-                                    <button className="btn btn--primary btn--sm" style={{ width: '100%', marginTop: '12px' }} onClick={() => addToCart(g.name, g.price, g.img)}>Add to Cart</button>
+                                    <button className="btn btn--primary btn--sm" style={{ width: '100%', marginTop: '12px' }} onClick={() => addToCart({ id: `gift-${i}`, slug: g.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'), name: g.name, price: g.price, size: 'Gift Set', img: g.img })}>Add to Cart</button>
                                 </div>
                             </div>
                         ))}

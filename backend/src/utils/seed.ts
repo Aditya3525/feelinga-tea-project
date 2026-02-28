@@ -219,7 +219,7 @@ const adminUser = {
 
 const seed = async () => {
     try {
-        await mongoose.connect(process.env.MONGODB_URI);
+        await mongoose.connect(process.env.MONGODB_URI as string);
         console.log('✓ Connected to MongoDB\n');
 
         // Clear existing data
@@ -239,7 +239,7 @@ const seed = async () => {
         console.log(`  Admin login: ${adminUser.email} / ${adminUser.password}\n`);
 
         process.exit(0);
-    } catch (err) {
+    } catch (err: any) {
         console.error('✗ Seed error:', err.message);
         process.exit(1);
     }

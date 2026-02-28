@@ -8,6 +8,8 @@ import { AppError } from '../../middleware/errorHandler.js';
 import { authenticate } from '../../middleware/auth.js';
 import { validate } from '../../middleware/validate.js';
 
+import { sendPasswordResetEmail, sendEmail } from '../../utils/email.js';
+
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const router = Router();
@@ -25,15 +27,15 @@ const loginSchema = z.object({
 });
 
 // Generate tokens
-const signAccessToken = (user) => {
-    return jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
-        expiresIn: process.env.JWT_EXPIRES_IN || '15m',
+const signAccessToken = (user: any) => {
+    return jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET as string, {
+        expiresIn: (process.env.JWT_EXPIRES_IN || '15m') as any,
     });
 };
 
-const signRefreshToken = (user) => {
-    return jwt.sign({ id: user._id }, process.env.JWT_REFRESH_SECRET, {
-        expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
+const signRefreshToken = (user: any) => {
+    return jwt.sign({ id: user._id }, process.env.JWT_REFRESH_SECRET as string, {
+        expiresIn: (process.env.JWT_REFRESH_EXPIRES_IN || '7d') as any,
     });
 };
 
@@ -53,7 +55,20 @@ router.post('/register', validate(registerSchema), async (req, res, next) => {
 
         // Save refresh token
         user.refreshToken = refreshToken;
+
+        // Generate email verification token (#17)
+        const verifyToken = crypto.randomBytes(32).toString('hex');
+        user.emailVerifyToken = crypto.createHash('sha256').update(verifyToken).digest('hex');
         await user.save({ validateBeforeSave: false });
+
+        // Send verification email (fire-and-forget)
+        const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+        const verifyUrl = `${clientUrl}/verify-email?token=${verifyToken}`;
+        sendEmail({
+            to: email,
+            subject: 'Verify your email — feelinga',
+            html: `<p>Hi ${name},</p><p>Welcome to feelinga! Please verify your email by clicking the link below:</p><p><a href="${verifyUrl}" style="padding:10px 20px;background:#8b6f47;color:#fff;text-decoration:none;border-radius:6px;">Verify Email</a></p><p>This link expires in 24 hours.</p>`,
+        }).catch(err => console.error('Verify email error:', err.message));
 
         res.status(201).json({
             status: 'success',
@@ -70,7 +85,7 @@ router.post('/login', validate(loginSchema), async (req, res, next) => {
         const { email, password } = req.body;
 
         const user = await User.findOne({ email }).select('+password');
-        if (!user || !(await user.comparePassword(password))) {
+        if (!user || !(await (user as any).comparePassword(password))) {
             throw new AppError('Invalid email or password', 401);
         }
 
@@ -95,7 +110,7 @@ router.post('/refresh', async (req, res, next) => {
         const { refreshToken } = req.body;
         if (!refreshToken) throw new AppError('Refresh token required', 400);
 
-        const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+        const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET as string) as any;
         const user = await User.findById(decoded.id).select('+refreshToken');
 
         if (!user || user.refreshToken !== refreshToken) {
@@ -120,8 +135,8 @@ router.post('/refresh', async (req, res, next) => {
 // POST /auth/logout
 router.post('/logout', authenticate, async (req, res, next) => {
     try {
-        req.user.refreshToken = undefined;
-        await req.user.save({ validateBeforeSave: false });
+        req.user!.refreshToken = undefined as any;
+        await (req.user! as any).save({ validateBeforeSave: false });
         res.json({ status: 'success', message: 'Logged out' });
     } catch (err) {
         next(err);
@@ -143,7 +158,7 @@ const updateProfileSchema = z.object({
 router.patch('/me', authenticate, validate(updateProfileSchema), async (req, res, next) => {
     try {
         const { name, email, phone } = req.body;
-        const user = req.user;
+        const user = req.user!;
 
         if (email && email !== user.email) {
             const existing = await User.findOne({ email });
@@ -153,7 +168,7 @@ router.patch('/me', authenticate, validate(updateProfileSchema), async (req, res
         if (name) user.name = name;
         if (phone !== undefined) user.phone = phone;
 
-        await user.save({ validateBeforeSave: false });
+        await (user as any).save({ validateBeforeSave: false });
 
         res.json({ status: 'success', data: { user } });
     } catch (err) {
@@ -170,9 +185,10 @@ const changePasswordSchema = z.object({
 router.post('/change-password', authenticate, validate(changePasswordSchema), async (req, res, next) => {
     try {
         const { currentPassword, newPassword } = req.body;
-        const user = await User.findById(req.user._id).select('+password');
+        const user = await User.findById(req.user!._id).select('+password');
+        if (!user) throw new AppError('User not found', 404);
 
-        if (!(await user.comparePassword(currentPassword))) {
+        if (!(await (user as any).comparePassword(currentPassword))) {
             throw new AppError('Current password is incorrect', 401);
         }
 
@@ -200,17 +216,17 @@ const addressSchema = z.object({
 
 router.post('/me/addresses', authenticate, validate(addressSchema), async (req, res, next) => {
     try {
-        const user = req.user;
+        const user = req.user!;
         const address = req.body;
 
         // If this is the first or set as default, unset others
         if (address.isDefault || user.addresses.length === 0) {
-            user.addresses.forEach(a => a.isDefault = false);
+            user.addresses.forEach((a: any) => a.isDefault = false);
             address.isDefault = true;
         }
 
         user.addresses.push(address);
-        await user.save({ validateBeforeSave: false });
+        await (user as any).save({ validateBeforeSave: false });
 
         res.status(201).json({ status: 'success', data: { addresses: user.addresses } });
     } catch (err) {
@@ -221,8 +237,8 @@ router.post('/me/addresses', authenticate, validate(addressSchema), async (req, 
 // DELETE /auth/me/addresses/:id — Remove address
 router.delete('/me/addresses/:id', authenticate, async (req, res, next) => {
     try {
-        const user = req.user;
-        const idx = user.addresses.findIndex(a => a._id.toString() === req.params.id);
+        const user = req.user!;
+        const idx = user.addresses.findIndex((a: any) => a._id.toString() === req.params.id);
         if (idx === -1) throw new AppError('Address not found', 404);
 
         const wasDefault = user.addresses[idx].isDefault;
@@ -233,7 +249,7 @@ router.delete('/me/addresses/:id', authenticate, async (req, res, next) => {
             user.addresses[0].isDefault = true;
         }
 
-        await user.save({ validateBeforeSave: false });
+        await (user as any).save({ validateBeforeSave: false });
 
         res.json({ status: 'success', data: { addresses: user.addresses } });
     } catch (err) {
@@ -252,7 +268,7 @@ router.post('/google', async (req, res, next) => {
             idToken: credential,
             audience: process.env.GOOGLE_CLIENT_ID,
         });
-        const payload = ticket.getPayload();
+        const payload = ticket.getPayload()!;
         const { email, name, sub: googleId } = payload;
 
         // Find or create user
@@ -275,7 +291,7 @@ router.post('/google', async (req, res, next) => {
             status: 'success',
             data: { user, accessToken, refreshToken },
         });
-    } catch (err) {
+    } catch (err: any) {
         if (err.message?.includes('Token used too late') || err.message?.includes('Invalid token')) {
             return next(new AppError('Invalid Google token', 401));
         }
@@ -288,17 +304,64 @@ router.post('/forgot-password', async (req, res, next) => {
     try {
         const { email } = req.body;
         if (!email) throw new AppError('Email is required', 400);
-        // Find user (don't reveal if not found — security best practice)
         const user = await User.findOne({ email });
         if (user) {
-            // In production: generate token, save hash to user, send email
-            // For now: just acknowledge silently (email service not configured)
             const resetToken = crypto.randomBytes(32).toString('hex');
             user.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-            user.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 mins
+            user.passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
             await user.save({ validateBeforeSave: false });
+
+            const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+            const resetUrl = `${clientUrl}/reset-password?token=${resetToken}`;
+            sendPasswordResetEmail(email, resetUrl).catch(err => console.error('Reset email error:', err.message));
         }
         res.json({ status: 'success', message: 'If that email exists, a reset link has been sent.' });
+    } catch (err) {
+        next(err);
+    }
+});
+
+// POST /auth/reset-password
+router.post('/reset-password', async (req, res, next) => {
+    try {
+        const { token, password } = req.body;
+        if (!token || !password) throw new AppError('Token and new password are required', 400);
+        if (password.length < 8) throw new AppError('Password must be at least 8 characters', 400);
+
+        const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+        const user = await User.findOne({
+            passwordResetToken: hashedToken,
+            passwordResetExpires: { $gt: new Date() },
+        });
+
+        if (!user) throw new AppError('Token is invalid or has expired', 400);
+
+        user.password = password;
+        user.passwordResetToken = undefined as any;
+        user.passwordResetExpires = undefined as any;
+        await user.save();
+
+        res.json({ status: 'success', message: 'Password has been reset successfully. You can now log in.' });
+    } catch (err) {
+        next(err);
+    }
+});
+
+// POST /auth/verify-email — Verify email (#17)
+router.post('/verify-email', async (req, res, next) => {
+    try {
+        const { token } = req.body;
+        if (!token) throw new AppError('Verification token required', 400);
+
+        const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+        const user = await User.findOne({ emailVerifyToken: hashedToken }).select('+emailVerifyToken');
+        if (!user) throw new AppError('Invalid or expired verification token', 400);
+
+        user.emailVerified = true;
+        user.emailVerifyToken = undefined as any;
+        await user.save({ validateBeforeSave: false });
+
+        res.json({ status: 'success', message: 'Email verified successfully!' });
     } catch (err) {
         next(err);
     }
@@ -307,8 +370,8 @@ router.post('/forgot-password', async (req, res, next) => {
 // GET /auth/wishlist — get current user's wishlist
 router.get('/wishlist', authenticate, async (req, res, next) => {
     try {
-        const user = await User.findById(req.user._id).populate('wishlist', 'name slug images prices type rating reviewCount');
-        res.json({ status: 'success', data: user.wishlist || [] });
+        const user = await User.findById(req.user!._id).populate('wishlist', 'name slug images prices type rating reviewCount');
+        res.json({ status: 'success', data: user?.wishlist || [] });
     } catch (err) {
         next(err);
     }
@@ -317,12 +380,13 @@ router.get('/wishlist', authenticate, async (req, res, next) => {
 // POST /auth/wishlist/:productId — add to wishlist (toggle)
 router.post('/wishlist/:productId', authenticate, async (req, res, next) => {
     try {
-        const user = await User.findById(req.user._id);
+        const user = await User.findById(req.user!._id);
+        if (!user) throw new AppError('User not found', 404);
         const productId = req.params.productId;
-        const idx = user.wishlist.indexOf(productId);
+        const idx = user.wishlist.indexOf(productId as any);
         let action;
         if (idx === -1) {
-            user.wishlist.push(productId);
+            user.wishlist.push(productId as any);
             action = 'added';
         } else {
             user.wishlist.splice(idx, 1);

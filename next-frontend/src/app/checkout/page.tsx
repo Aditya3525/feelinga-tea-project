@@ -1,6 +1,6 @@
 'use client';
 import Layout from '../../components/Layout';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCart } from '../../context/CartContext';
@@ -10,7 +10,7 @@ import { apiRequest } from '../../utils/api';
 
 export default function Checkout() {
     const { cart, subtotal, shipping, clearCart } = useCart();
-    const { isAuthenticated, openAuthModal } = useAuth();
+    const { isAuthenticated, openAuthModal, user } = useAuth();
     const { showToast } = useToast();
     const router = useRouter();
     const [step, setStep] = useState(1);
@@ -18,6 +18,25 @@ export default function Checkout() {
     const [paymentMethod, setPaymentMethod] = useState('cod');
     const [notes, setNotes] = useState('');
     const [loading, setLoading] = useState(false);
+
+    // Pre-fill shipping address from user's default saved address
+    useEffect(() => {
+        if (!isAuthenticated || !user?.addresses?.length) return;
+        const defaultAddr = user.addresses.find((a: any) => a.isDefault) || user.addresses[0];
+        if (defaultAddr && !address.firstName && !address.line1) {
+            const nameParts = (defaultAddr.fullName || '').split(' ');
+            setAddress({
+                firstName: nameParts[0] || '',
+                lastName: nameParts.slice(1).join(' ') || '',
+                line1: defaultAddr.addressLine1 || '',
+                line2: defaultAddr.addressLine2 || '',
+                city: defaultAddr.city || '',
+                state: defaultAddr.state || '',
+                pincode: defaultAddr.pincode || '',
+                phone: defaultAddr.phone || '',
+            });
+        }
+    }, [isAuthenticated, user]);
 
     const tax = Math.round(subtotal * 0.05);
     const total = subtotal + shipping + tax;
@@ -79,13 +98,41 @@ export default function Checkout() {
                     ))}
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 'var(--space-3xl)', alignItems: 'start' }}>
+                <div className="checkout-layout">
                     <div>
                         {/* Step 1: Shipping */}
                         {step === 1 && (
                             <div>
                                 <h2 style={{ marginBottom: 'var(--space-lg)' }}>Shipping Address</h2>
-                                <form onSubmit={(e) => { e.preventDefault(); setStep(2); }} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-md)' }}>
+                                {isAuthenticated && user?.addresses?.length > 0 && (
+                                    <div style={{ marginBottom: 'var(--space-lg)' }}>
+                                        <label style={{ fontWeight: 600, marginBottom: 'var(--space-xs)', display: 'block' }}>Use a saved address</label>
+                                        <select
+                                            style={{ width: '100%', padding: '10px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }}
+                                            onChange={(e) => {
+                                                const addr = user.addresses[parseInt(e.target.value)];
+                                                if (!addr) return;
+                                                const nameParts = (addr.fullName || '').split(' ');
+                                                setAddress({
+                                                    firstName: nameParts[0] || '',
+                                                    lastName: nameParts.slice(1).join(' ') || '',
+                                                    line1: addr.addressLine1 || '',
+                                                    line2: addr.addressLine2 || '',
+                                                    city: addr.city || '',
+                                                    state: addr.state || '',
+                                                    pincode: addr.pincode || '',
+                                                    phone: addr.phone || '',
+                                                });
+                                            }}
+                                            defaultValue={user.addresses.findIndex((a: any) => a.isDefault) >= 0 ? user.addresses.findIndex((a: any) => a.isDefault) : 0}
+                                        >
+                                            {user.addresses.map((a: any, i: number) => (
+                                                <option key={a._id || i} value={i}>{a.label} — {a.fullName}, {a.city}{a.isDefault ? ' (Default)' : ''}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
+                                <form onSubmit={(e) => { e.preventDefault(); setStep(2); }} className="checkout-shipping-form">
                                     <div><label>First Name *</label><input type="text" required value={address.firstName} onChange={e => setAddress({ ...address, firstName: e.target.value })} style={{ width: '100%', padding: '10px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
                                     <div><label>Last Name *</label><input type="text" required value={address.lastName} onChange={e => setAddress({ ...address, lastName: e.target.value })} style={{ width: '100%', padding: '10px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
                                     <div style={{ gridColumn: '1 / -1' }}><label>Address Line 1 *</label><input type="text" required value={address.line1} onChange={e => setAddress({ ...address, line1: e.target.value })} style={{ width: '100%', padding: '10px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>

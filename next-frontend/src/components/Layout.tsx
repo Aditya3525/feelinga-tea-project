@@ -135,7 +135,7 @@ export default function Layout({ children }) {
                         <div className="footer__brand">
                             <Link href="/" className="header__logo" style={{ color: '#fff' }}>feelinga<span>.</span></Link>
                             <p>happiness is here. Sourced with care from India&apos;s finest estates, delivered fresh to your doorstep.</p>
-                            <div className="footer__social"><a href="#" aria-label="Instagram">IG</a><a href="#" aria-label="Facebook">FB</a><a href="#" aria-label="Twitter">TW</a><a href="#" aria-label="Pinterest">PI</a></div>
+                            <div className="footer__social"><a href="https://instagram.com/feelinga.tea" target="_blank" rel="noopener noreferrer" aria-label="Instagram">IG</a><a href="https://facebook.com/feelinga.tea" target="_blank" rel="noopener noreferrer" aria-label="Facebook">FB</a><a href="https://twitter.com/feelinga_tea" target="_blank" rel="noopener noreferrer" aria-label="Twitter">TW</a><a href="https://pinterest.com/feelingatea" target="_blank" rel="noopener noreferrer" aria-label="Pinterest">PI</a></div>
                         </div>
                         <div>
                             <h4 className="footer__heading">Shop</h4>
@@ -143,11 +143,11 @@ export default function Layout({ children }) {
                         </div>
                         <div>
                             <h4 className="footer__heading">Company</h4>
-                            <div className="footer__links"><Link href="/about">About Us</Link><Link href="/learn">Blog &amp; Guides</Link><Link href="/contact">Contact</Link><Link href="/faq">FAQ</Link><a href="#">Careers</a></div>
+                            <div className="footer__links"><Link href="/about">About Us</Link><Link href="/learn">Blog &amp; Guides</Link><Link href="/contact">Contact</Link><Link href="/faq">FAQ</Link><Link href="/about#careers">Careers</Link></div>
                         </div>
                         <div>
                             <h4 className="footer__heading">Help</h4>
-                            <div className="footer__links"><a href="#">Shipping &amp; Returns</a><a href="#">Track Order</a><a href="#">Privacy Policy</a><a href="#">Terms of Service</a></div>
+                            <div className="footer__links"><Link href="/faq#shipping">Shipping &amp; Returns</Link><Link href="/profile">Track Order</Link><Link href="/privacy">Privacy Policy</Link><Link href="/terms">Terms of Service</Link></div>
                         </div>
                     </div>
                     <div className="footer__bottom">

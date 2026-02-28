@@ -42,7 +42,7 @@ router.get('/', async (req, res, next) => {
         const { type, mood, caffeine, minPrice, maxPrice,
             sort = '-createdAt', page = 1, limit = 12, q } = req.query;
 
-        const filter = {};
+        const filter: Record<string, any> = {};
         if (type) filter.type = type;
         if (mood) filter.moods = { $in: Array.isArray(mood) ? mood : [mood] };
         if (caffeine) filter.caffeine = caffeine;
@@ -57,12 +57,12 @@ router.get('/', async (req, res, next) => {
             filter.$text = { $search: q };
         }
 
-        const pageNum = Math.max(1, parseInt(page));
-        const limitNum = Math.min(50, Math.max(1, parseInt(limit)));
+        const pageNum = Math.max(1, parseInt(String(page)));
+        const limitNum = Math.min(50, Math.max(1, parseInt(String(limit))));
         const skip = (pageNum - 1) * limitNum;
 
         // Sort mapping
-        const sortMap = {
+        const sortMap: Record<string, any> = {
             'price': { 'prices.100g': 1 },
             '-price': { 'prices.100g': -1 },
             'rating': { rating: -1 },
@@ -72,7 +72,7 @@ router.get('/', async (req, res, next) => {
             '-reviewCount': { reviewCount: -1 },
             '-rating': { rating: -1 },
         };
-        const sortObj = sortMap[sort] || { createdAt: -1 };
+        const sortObj = sortMap[sort as string] || { createdAt: -1 };
 
         const [products, total] = await Promise.all([
             Product.find(filter).sort(sortObj).skip(skip).limit(limitNum),
@@ -99,11 +99,11 @@ router.get('/', async (req, res, next) => {
 router.get('/search', async (req, res, next) => {
     try {
         const { q } = req.query;
-        if (!q || q.trim().length < 2) {
+        if (!q || String(q).trim().length < 2) {
             throw new AppError('Search query must be at least 2 characters', 400);
         }
 
-        const regex = new RegExp(q.trim(), 'i');
+        const regex = new RegExp(String(q).trim(), 'i');
         const products = await Product.find({
             $or: [
                 { name: regex },
@@ -141,7 +141,7 @@ router.post('/', authenticate, authorize('admin'), validate(createProductSchema)
     try {
         const product = await Product.create(req.body);
         await logAdminAction({
-            actor: req.user,
+            actor: req.user!,
             action: 'product.create',
             entityType: 'product',
             entityId: product._id,
@@ -163,7 +163,7 @@ router.patch('/bulk-stock', authenticate, authorize('admin'), validate(bulkStock
             { $set: { stock, inStock: stock > 0 } },
         );
         await logAdminAction({
-            actor: req.user,
+            actor: req.user!,
             action: 'product.bulk_stock_update',
             entityType: 'product',
             summary: `Bulk updated stock for ${result.modifiedCount} products`,
@@ -189,7 +189,7 @@ router.delete('/bulk', authenticate, authorize('admin'), validate(bulkDeleteSche
         const { productIds } = req.body;
         const result = await Product.deleteMany({ _id: { $in: productIds } });
         await logAdminAction({
-            actor: req.user,
+            actor: req.user!,
             action: 'product.bulk_delete',
             entityType: 'product',
             summary: `Bulk deleted ${result.deletedCount} products`,
@@ -204,8 +204,32 @@ router.delete('/bulk', authenticate, authorize('admin'), validate(bulkDeleteSche
     }
 });
 
-// PATCH /products/:id (admin only)
-router.patch('/:id', authenticate, authorize('admin'), async (req, res, next) => {
+// Validation schema for product updates (#7)
+const updateProductSchema = z.object({
+    name: z.string().min(2).max(100).optional(),
+    slug: z.string().min(2).max(100).optional(),
+    type: z.enum(['Black Tea', 'Green Tea', 'White Tea', 'Oolong', 'Herbal', 'Herbal Infusion', 'Masala Chai', 'Matcha']).optional(),
+    description: z.string().min(10).max(1000).optional(),
+    shortDescription: z.string().max(200).optional(),
+    prices: z.object({
+        '50g': z.number().positive().optional(),
+        '100g': z.number().positive().optional(),
+        '200g': z.number().positive().optional(),
+    }).optional(),
+    moods: z.array(z.enum(['energize', 'relax', 'focus', 'detox', 'glow', 'immunity'])).optional(),
+    origin: z.string().min(2).optional(),
+    caffeine: z.enum(['none', 'low', 'medium', 'high']).optional(),
+    tastingNotes: z.array(z.string()).optional(),
+    images: z.array(z.string()).optional(),
+    stock: z.number().int().min(0).optional(),
+    inStock: z.boolean().optional(),
+    isBestSeller: z.boolean().optional(),
+    isNewArrival: z.boolean().optional(),
+    tags: z.array(z.string()).optional(),
+}).strict();
+
+// PATCH /products/:id (admin only) — validated
+router.patch('/:id', authenticate, authorize('admin'), validate(updateProductSchema), async (req, res, next) => {
     try {
         const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
             new: true,
@@ -213,7 +237,7 @@ router.patch('/:id', authenticate, authorize('admin'), async (req, res, next) =>
         });
         if (!product) throw new AppError('Product not found', 404);
         await logAdminAction({
-            actor: req.user,
+            actor: req.user!,
             action: 'product.update',
             entityType: 'product',
             entityId: product._id,
@@ -226,17 +250,17 @@ router.patch('/:id', authenticate, authorize('admin'), async (req, res, next) =>
     }
 });
 
-// DELETE /products/:id (admin only)
+// DELETE /products/:id (admin only) — soft delete
 router.delete('/:id', authenticate, authorize('admin'), async (req, res, next) => {
     try {
-        const product = await Product.findByIdAndDelete(req.params.id);
+        const product = await Product.findByIdAndUpdate(req.params.id, { deletedAt: new Date() }, { new: true });
         if (!product) throw new AppError('Product not found', 404);
         await logAdminAction({
-            actor: req.user,
+            actor: req.user!,
             action: 'product.delete',
             entityType: 'product',
             entityId: product._id,
-            summary: `Deleted product "${product.name}"`,
+            summary: `Soft-deleted product "${product.name}"`,
             meta: { slug: product.slug },
         });
         res.status(204).send();

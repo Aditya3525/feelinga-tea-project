@@ -20,8 +20,8 @@ router.get('/', async (req, res, next) => {
         const { productId, page = 1, limit = 10 } = req.query;
         if (!productId) throw new AppError('productId is required', 400);
 
-        const pageNum = Math.max(1, parseInt(page));
-        const limitNum = Math.min(50, parseInt(limit));
+        const pageNum = Math.max(1, parseInt(String(page)));
+        const limitNum = Math.min(50, parseInt(String(limit)));
 
         const [reviews, total] = await Promise.all([
             Review.find({ product: productId })
@@ -49,13 +49,13 @@ router.post('/', authenticate, validate(createReviewSchema), async (req, res, ne
         const { productId, rating, title, body } = req.body;
 
         // Check for duplicate review
-        const existing = await Review.findOne({ user: req.user._id, product: productId });
+        const existing = await Review.findOne({ user: req.user!._id, product: productId });
         if (existing) {
             throw new AppError('You have already reviewed this product', 400);
         }
 
         const review = await Review.create({
-            user: req.user._id,
+            user: req.user!._id,
             product: productId,
             rating,
             title,
@@ -76,7 +76,7 @@ router.delete('/:id', authenticate, async (req, res, next) => {
         const review = await Review.findById(req.params.id);
         if (!review) throw new AppError('Review not found', 404);
 
-        if (req.user.role !== 'admin' && review.user.toString() !== req.user._id.toString()) {
+        if (req.user!.role !== 'admin' && review.user.toString() !== req.user!._id.toString()) {
             throw new AppError('Not authorized to delete this review', 403);
         }
 
