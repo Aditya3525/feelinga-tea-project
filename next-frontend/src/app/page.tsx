@@ -3,6 +3,9 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Layout from '../components/Layout';
+import ProductCard from '../components/ProductCard';
+import ProductGridSkeleton from '../components/ProductGridSkeleton';
+import SectionHeader from '../components/SectionHeader';
 import { useCart } from '../context/CartContext';
 
 export default function Home() {
@@ -54,26 +57,6 @@ export default function Home() {
 
     const renderStars = (count) => '★'.repeat(count) + (count < 5 ? '☆'.repeat(5 - count) : '');
 
-    const ProductCard = ({ p, badge, badgeStyle }: { p: any; badge?: any; badgeStyle?: any }) => (
-        <div className="product-card">
-            {badge && <span className="product-card__badge" style={badgeStyle}>{badge}</span>}
-            <Link href={`/product/${p.slug}`}>
-                <div className="product-card__img"><Image src={p.img} alt={`${p.name} tea`} width={300} height={300} style={{ objectFit: 'contain', width: '100%', height: 'auto' }} /></div>
-            </Link>
-            <div className="product-card__body">
-                <div className="product-card__type">{p.type}</div>
-                <Link href={`/product/${p.slug}`} className="product-card__name">{p.name}</Link>
-                <div className="product-card__note">{p.note}</div>
-                <div className="product-card__bottom">
-                    <div className="product-card__price">₹{p.price.toLocaleString()}</div>
-                    <div className="product-card__rating">{renderStars(p.stars)} <span>({p.reviews})</span></div>
-                </div>
-                <button className="btn btn--primary btn--sm" style={{ width: '100%', marginTop: '12px' }} onClick={() => handleAddToCart(p)} disabled={!p.inStock}>
-                    {p.inStock ? 'Add to Cart' : 'Sold Out'}
-                </button>
-            </div>
-        </div>
-    );
 
     const seasonalGifts = [
         { name: 'Spring Festival Tea Box', type: 'Gift Collection', price: 1499, img: '/images/gift-box.png', note: '5 curated teas in a premium gift box', reviews: 45, stars: 5 },
@@ -81,21 +64,6 @@ export default function Home() {
         { name: "Connoisseur's Collection", type: 'Luxury Hamper', price: 3999, img: '/images/gift-box.png', note: '8 rare teas with teaware in wooden chest', reviews: 28, stars: 5 },
         { name: 'Tea & Honey Pairing Set', type: 'Gift Collection', price: 799, img: '/images/herbal-tea.png', note: '2 teas paired with artisanal honey', reviews: 34, stars: 4 },
     ];
-
-    const LoadingSkeleton = () => (
-        <div className="product-grid">
-            {[1, 2, 3, 4].map(i => (
-                <div key={i} className="product-card" style={{ background: 'var(--color-bg-alt)', minHeight: 320, overflow: 'hidden' }}>
-                    <div style={{ height: 220, background: 'linear-gradient(90deg, var(--color-border) 25%, var(--color-bg) 50%, var(--color-border) 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.4s infinite', borderRadius: 'var(--radius-md)', margin: 'var(--space-md)' }} />
-                    <div style={{ padding: 'var(--space-md)', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                        <div style={{ height: 12, background: 'var(--color-border)', borderRadius: 4, width: '40%', animation: 'shimmer 1.4s infinite', animationDelay: '0.1s' }} />
-                        <div style={{ height: 18, background: 'var(--color-border)', borderRadius: 4, width: '80%', animation: 'shimmer 1.4s infinite', animationDelay: '0.2s' }} />
-                        <div style={{ height: 12, background: 'var(--color-border)', borderRadius: 4, width: '60%', animation: 'shimmer 1.4s infinite', animationDelay: '0.3s' }} />
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
 
     return (
         <Layout>
@@ -116,18 +84,19 @@ export default function Home() {
                     </div>
                 </div>
                 <div className="hero__decor" aria-hidden="true">
-                    <div className="hero__decor-inner"><Image src="/images/tea-lifestyle.png" alt="Tea ritual" width={400} height={400} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} priority /></div>
+                    <div className="hero__decor-inner"><Image src="/images/tea-lifestyle.png" alt="Tea ritual" width={400} height={400} className="hero-decor-img" priority /></div>
                 </div>
             </section>
 
             {/* 2. SHOP BY MOOD */}
             <section className="section" id="moods">
                 <div className="container">
-                    <div className="section-header fade-in">
-                        <p className="overline">Find Your Blend</p>
-                        <h2>Shop by Mood</h2>
-                        <p>Let your mood guide you to the perfect cup.</p>
-                    </div>
+                    <SectionHeader
+                        className="fade-in"
+                        overline="Find Your Blend"
+                        title="Shop by Mood"
+                        description="Let your mood guide you to the perfect cup."
+                    />
                     <div className="mood-grid fade-in">
                         {[
                             { mood: 'energize', icon: '⚡', title: 'Energize', desc: "Start your day with vibrant, uplifting blends." },
@@ -150,10 +119,11 @@ export default function Home() {
             {/* 3. PRODUCT TABS */}
             <section className="section section--alt">
                 <div className="container">
-                    <div className="section-header fade-in">
-                        <p className="overline">Our Collection</p>
-                        <h2>Discover Our Teas</h2>
-                    </div>
+                    <SectionHeader
+                        className="fade-in"
+                        overline="Our Collection"
+                        title="Discover Our Teas"
+                    />
                     <div className="commerce-tabs fade-in" role="tablist">
                         {[{ key: 'new', label: 'New Arrivals' }, { key: 'best', label: 'Best Sellers' }, { key: 'seasonal', label: 'Seasonal Gifts' }].map(t => (
                             <button key={t.key} className={`commerce-tab ${activeTab === t.key ? 'active' : ''}`} role="tab" aria-selected={activeTab === t.key} onClick={() => setActiveTab(t.key)}>{t.label}</button>
@@ -161,27 +131,44 @@ export default function Home() {
                     </div>
 
                     {loadingProducts ? (
-                        <LoadingSkeleton />
+                        <ProductGridSkeleton />
                     ) : (
                         <>
                             {/* New Arrivals */}
-                            <div className="product-grid fade-in" style={{ display: activeTab === 'new' ? '' : 'none' }}>
-                                {newArrivals.map(p => <ProductCard key={p.id} p={p} badge="New" />)}
+                            <div className={`product-grid fade-in ${activeTab === 'new' ? '' : 'product-grid--hidden'}`}>
+                                {newArrivals.map(p => (
+                                    <ProductCard
+                                        key={p.id}
+                                        product={p}
+                                        badge="New"
+                                        renderStars={renderStars}
+                                        onAdd={handleAddToCart}
+                                    />
+                                ))}
                             </div>
 
                             {/* Best Sellers */}
-                            <div className="product-grid" style={{ display: activeTab === 'best' ? '' : 'none' }}>
-                                {bestSellers.map(p => <ProductCard key={p.id} p={p} badge="Best Seller" badgeStyle={{ background: 'var(--color-gold)' }} />)}
+                            <div className={`product-grid ${activeTab === 'best' ? '' : 'product-grid--hidden'}`}>
+                                {bestSellers.map(p => (
+                                    <ProductCard
+                                        key={p.id}
+                                        product={p}
+                                        badge="Best Seller"
+                                        badgeClass="product-card__badge--gold"
+                                        renderStars={renderStars}
+                                        onAdd={handleAddToCart}
+                                    />
+                                ))}
                             </div>
                         </>
                     )}
 
                     {/* Seasonal Gifts — static */}
-                    <div className="product-grid" style={{ display: activeTab === 'seasonal' ? '' : 'none' }}>
+                    <div className={`product-grid ${activeTab === 'seasonal' ? '' : 'product-grid--hidden'}`}>
                         {seasonalGifts.map((p, i) => (
                             <div className="product-card" key={i}>
-                                <span className="product-card__badge" style={{ background: 'var(--color-success)' }}>Gift Set</span>
-                                <div className="product-card__img"><Image src={p.img} alt={p.name} width={300} height={300} style={{ objectFit: 'contain', width: '100%', height: 'auto' }} /></div>
+                                <span className="product-card__badge product-card__badge--success">Gift Set</span>
+                                <div className="product-card__img"><Image src={p.img} alt={p.name} width={300} height={300} className="img-contain-full" /></div>
                                 <div className="product-card__body">
                                     <div className="product-card__type">{p.type}</div>
                                     <div className="product-card__name">{p.name}</div>
@@ -190,13 +177,13 @@ export default function Home() {
                                         <div className="product-card__price">₹{p.price.toLocaleString()}</div>
                                         <div className="product-card__rating">{renderStars(p.stars)} <span>({p.reviews})</span></div>
                                     </div>
-                                    <Link href="/gifting" className="btn btn--ghost btn--sm" style={{ width: '100%', marginTop: '12px', textAlign: 'center' }}>View Gift Sets</Link>
+                                    <Link href="/gifting" className="btn btn--ghost btn--sm btn-block mt-12">View Gift Sets</Link>
                                 </div>
                             </div>
                         ))}
                     </div>
 
-                    <div className="text-center" style={{ marginTop: 'var(--space-2xl)' }}>
+                    <div className="text-center mt-2xl">
                         <Link href="/shop" className="btn btn--secondary">View All Teas</Link>
                     </div>
                 </div>
@@ -205,11 +192,12 @@ export default function Home() {
             {/* 4. TEA MASTER'S SELECTIONS */}
             <section className="section">
                 <div className="container">
-                    <div className="section-header fade-in">
-                        <p className="overline">Expert Curated</p>
-                        <h2>Tea Master&apos;s Selections</h2>
-                        <p>Hand-picked by our master taster for exceptional quality and character.</p>
-                    </div>
+                    <SectionHeader
+                        className="fade-in"
+                        overline="Expert Curated"
+                        title="Tea Master&apos;s Selections"
+                        description="Hand-picked by our master taster for exceptional quality and character."
+                    />
                     <div className="curated-grid fade-in">
                         {[
                             { name: 'First Flush Darjeeling', img: '/images/darjeeling-tea.png', desc: '"The champagne of teas — this spring harvest delivers an exquisite muscatel aroma with a light, floral body."', meta: '₹1,299 · Limited Edition', slug: 'darjeeling-first-flush' },
@@ -217,12 +205,12 @@ export default function Home() {
                             { name: 'Aged Pu-erh Reserve', img: '/images/oolong-tea.png', desc: '"Deep, earthy complexity with a smooth, velvety finish. A meditative tea for the true connoisseur."', meta: '₹2,499 · Rare Find', slug: null },
                         ].map((c, i) => (
                             <div className="curated-card" key={i}>
-                                <div className="curated-card__img"><Image src={c.img} alt={c.name} width={400} height={300} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'var(--radius-md)' }} /></div>
+                                <div className="curated-card__img"><Image src={c.img} alt={c.name} width={400} height={300} className="img-cover-rounded-md" /></div>
                                 <div className="curated-card__body">
                                     <h4>{c.name}</h4>
                                     <p>{c.desc}</p>
                                     <div className="curated-card__meta">{c.meta}</div>
-                                    {c.slug && <Link href={`/product/${c.slug}`} className="btn btn--ghost btn--sm" style={{ marginTop: 'var(--space-sm)' }}>View Details</Link>}
+                                    {c.slug && <Link href={`/product/${c.slug}`} className="btn btn--ghost btn--sm mt-sm">View Details</Link>}
                                 </div>
                             </div>
                         ))}
@@ -243,12 +231,12 @@ export default function Home() {
                                 <div><div className="story__stat-value">50+</div><div className="story__stat-label">Tea Varieties</div></div>
                                 <div><div className="story__stat-value">10K+</div><div className="story__stat-label">Happy Sippers</div></div>
                             </div>
-                            <div style={{ marginTop: 'var(--space-xl)' }}>
+                            <div className="mt-xl">
                                 <Link href="/about" className="btn btn--ghost">Learn More About Us</Link>
                             </div>
                         </div>
                         <div className="story__visual">
-                            <Image src="/images/hero-estate.png" alt="Mist-covered tea gardens" width={600} height={400} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'var(--radius-lg)' }} />
+                            <Image src="/images/hero-estate.png" alt="Mist-covered tea gardens" width={600} height={400} className="img-cover-rounded-lg" />
                         </div>
                     </div>
                 </div>
@@ -257,11 +245,12 @@ export default function Home() {
             {/* 6. LEARN THE ART OF TEA */}
             <section className="section">
                 <div className="container">
-                    <div className="section-header fade-in">
-                        <p className="overline">Knowledge</p>
-                        <h2>Learn the Art of Tea</h2>
-                        <p>Explore guides, stories, and brewing wisdom from our experts.</p>
-                    </div>
+                    <SectionHeader
+                        className="fade-in"
+                        overline="Knowledge"
+                        title="Learn the Art of Tea"
+                        description="Explore guides, stories, and brewing wisdom from our experts."
+                    />
                     <div className="guide-grid fade-in">
                         {[
                             { icon: '🫖', title: 'The Perfect Brew', desc: 'Temperature, timing, and technique — master the art of brewing every tea type.' },
@@ -327,7 +316,7 @@ export default function Home() {
                             <input type="email" placeholder="Your email address" required aria-label="Email address" />
                             <button type="submit">Subscribe</button>
                         </form>
-                        {nlStatus.text && <p style={{ marginTop: 'var(--space-sm)', fontSize: '0.9rem', color: nlStatus.type === 'success' ? 'var(--color-success)' : 'var(--color-error)' }}>{nlStatus.text}</p>}
+                        {nlStatus.text && <p className={`mt-sm text-0-9 ${nlStatus.type === 'success' ? 'text-success' : 'text-error'}`}>{nlStatus.text}</p>}
                     </div>
                 </div>
             </section>

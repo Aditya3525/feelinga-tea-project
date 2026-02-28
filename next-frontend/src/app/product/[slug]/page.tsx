@@ -7,6 +7,8 @@ import { useParams } from 'next/navigation';
 import { useCart } from '../../../context/CartContext';
 import { useAuth } from '../../../context/AuthContext';
 import { useToast } from '../../../components/Toast';
+import ProductGridSkeleton from '../../../components/ProductGridSkeleton';
+import EmptyState from '../../../components/EmptyState';
 import { apiRequest } from '../../../utils/api';
 
 export default function ProductDetail() {
@@ -199,11 +201,11 @@ export default function ProductDetail() {
 
     const renderStars = (rating: number, interactive = false, onChange?: (n: number) => void) => {
         return (
-            <span style={{ fontSize: '1.1rem', letterSpacing: 2, cursor: interactive ? 'pointer' : 'default' }}>
+            <span className={`pdp-stars ${interactive ? 'is-interactive' : ''}`}>
                 {[1, 2, 3, 4, 5].map(n => (
                     <span
                         key={n}
-                        style={{ color: n <= rating ? '#d4a017' : '#ccc' }}
+                        className={`pdp-star ${n <= rating ? 'active' : ''}`}
                         onClick={interactive ? () => onChange(n) : undefined}
                     >★</span>
                 ))}
@@ -214,17 +216,7 @@ export default function ProductDetail() {
     if (loading) {
         return (
             <Layout>
-                <div className="container section" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-3xl)', padding: 'var(--space-3xl) 0' }}>
-                    {/* Skeleton */}
-                    <div style={{ background: 'var(--color-bg-alt)', borderRadius: 'var(--radius-lg)', height: 400 }} />
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
-                        <div style={{ height: 14, width: '30%', background: 'var(--color-border)', borderRadius: 4 }} />
-                        <div style={{ height: 36, width: '80%', background: 'var(--color-border)', borderRadius: 4 }} />
-                        <div style={{ height: 14, width: '40%', background: 'var(--color-border)', borderRadius: 4 }} />
-                        <div style={{ height: 80, background: 'var(--color-border)', borderRadius: 4, marginTop: 'var(--space-md)' }} />
-                        <div style={{ height: 48, background: 'var(--color-border)', borderRadius: 4, marginTop: 'var(--space-md)' }} />
-                    </div>
-                </div>
+                <ProductGridSkeleton variant="pdp" />
             </Layout>
         );
     }
@@ -232,11 +224,16 @@ export default function ProductDetail() {
     if (error || !product) {
         return (
             <Layout>
-                <div className="container section" style={{ textAlign: 'center', padding: 'var(--space-4xl) 0' }}>
-                    <div style={{ fontSize: '3rem', marginBottom: 'var(--space-lg)' }}>🍵</div>
-                    <h2>Product Not Found</h2>
-                    <p style={{ marginTop: 'var(--space-md)', color: 'var(--color-text-muted)' }}>{error || 'This tea could not be found.'}</p>
-                    <Link href="/shop" className="btn btn--primary" style={{ marginTop: 'var(--space-xl)', display: 'inline-block' }}>Browse All Teas</Link>
+                <div className="container section">
+                    <EmptyState
+                        icon="🍵"
+                        iconSize="lg"
+                        title="Product Not Found"
+                        message={error || 'This tea could not be found.'}
+                        actionLabel="Browse All Teas"
+                        actionHref="/shop"
+                        className="py-4xl"
+                    />
                 </div>
             </Layout>
         );
@@ -249,7 +246,7 @@ export default function ProductDetail() {
     return (
         <Layout>
             {/* Breadcrumb */}
-            <div className="page-hero" style={{ paddingBottom: 'var(--space-md)' }}>
+            <div className="page-hero page-hero--compact">
                 <div className="container">
                     <nav className="breadcrumb" aria-label="Breadcrumb">
                         <Link href="/">Home</Link> <span>/</span> <Link href="/shop">Shop</Link> <span>/</span> <span>{product.name}</span>
@@ -259,77 +256,71 @@ export default function ProductDetail() {
 
             {/* Main PDP */}
             <div className="container">
-                <div className="section" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-3xl)', alignItems: 'start' }}>
+                <div className="section pdp-grid">
                     {/* Image Panel */}
                     <div className="pdp-gallery">
-                        <div style={{ background: 'var(--color-bg-alt)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-2xl)', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+                        <div className="pdp-media">
                             <Image
                                 src={product.images?.[selectedImage] || product.images?.[0] || '/images/darjeeling-tea.png'}
                                 alt={product.name}
                                 width={420}
                                 height={420}
-                                style={{ maxWidth: '100%', maxHeight: '420px', objectFit: 'contain', transition: 'transform 0.4s ease' }}
+                                className="pdp-media__img"
                                 priority
                             />
                             {/* Wishlist button */}
                             <button
-                                className={`wishlist-btn ${wishlisted ? 'active' : ''}`}
+                                className={`wishlist-btn pdp-wishlist ${wishlisted ? 'active' : ''}`}
                                 onClick={toggleWishlist}
                                 aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
                                 title={wishlisted ? 'Remove from wishlist' : 'Save to wishlist'}
-                                style={{ position: 'absolute', top: 12, right: 12 }}
                             >
                                 {wishlisted ? '❤️' : '🤍'}
                             </button>
                         </div>
                         {/* Thumbnail gallery */}
                         {product.images?.length > 1 && (
-                            <div style={{ display: 'flex', gap: 'var(--space-sm)', marginTop: 'var(--space-md)', overflowX: 'auto' }}>
+                            <div className="pdp-thumbs">
                                 {product.images.map((img, i) => (
                                     <button
                                         key={i}
                                         onClick={() => setSelectedImage(i)}
-                                        style={{
-                                            width: 64, height: 64, borderRadius: 'var(--radius-md)', overflow: 'hidden',
-                                            border: selectedImage === i ? '2px solid var(--color-accent)' : '2px solid var(--color-border)',
-                                            background: 'var(--color-bg-alt)', cursor: 'pointer', padding: 4, flexShrink: 0,
-                                            opacity: selectedImage === i ? 1 : 0.7, transition: 'all 0.2s ease',
-                                        }}
+                                        className={`pdp-thumb ${selectedImage === i ? 'active' : ''}`}
                                     >
-                                        <Image src={img} alt={`${product.name} view ${i + 1}`} width={56} height={56} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                        <Image src={img} alt={`${product.name} view ${i + 1}`} width={56} height={56} className="pdp-thumb__img" />
                                     </button>
                                 ))}
                             </div>
                         )}
                         {/* Mood + Stock tags */}
-                        <div style={{ display: 'flex', gap: 'var(--space-sm)', marginTop: 'var(--space-md)', flexWrap: 'wrap' }}>
-                            {!product.inStock && <span style={{ background: '#e74c3c', color: '#fff', padding: '4px 12px', borderRadius: 20, fontSize: '0.8rem', fontWeight: 600 }}>Out of Stock</span>}
+                        <div className="pdp-tags">
+                            {!product.inStock && <span className="tag-pill tag-pill--danger">Out of Stock</span>}
                             {product.moods?.map(m => (
-                                <Link key={m} href={`/shop?mood=${m}`} style={{ background: 'var(--color-bg-alt)', border: '1px solid var(--color-border)', padding: '4px 12px', borderRadius: 20, fontSize: '0.8rem', textTransform: 'capitalize' }}>{m}</Link>
+                                <Link key={m} href={`/shop?mood=${m}`} className="tag-pill">{m}</Link>
                             ))}
                         </div>
                     </div>
 
                     {/* Info Panel */}
                     <div className="pdp-info">
-                        <div className="product-card__type" style={{ marginBottom: 'var(--space-xs)' }}>{product.type}</div>
-                        <h1 style={{ fontSize: '2rem', lineHeight: 1.2, marginBottom: 'var(--space-sm)' }}>{product.name}</h1>
+                        <div className="product-card__type pdp-type">{product.type}</div>
+                        <h1 className="pdp-title">{product.name}</h1>
 
                         {/* Rating summary */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-lg)' }}>
+                        <div className="pdp-rating">
                             {renderStars(Math.round(product.rating || 0))}
-                            <span style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
+                            <span className="pdp-rating__meta">
                                 {product.rating ? `${Number(product.rating).toFixed(1)} ` : ''} ({product.reviewCount || 0} {product.reviewCount === 1 ? 'review' : 'reviews'})
                             </span>
                         </div>
 
-                        <p style={{ marginBottom: 'var(--space-xl)', color: 'var(--color-text-muted)', lineHeight: 1.8 }}>{product.shortDescription || product.description}</p>
+                        <p className="pdp-desc">{product.shortDescription || product.description}</p>
 
                         {/* Size Selector */}
                         {availableSizes.length > 0 && (
-                            <div style={{ marginBottom: 'var(--space-lg)' }}>
-                                <label style={{ display: 'block', fontWeight: 600, marginBottom: 'var(--space-sm)' }}>Select Size</label>
-                                <div style={{ display: 'flex', gap: 'var(--space-sm)', flexWrap: 'wrap' }}>
+                            <div className="pdp-section">
+                                <label className="pdp-label">Select Size</label>
+                                <div className="pdp-size-options">
                                     {availableSizes.map(([size, price]) => (
                                         <button
                                             key={size}
@@ -344,21 +335,20 @@ export default function ProductDetail() {
                         )}
 
                         {/* Quantity */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)', marginBottom: 'var(--space-lg)' }}>
-                            <label style={{ fontWeight: 600 }}>Qty</label>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-xs)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', padding: '4px 12px' }}>
-                                <button style={{ fontWeight: 700, padding: '0 4px' }} onClick={() => setQty(Math.max(1, qty - 1))}>−</button>
-                                <span style={{ minWidth: 32, textAlign: 'center', fontWeight: 600 }}>{qty}</span>
-                                <button style={{ fontWeight: 700, padding: '0 4px' }} onClick={() => setQty(qty + 1)}>+</button>
+                        <div className="pdp-qty">
+                            <label className="pdp-label">Qty</label>
+                            <div className="pdp-qty-control">
+                                <button className="pdp-qty-btn" onClick={() => setQty(Math.max(1, qty - 1))}>−</button>
+                                <span className="pdp-qty-count">{qty}</span>
+                                <button className="pdp-qty-btn" onClick={() => setQty(qty + 1)}>+</button>
                             </div>
                         </div>
 
                         {/* Price + CTA */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-lg)', marginBottom: 'var(--space-2xl)' }}>
-                            <div style={{ fontSize: '1.9rem', fontWeight: 800 }}>₹{(currentPrice * qty).toLocaleString()}</div>
+                        <div className="pdp-price-cta">
+                            <div className="pdp-price">₹{(currentPrice * qty).toLocaleString()}</div>
                             <button
-                                className="btn btn--primary"
-                                style={{ flex: 1, fontSize: '1rem', padding: '14px 24px' }}
+                                className="btn btn--primary pdp-cta"
                                 onClick={handleAddToCart}
                                 disabled={!product.inStock}
                             >
@@ -367,47 +357,47 @@ export default function ProductDetail() {
                         </div>
 
                         {/* Highlights */}
-                        <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 'var(--space-lg)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-md)', fontSize: '0.9rem' }}>
+                        <div className="pdp-highlights">
                             {product.origin && <div><strong>🗺 Origin</strong><br />{product.origin}</div>}
-                            {product.caffeine && <div><strong>☕ Caffeine</strong><br /><span style={{ textTransform: 'capitalize' }}>{product.caffeine}</span></div>}
-                            {product.tastingNotes?.length > 0 && <div style={{ gridColumn: '1 / -1' }}><strong>👅 Tasting Notes</strong><br />{product.tastingNotes.join(' · ')}</div>}
+                            {product.caffeine && <div><strong>☕ Caffeine</strong><br /><span className="pdp-text-cap">{product.caffeine}</span></div>}
+                            {product.tastingNotes?.length > 0 && <div className="pdp-highlight-full"><strong>👅 Tasting Notes</strong><br />{product.tastingNotes.join(' · ')}</div>}
                         </div>
 
                         {/* Low stock warning */}
                         {product.inStock && product.stock > 0 && product.stock <= 10 && (
-                            <div style={{ marginTop: 'var(--space-md)', padding: 'var(--space-sm) var(--space-md)', background: '#fff8e1', borderRadius: 'var(--radius-sm)', borderLeft: '3px solid #f9a825', fontSize: '0.9rem', fontWeight: 600, color: '#e65100' }}>
+                            <div className="pdp-lowstock">
                                 ⚡ Only {product.stock} left — order soon!
                             </div>
                         )}
 
                         {/* Benefits badges */}
-                        <div style={{ display: 'flex', gap: 'var(--space-sm)', marginTop: 'var(--space-lg)', flexWrap: 'wrap' }}>
+                        <div className="pdp-benefits">
                             {['Free shipping over ₹999', '100% Natural', 'Garden Fresh'].map(b => (
-                                <span key={b} style={{ fontSize: '0.78rem', padding: '4px 10px', border: '1px solid var(--color-border)', borderRadius: 20, color: 'var(--color-text-muted)' }}>✓ {b}</span>
+                                <span key={b} className="benefit-pill">✓ {b}</span>
                             ))}
                         </div>
 
                         {/* Social Sharing */}
-                        <div style={{ marginTop: 'var(--space-lg)', display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', flexWrap: 'wrap' }}>
-                            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-text-muted)' }}>Share:</span>
+                        <div className="pdp-share">
+                            <span className="pdp-share__label">Share:</span>
                             <button
                                 onClick={() => window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(`Check out ${product.name} on Feelinga! ${window.location.href}`)}`, '_blank')}
-                                style={{ padding: '6px 12px', borderRadius: 20, border: '1px solid #25d366', background: '#25d366', color: '#fff', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
+                                className="share-btn share-btn--whatsapp"
                                 aria-label="Share on WhatsApp"
                             >WhatsApp</button>
                             <button
                                 onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank', 'width=600,height=400')}
-                                style={{ padding: '6px 12px', borderRadius: 20, border: '1px solid #1877f2', background: '#1877f2', color: '#fff', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
+                                className="share-btn share-btn--facebook"
                                 aria-label="Share on Facebook"
                             >Facebook</button>
                             <button
                                 onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${product.name} — premium tea from Feelinga 🍵`)}&url=${encodeURIComponent(window.location.href)}`, '_blank', 'width=600,height=400')}
-                                style={{ padding: '6px 12px', borderRadius: 20, border: '1px solid #000', background: '#000', color: '#fff', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
+                                className="share-btn share-btn--x"
                                 aria-label="Share on X (Twitter)"
                             >𝕏 Post</button>
                             <button
                                 onClick={() => { navigator.clipboard.writeText(window.location.href); }}
-                                style={{ padding: '6px 12px', borderRadius: 20, border: '1px solid var(--color-border)', background: 'var(--color-bg-alt)', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
+                                className="share-btn"
                                 aria-label="Copy link"
                             >🔗 Copy Link</button>
                         </div>
@@ -415,21 +405,13 @@ export default function ProductDetail() {
                 </div>
 
                 {/* Tabs: Description / Brewing / Reviews */}
-                <div style={{ borderTop: '1px solid var(--color-border)', marginTop: 'var(--space-2xl)' }}>
-                    <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--color-border)' }}>
+                <div className="pdp-tabs">
+                    <div className="pdp-tablist">
                         {['description', 'brewing', 'reviews'].map(tab => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
-                                style={{
-                                    padding: 'var(--space-md) var(--space-xl)',
-                                    fontWeight: activeTab === tab ? 700 : 400,
-                                    borderBottom: activeTab === tab ? '2px solid var(--color-primary)' : '2px solid transparent',
-                                    color: activeTab === tab ? 'var(--color-primary)' : 'var(--color-text-muted)',
-                                    fontSize: '0.95rem',
-                                    textTransform: 'capitalize',
-                                    transition: 'all 0.2s',
-                                }}
+                                className={`pdp-tab ${activeTab === tab ? 'active' : ''}`}
                             >
                                 {tab === 'reviews' ? `Reviews (${reviews.length})` : tab.charAt(0).toUpperCase() + tab.slice(1)}
                             </button>
@@ -438,12 +420,12 @@ export default function ProductDetail() {
 
                     {/* Description Tab */}
                     {activeTab === 'description' && (
-                        <div style={{ padding: 'var(--space-2xl) 0', maxWidth: 700 }}>
-                            <p style={{ lineHeight: 1.9, color: 'var(--color-text-muted)' }}>{product.description}</p>
+                        <div className="pdp-tabpanel pdp-tabpanel--narrow">
+                            <p className="pdp-body">{product.description}</p>
                             {product.origin && (
-                                <div style={{ marginTop: 'var(--space-xl)', padding: 'var(--space-lg)', background: 'var(--color-bg-alt)', borderRadius: 'var(--radius-md)', borderLeft: '3px solid var(--color-primary)' }}>
+                                <div className="pdp-origin">
                                     <strong>About the Origin</strong>
-                                    <p style={{ marginTop: 'var(--space-sm)', color: 'var(--color-text-muted)', lineHeight: 1.7 }}>
+                                    <p className="pdp-origin__text">
                                         Sourced from {product.origin} — one of India&apos;s premier tea-growing regions, known for its unique terroir and expert craftsmanship.
                                     </p>
                                 </div>
@@ -453,37 +435,37 @@ export default function ProductDetail() {
 
                     {/* Brewing Tab */}
                     {activeTab === 'brewing' && (
-                        <div style={{ padding: 'var(--space-2xl) 0' }}>
+                        <div className="pdp-tabpanel">
                             {product.brewingInstructions ? (
                                 <div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--space-lg)', maxWidth: 600, marginBottom: 'var(--space-2xl)' }}>
+                                    <div className="pdp-brew-grid">
                                         {[
                                             { icon: '🌡️', label: 'Temperature', val: product.brewingInstructions.temperature },
                                             { icon: '⏱️', label: 'Steep Time', val: product.brewingInstructions.steepTime },
                                             { icon: '🥄', label: 'Amount', val: product.brewingInstructions.amount },
                                         ].filter(x => x.val).map(x => (
-                                            <div key={x.label} style={{ textAlign: 'center', padding: 'var(--space-lg)', background: 'var(--color-bg-alt)', borderRadius: 'var(--radius-md)' }}>
-                                                <div style={{ fontSize: '1.8rem', marginBottom: 'var(--space-xs)' }}>{x.icon}</div>
-                                                <div style={{ fontWeight: 700, marginBottom: 4 }}>{x.label}</div>
-                                                <div style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>{x.val}</div>
+                                            <div key={x.label} className="pdp-brew-card">
+                                                <div className="pdp-brew-icon">{x.icon}</div>
+                                                <div className="pdp-brew-label">{x.label}</div>
+                                                <div className="pdp-brew-value">{x.val}</div>
                                             </div>
                                         ))}
                                     </div>
                                     {product.brewingInstructions.steps?.length > 0 && (
                                         <div>
-                                            <h3 style={{ marginBottom: 'var(--space-md)' }}>Step-by-Step Guide</h3>
-                                            <ol style={{ paddingLeft: 'var(--space-xl)', display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+                                            <h3 className="mb-md">Step-by-Step Guide</h3>
+                                            <ol className="pdp-steps">
                                                 {product.brewingInstructions.steps.map((step, i) => (
-                                                    <li key={i} style={{ color: 'var(--color-text-muted)', lineHeight: 1.7 }}>{step}</li>
+                                                    <li key={i} className="pdp-step">{step}</li>
                                                 ))}
                                             </ol>
                                         </div>
                                     )}
                                 </div>
                             ) : (
-                                <div style={{ color: 'var(--color-text-muted)', padding: 'var(--space-2xl) 0' }}>
+                                <div className="pdp-empty">
                                     <p>Brewing guide not available for this tea yet.</p>
-                                    <p style={{ marginTop: 'var(--space-md)' }}>General tip: Start with 85–95°C water and steep for 2–4 minutes depending on your taste preference.</p>
+                                    <p className="mt-md">General tip: Start with 85–95°C water and steep for 2–4 minutes depending on your taste preference.</p>
                                 </div>
                             )}
                         </div>
@@ -491,26 +473,26 @@ export default function ProductDetail() {
 
                     {/* Reviews Tab */}
                     {activeTab === 'reviews' && (
-                        <div style={{ padding: 'var(--space-2xl) 0' }}>
+                        <div className="pdp-tabpanel">
                             {/* Rating Summary */}
                             {reviews.length > 0 && (
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2xl)', marginBottom: 'var(--space-2xl)', padding: 'var(--space-xl)', background: 'var(--color-bg-alt)', borderRadius: 'var(--radius-lg)' }}>
-                                    <div style={{ textAlign: 'center' }}>
-                                        <div style={{ fontSize: '3.5rem', fontWeight: 800, lineHeight: 1 }}>{avgRating?.toFixed(1)}</div>
-                                        <div style={{ marginTop: 'var(--space-xs)' }}>{renderStars(Math.round(avgRating || 0))}</div>
-                                        <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginTop: 4 }}>{reviews.length} reviews</div>
+                                <div className="pdp-rating-summary">
+                                    <div className="pdp-rating-summary__score">
+                                        <div className="pdp-rating-summary__value">{avgRating?.toFixed(1)}</div>
+                                        <div className="mt-xs">{renderStars(Math.round(avgRating || 0))}</div>
+                                        <div className="pdp-rating-summary__count">{reviews.length} reviews</div>
                                     </div>
-                                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
+                                    <div className="pdp-rating-summary__bars">
                                         {[5, 4, 3, 2, 1].map(star => {
                                             const count = reviews.filter(r => r.rating === star).length;
                                             const pct = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
                                             return (
-                                                <div key={star} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', fontSize: '0.85rem' }}>
-                                                    <span style={{ minWidth: 20 }}>{star}★</span>
-                                                    <div style={{ flex: 1, height: 8, background: 'var(--color-border)', borderRadius: 4, overflow: 'hidden' }}>
-                                                        <div style={{ height: '100%', width: `${pct}%`, background: '#d4a017', borderRadius: 4, transition: 'width 0.6s ease' }} />
+                                                <div key={star} className="pdp-rating-row">
+                                                    <span className="min-w-20">{star}★</span>
+                                                    <div className="pdp-rating-bar">
+                                                        <progress value={pct} max={100} />
                                                     </div>
-                                                    <span style={{ minWidth: 24, color: 'var(--color-text-muted)' }}>{count}</span>
+                                                    <span className="min-w-24 text-muted">{count}</span>
                                                 </div>
                                             );
                                         })}

@@ -105,11 +105,11 @@ export default function Layout({ children }) {
                     ) : (
                         cart.map((item, i) => (
                             <div className="cart-item" key={item.key}>
-                                <div className="cart-item__img">{item.img ? <img src={item.img} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8 }} /> : '🍵'}</div>
+                                <div className="cart-item__img">{item.img ? <img src={item.img} alt={item.name} className="cart-item__img-el" /> : '🍵'}</div>
                                 <div className="cart-item__details">
                                     <div className="cart-item__name">{item.name}</div>
                                     <div className="cart-item__price">₹{item.price} × {item.qty} · {item.size || '100g'}</div>
-                                    <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+                                    <div className="cart-item__qty">
                                         <button onClick={() => updateQty(item.key, item.qty - 1)}>−</button>
                                         <span>{item.qty}</span>
                                         <button onClick={() => updateQty(item.key, item.qty + 1)}>+</button>
@@ -122,7 +122,7 @@ export default function Layout({ children }) {
                 </div>
                 <div className="cart-drawer__footer">
                     <div className="cart-drawer__total"><span>Subtotal</span><span id="cartTotal">₹{subtotal}</span></div>
-                    <Link href="/checkout" className="btn btn--primary" style={{ width: '100%', textAlign: 'center' }} onClick={() => setCartOpen(false)}>Checkout</Link>
+                    <Link href="/checkout" className="btn btn--primary btn-block" onClick={() => setCartOpen(false)}>Checkout</Link>
                 </div>
             </aside>
 
@@ -137,7 +137,7 @@ export default function Layout({ children }) {
                 <div className="container">
                     <div className="footer__grid">
                         <div className="footer__brand">
-                            <Link href="/" className="header__logo footer__logo-link" style={{ color: '#fff' }}>
+                            <Link href="/" className="header__logo footer__logo-link">
                                 <Image src="/images/logo.png" alt="" width={32} height={32} className="header__logo-img footer__logo-img" />
                                 <span className="header__logo-text">Feelinga<span>.</span></span>
                             </Link>
@@ -160,7 +160,7 @@ export default function Layout({ children }) {
                     <div className="footer__bottom">
                         <span>© 2026 Feelinga. All rights reserved.</span>
                         <span>Made with 🍃 in India</span>
-                        <Link href="/admin" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>Admin Access</Link>
+                        <Link href="/admin" className="footer__admin-link">Admin Access</Link>
                     </div>
                 </div>
             </footer>

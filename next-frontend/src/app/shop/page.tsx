@@ -1,9 +1,10 @@
 'use client';
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import Layout from '../../components/Layout';
+import ProductCard from '../../components/ProductCard';
+import EmptyState from '../../components/EmptyState';
 import { useCart } from '../../context/CartContext';
 
 function ShopInner() {
@@ -154,36 +155,27 @@ function ShopInner() {
                             </div>
                         </div>
                         {loading ? (
-                            <div style={{ textAlign: 'center', padding: 'var(--space-3xl) 0' }}>
-                                <div style={{ fontSize: '2rem' }}>🍵</div>
-                                <p style={{ marginTop: 'var(--space-md)', color: 'var(--color-text-muted)' }}>Loading teas...</p>
+                            <div className="state-center py-3xl">
+                                <div className="state-emoji">🍵</div>
+                                <p className="mt-md state-text">Loading teas...</p>
                             </div>
                         ) : (
                             <div className="plp-products">
                                 {products.length === 0 ? (
-                                    <div style={{ textAlign: 'center', padding: 'var(--space-3xl) 0', gridColumn: '1 / -1' }}>
-                                        <p style={{ color: 'var(--color-text-muted)' }}>No teas match your filters. Try adjusting your criteria.</p>
-                                    </div>
+                                    <EmptyState
+                                        message="No teas match your filters. Try adjusting your criteria."
+                                        className="py-3xl grid-span-full"
+                                    />
                                 ) : (
                                     products.map((p) => (
-                                        <div className="product-card" key={p.id}>
-                                            {p.badge && <span className="product-card__badge" style={p.badgeColor ? { background: p.badgeColor } : {}}>{p.badge}</span>}
-                                            <Link href={`/product/${p.slug}`}>
-                                                <div className="product-card__img"><Image src={p.img || '/images/placeholder-tea.png'} alt={p.name} width={300} height={300} style={{ objectFit: 'contain', width: '100%', height: 'auto' }} /></div>
-                                            </Link>
-                                            <div className="product-card__body">
-                                                <div className="product-card__type">{p.typeName}</div>
-                                                <Link href={`/product/${p.slug}`} className="product-card__name">{p.name}</Link>
-                                                <div className="product-card__note">{p.note}</div>
-                                                <div className="product-card__bottom">
-                                                    <div className="product-card__price">₹{p.price.toLocaleString()}</div>
-                                                    <div className="product-card__rating">{renderStars(p.stars)} <span>({p.reviews})</span></div>
-                                                </div>
-                                                <button className="btn btn--primary btn--sm" style={{ width: '100%', marginTop: '12px' }} onClick={() => handleAddToCart(p)} disabled={!p.inStock}>
-                                                    {p.inStock ? 'Add to Cart' : 'Sold Out'}
-                                                </button>
-                                            </div>
-                                        </div>
+                                        <ProductCard
+                                            key={p.id}
+                                            product={p}
+                                            badge={p.badge}
+                                            badgeClass={p.badgeColor ? 'product-card__badge--danger' : undefined}
+                                            renderStars={renderStars}
+                                            onAdd={handleAddToCart}
+                                        />
                                     ))
                                 )}
                             </div>
@@ -191,7 +183,7 @@ function ShopInner() {
 
                         {/* Pagination */}
                         {totalPages > 1 && (
-                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 'var(--space-sm)', marginTop: 'var(--space-3xl)', paddingBottom: 'var(--space-xl)' }}>
+                            <div className="pagination-bar">
                                 <button
                                     className="btn btn--ghost btn--sm"
                                     onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
@@ -200,9 +192,8 @@ function ShopInner() {
                                 {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
                                     <button
                                         key={n}
-                                        className={`btn btn--sm ${n === page ? 'btn--primary' : 'btn--ghost'}`}
+                                        className={`btn btn--sm ${n === page ? 'btn--primary' : 'btn--ghost'} min-w-38`}
                                         onClick={() => { setPage(n); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                                        style={{ minWidth: 38 }}
                                     >{n}</button>
                                 ))}
                                 <button
@@ -221,7 +212,7 @@ function ShopInner() {
 
 export default function Shop() {
     return (
-        <Suspense fallback={<Layout><div className="container section" style={{ textAlign: 'center', padding: '4rem 0' }}>Loading...</div></Layout>}>
+        <Suspense fallback={<Layout><div className="container section state-center py-3xl">Loading...</div></Layout>}>
             <ShopInner />
         </Suspense>
     );
