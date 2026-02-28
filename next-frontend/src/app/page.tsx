@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import Layout from '../components/Layout';
 import { useCart } from '../context/CartContext';
 
@@ -57,7 +58,7 @@ export default function Home() {
         <div className="product-card">
             {badge && <span className="product-card__badge" style={badgeStyle}>{badge}</span>}
             <Link href={`/product/${p.slug}`}>
-                <div className="product-card__img"><img src={p.img} alt={`${p.name} tea`} /></div>
+                <div className="product-card__img"><Image src={p.img} alt={`${p.name} tea`} width={300} height={300} style={{ objectFit: 'contain', width: '100%', height: 'auto' }} /></div>
             </Link>
             <div className="product-card__body">
                 <div className="product-card__type">{p.type}</div>
@@ -115,7 +116,7 @@ export default function Home() {
                     </div>
                 </div>
                 <div className="hero__decor" aria-hidden="true">
-                    <div className="hero__decor-inner"><img src="/images/tea-lifestyle.png" alt="Tea ritual" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} /></div>
+                    <div className="hero__decor-inner"><Image src="/images/tea-lifestyle.png" alt="Tea ritual" width={400} height={400} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} priority /></div>
                 </div>
             </section>
 
@@ -180,7 +181,7 @@ export default function Home() {
                         {seasonalGifts.map((p, i) => (
                             <div className="product-card" key={i}>
                                 <span className="product-card__badge" style={{ background: 'var(--color-success)' }}>Gift Set</span>
-                                <div className="product-card__img"><img src={p.img} alt={p.name} /></div>
+                                <div className="product-card__img"><Image src={p.img} alt={p.name} width={300} height={300} style={{ objectFit: 'contain', width: '100%', height: 'auto' }} /></div>
                                 <div className="product-card__body">
                                     <div className="product-card__type">{p.type}</div>
                                     <div className="product-card__name">{p.name}</div>
@@ -216,7 +217,7 @@ export default function Home() {
                             { name: 'Aged Pu-erh Reserve', img: '/images/oolong-tea.png', desc: '"Deep, earthy complexity with a smooth, velvety finish. A meditative tea for the true connoisseur."', meta: '₹2,499 · Rare Find', slug: null },
                         ].map((c, i) => (
                             <div className="curated-card" key={i}>
-                                <div className="curated-card__img"><img src={c.img} alt={c.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'var(--radius-md)' }} /></div>
+                                <div className="curated-card__img"><Image src={c.img} alt={c.name} width={400} height={300} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'var(--radius-md)' }} /></div>
                                 <div className="curated-card__body">
                                     <h4>{c.name}</h4>
                                     <p>{c.desc}</p>
@@ -247,7 +248,7 @@ export default function Home() {
                             </div>
                         </div>
                         <div className="story__visual">
-                            <img src="/images/hero-estate.png" alt="Mist-covered tea gardens" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'var(--radius-lg)' }} />
+                            <Image src="/images/hero-estate.png" alt="Mist-covered tea gardens" width={600} height={400} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'var(--radius-lg)' }} />
                         </div>
                     </div>
                 </div>

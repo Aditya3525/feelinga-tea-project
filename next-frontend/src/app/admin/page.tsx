@@ -17,6 +17,8 @@ export default function Admin() {
     const [productPagination, setProductPagination] = useState({ page: 1, totalPages: 1 });
     const [orders, setOrders] = useState([]);
     const [orderPagination, setOrderPagination] = useState({ page: 1, totalPages: 1 });
+    const [orderSearch, setOrderSearch] = useState('');
+    const [orderStatusFilter, setOrderStatusFilter] = useState('');
     const [activity, setActivity] = useState([]);
 
     // Users state
@@ -62,14 +64,7 @@ export default function Admin() {
     const [actionLoading, setActionLoading] = useState<string | null>(null);
 
     const adminApi = useCallback(async (path: string, options: any = {}) => {
-        const tkn = localStorage.getItem('feelinga_token');
-        const res = await fetch(`/api/v1${path}`, {
-            ...options,
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tkn}`, ...options.headers },
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.message || 'Request failed');
-        return data;
+        return apiRequest(path, options);
     }, []);
 
     const checkAuth = useCallback(async () => {
@@ -101,19 +96,24 @@ export default function Admin() {
         }
     };
 
-    // Load data when we have an admin user
+    // Load only overview data when we have an admin user
     useEffect(() => {
         if (!currentUser) return;
         loadOverview();
-        loadProducts();
-        loadOrders();
-        loadActivity();
-        loadUsers();
         loadLowStock();
-        loadMessages();
-        loadSubscribers();
-        loadCoupons();
     }, [currentUser]);
+
+    // Lazy-load tab data when tab changes
+    useEffect(() => {
+        if (!currentUser) return;
+        if (activeSection === 'products') loadProducts();
+        else if (activeSection === 'orders') loadOrders();
+        else if (activeSection === 'users') loadUsers();
+        else if (activeSection === 'activity') loadActivity();
+        else if (activeSection === 'messages') loadMessages();
+        else if (activeSection === 'newsletter') loadSubscribers();
+        else if (activeSection === 'coupons') loadCoupons();
+    }, [activeSection, currentUser]);
 
     const loadOverview = async () => {
         try {
@@ -130,9 +130,12 @@ export default function Admin() {
         } catch (err) { console.error(err); }
     };
 
-    const loadOrders = async (page = 1) => {
+    const loadOrders = async (page = 1, search = orderSearch, status = orderStatusFilter) => {
         try {
-            const data = await adminApi(`/orders?page=${page}&limit=10`);
+            let url = `/orders?page=${page}&limit=10`;
+            if (search) url += `&q=${encodeURIComponent(search)}`;
+            if (status) url += `&status=${status}`;
+            const data = await adminApi(url);
             setOrders(data.data || []);
             setOrderPagination(data.pagination || { page: 1, totalPages: 1 });
         } catch (err) { console.error(err); }
@@ -291,6 +294,18 @@ export default function Admin() {
         setActionLoading(`status-${id}`);
         try {
             await adminApi(`/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) });
+            loadOrders(orderPagination.page);
+        } catch (err) { alert(err.message); }
+        finally { setActionLoading(null); }
+    };
+
+    const updateTracking = async (orderId, trackingNumber, trackingUrl) => {
+        setActionLoading(`tracking-${orderId}`);
+        try {
+            await adminApi(`/admin/orders/${orderId}/tracking`, {
+                method: 'PATCH',
+                body: JSON.stringify({ trackingNumber, trackingUrl }),
+            });
             loadOrders(orderPagination.page);
         } catch (err) { alert(err.message); }
         finally { setActionLoading(null); }
@@ -714,8 +729,33 @@ export default function Admin() {
                     {/* ORDERS */}
                     {activeSection === 'orders' && (
                         <div className="admin__section active" id="sectionOrders">
+                            {/* Search & Filter */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)', gap: 'var(--space-md)', flexWrap: 'wrap' }}>
+                                <h3>{orders.length} Orders</h3>
+                                <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center' }}>
+                                    <select
+                                        value={orderStatusFilter}
+                                        onChange={(e) => { setOrderStatusFilter(e.target.value); loadOrders(1, orderSearch, e.target.value); }}
+                                        style={{ padding: '6px 12px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }}
+                                    >
+                                        <option value="">All Statuses</option>
+                                        {['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'].map(s => (
+                                            <option key={s} value={s}>{capitalize(s)}</option>
+                                        ))}
+                                    </select>
+                                    <input
+                                        type="text"
+                                        placeholder="Search orders..."
+                                        value={orderSearch}
+                                        onChange={e => setOrderSearch(e.target.value)}
+                                        onKeyDown={e => e.key === 'Enter' && loadOrders(1, orderSearch, orderStatusFilter)}
+                                        style={{ padding: '6px 12px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', minWidth: 200 }}
+                                    />
+                                    <button className="btn btn--ghost btn--sm" onClick={() => loadOrders(1, orderSearch, orderStatusFilter)}>Search</button>
+                                </div>
+                            </div>
                             <table className="admin__table">
-                                <thead><tr><th>Order #</th><th>Customer</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead>
+                                <thead><tr><th>Order #</th><th>Customer</th><th>Total</th><th>Status</th><th>Tracking</th><th>Actions</th></tr></thead>
                                 <tbody>
                                     {orders.map(order => (
                                         <tr key={order._id}>
@@ -723,6 +763,34 @@ export default function Admin() {
                                             <td>{order.user?.name || order.user?.email || 'N/A'}</td>
                                             <td>₹{order.total}</td>
                                             <td><span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '0.8rem', background: statusColors[order.status] || '#888', color: '#fff' }}>{order.status}</span></td>
+                                            <td>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 140 }}>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Tracking #"
+                                                        defaultValue={order.trackingNumber || ''}
+                                                        onBlur={(e) => {
+                                                            const val = e.target.value.trim();
+                                                            if (val !== (order.trackingNumber || '')) {
+                                                                updateTracking(order._id, val, order.trackingUrl || '');
+                                                            }
+                                                        }}
+                                                        style={{ padding: '3px 6px', fontSize: '0.8rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', width: '100%' }}
+                                                    />
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Tracking URL"
+                                                        defaultValue={order.trackingUrl || ''}
+                                                        onBlur={(e) => {
+                                                            const val = e.target.value.trim();
+                                                            if (val !== (order.trackingUrl || '')) {
+                                                                updateTracking(order._id, order.trackingNumber || '', val);
+                                                            }
+                                                        }}
+                                                        style={{ padding: '3px 6px', fontSize: '0.8rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', width: '100%' }}
+                                                    />
+                                                </div>
+                                            </td>
                                             <td style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
                                                 <select value={order.status} onChange={(e) => updateOrderStatus(order._id, e.target.value)} disabled={actionLoading === `status-${order._id}`} style={{ padding: '4px 8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)' }}>
                                                     {['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'].map(s => (

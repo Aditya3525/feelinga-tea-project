@@ -18,6 +18,10 @@ export default function Checkout() {
     const [paymentMethod, setPaymentMethod] = useState('cod');
     const [notes, setNotes] = useState('');
     const [loading, setLoading] = useState(false);
+    const [couponCode, setCouponCode] = useState('');
+    const [couponApplied, setCouponApplied] = useState<any>(null);
+    const [couponError, setCouponError] = useState('');
+    const [couponLoading, setCouponLoading] = useState(false);
 
     // Pre-fill shipping address from user's default saved address
     useEffect(() => {
@@ -38,8 +42,33 @@ export default function Checkout() {
         }
     }, [isAuthenticated, user]);
 
-    const tax = Math.round(subtotal * 0.05);
-    const total = subtotal + shipping + tax;
+    const discount = couponApplied?.discount || 0;
+    const tax = Math.round((subtotal - discount) * 0.05);
+    const total = subtotal + shipping + tax - discount;
+
+    const handleApplyCoupon = async () => {
+        if (!couponCode.trim()) return;
+        setCouponError('');
+        setCouponLoading(true);
+        try {
+            const data = await apiRequest('/coupons/validate', {
+                method: 'POST',
+                body: JSON.stringify({ code: couponCode.trim(), subtotal }),
+            });
+            setCouponApplied(data.data);
+        } catch (err: any) {
+            setCouponError(err.message || 'Invalid coupon');
+            setCouponApplied(null);
+        } finally {
+            setCouponLoading(false);
+        }
+    };
+
+    const handleRemoveCoupon = () => {
+        setCouponApplied(null);
+        setCouponCode('');
+        setCouponError('');
+    };
 
     const handlePlaceOrder = async () => {
         if (!isAuthenticated) { openAuthModal(); return; }
@@ -52,7 +81,7 @@ export default function Checkout() {
             }));
             const result = await apiRequest('/orders', {
                 method: 'POST',
-                body: JSON.stringify({ items, shippingAddress: address, paymentMethod, notes }),
+                body: JSON.stringify({ items, shippingAddress: address, paymentMethod, notes, couponCode: couponApplied?.code || undefined }),
             });
             clearCart();
             showToast('Order placed! 🎉', 'success');
@@ -207,11 +236,44 @@ export default function Checkout() {
                             ))}
                             <hr style={{ margin: 'var(--space-md) 0', border: 'none', borderTop: '1px solid var(--color-border)' }} />
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--space-xs)' }}><span>Subtotal</span><span>₹{subtotal}</span></div>
+                            {couponApplied && (
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--space-xs)', color: 'var(--color-success)' }}>
+                                    <span>Discount ({couponApplied.code})</span>
+                                    <span>−₹{discount}</span>
+                                </div>
+                            )}
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--space-xs)' }}><span>Shipping</span><span>{shipping === 0 ? 'Free' : `₹${shipping}`}</span></div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--space-md)' }}><span>Tax (5% GST)</span><span>₹{tax}</span></div>
                             <hr style={{ marginBottom: 'var(--space-md)', border: 'none', borderTop: '1px solid var(--color-border)' }} />
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, fontSize: '1.2rem' }}><span>Total</span><span>₹{total}</span></div>
                             {subtotal < 999 && <p style={{ fontSize: '0.85rem', marginTop: 'var(--space-sm)', color: 'var(--color-text-muted)' }}>Add ₹{999 - subtotal} more for free shipping!</p>}
+
+                            {/* Coupon Code */}
+                            <div style={{ marginTop: 'var(--space-lg)', borderTop: '1px solid var(--color-border)', paddingTop: 'var(--space-md)' }}>
+                                <label style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: 'var(--space-xs)', display: 'block' }}>Have a coupon?</label>
+                                {couponApplied ? (
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', padding: '8px 12px', background: 'rgba(16,185,129,0.1)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-success)' }}>
+                                        <span style={{ flex: 1, fontWeight: 600, color: 'var(--color-success)' }}>✓ {couponApplied.code} applied (−₹{discount})</span>
+                                        <button onClick={handleRemoveCoupon} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-error)', fontWeight: 600 }}>✕</button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div style={{ display: 'flex', gap: 'var(--space-xs)' }}>
+                                            <input
+                                                type="text"
+                                                placeholder="Enter code"
+                                                value={couponCode}
+                                                onChange={e => { setCouponCode(e.target.value.toUpperCase()); setCouponError(''); }}
+                                                style={{ flex: 1, padding: '8px 12px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', textTransform: 'uppercase' }}
+                                            />
+                                            <button className="btn btn--primary btn--sm" onClick={handleApplyCoupon} disabled={couponLoading || !couponCode.trim()}>
+                                                {couponLoading ? '...' : 'Apply'}
+                                            </button>
+                                        </div>
+                                        {couponError && <p style={{ color: 'var(--color-error)', fontSize: '0.8rem', marginTop: 4 }}>{couponError}</p>}
+                                    </>
+                                )}
+                            </div>
                         </div>
                     )}
                 </div>

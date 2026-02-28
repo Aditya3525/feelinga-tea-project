@@ -29,7 +29,7 @@ export default function Layout({ children }) {
 
     const navLinks = [
         { href: '/shop', label: 'Shop' },
-        { href: '/shop#moods', label: 'Moods' },
+        { href: '/#moods', label: 'Moods' },
         { href: '/gifting', label: 'Gifting' },
         { href: '/learn', label: 'Learn' },
         { href: '/about', label: 'About' },

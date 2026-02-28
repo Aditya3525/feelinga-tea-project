@@ -13,6 +13,7 @@ export default function OrderDetail() {
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [cancelLoading, setCancelLoading] = useState(false);
 
     useEffect(() => {
         if (!isAuthenticated) {
@@ -42,6 +43,25 @@ export default function OrderDetail() {
             cancelled: '#e74c3c',
         };
         return map[status] || '#999';
+    };
+
+    const canCancel = order && ['pending', 'confirmed'].includes(order.status);
+
+    const handleCancel = async () => {
+        if (!confirm('Are you sure you want to cancel this order?')) return;
+        setCancelLoading(true);
+        try {
+            await apiRequest(`/orders/${id}/cancel`, {
+                method: 'PATCH',
+                body: JSON.stringify({ reason: 'Customer requested cancellation' }),
+            });
+            const data = await apiRequest(`/orders/${id}`);
+            setOrder(data.data);
+        } catch (err: any) {
+            alert(err.message || 'Failed to cancel order');
+        } finally {
+            setCancelLoading(false);
+        }
     };
 
     if (loading) {
@@ -100,6 +120,35 @@ export default function OrderDetail() {
                         </span>
                     </div>
 
+                    {/* Cancel Order Button */}
+                    {canCancel && (
+                        <div style={{ marginBottom: 'var(--space-lg)' }}>
+                            <button
+                                className="btn btn--ghost btn--sm"
+                                style={{ color: 'var(--color-error)', borderColor: 'var(--color-error)' }}
+                                onClick={handleCancel}
+                                disabled={cancelLoading}
+                            >
+                                {cancelLoading ? '⏳ Cancelling...' : '✕ Cancel Order'}
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Tracking Info */}
+                    {order.trackingNumber && (
+                        <div style={{ background: 'rgba(46,204,113,0.08)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-lg)', marginBottom: 'var(--space-xl)', border: '1px solid rgba(46,204,113,0.2)' }}>
+                            <h3 style={{ marginBottom: 'var(--space-sm)' }}>📦 Tracking Information</h3>
+                            <p style={{ fontSize: '0.9rem' }}>
+                                <strong>Tracking Number:</strong> {order.trackingNumber}
+                            </p>
+                            {order.trackingUrl && (
+                                <a href={order.trackingUrl} target="_blank" rel="noopener noreferrer" className="btn btn--primary btn--sm" style={{ marginTop: 'var(--space-sm)', display: 'inline-block' }}>
+                                    Track Shipment →
+                                </a>
+                            )}
+                        </div>
+                    )}
+
                     {/* Items */}
                     <div style={{ background: 'var(--color-bg-alt)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-lg)', marginBottom: 'var(--space-xl)' }}>
                         <h3 style={{ marginBottom: 'var(--space-md)' }}>Items</h3>
@@ -146,6 +195,11 @@ export default function OrderDetail() {
                                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                     <span>Subtotal</span><span>₹{order.subtotal?.toLocaleString()}</span>
                                 </div>
+                                {order.discount > 0 && (
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--color-success)' }}>
+                                        <span>Discount{order.couponCode ? ` (${order.couponCode})` : ''}</span><span>−₹{order.discount?.toLocaleString()}</span>
+                                    </div>
+                                )}
                                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                     <span>Shipping</span><span>{order.shipping === 0 ? 'FREE' : `₹${order.shipping}`}</span>
                                 </div>

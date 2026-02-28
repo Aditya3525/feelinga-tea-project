@@ -12,11 +12,29 @@ export function AuthProvider({ children }) {
 
     useEffect(() => {
         const stored = localStorage.getItem('feelinga_user');
-        if (stored) {
+        const token = localStorage.getItem('feelinga_token');
+        if (stored && token) {
+            // Hydrate immediately from localStorage for fast UI
             const u = JSON.parse(stored);
             setUser(u);
             setIsAuthenticated(true);
             setIsAdmin(u.role === 'admin');
+
+            // Validate token in background
+            apiRequest('/auth/me').then(data => {
+                const freshUser = data.data.user;
+                localStorage.setItem('feelinga_user', JSON.stringify(freshUser));
+                setUser(freshUser);
+                setIsAdmin(freshUser.role === 'admin');
+            }).catch(() => {
+                // Token invalid — clear auth state
+                localStorage.removeItem('feelinga_user');
+                localStorage.removeItem('feelinga_token');
+                localStorage.removeItem('feelinga_refresh');
+                setUser(null);
+                setIsAuthenticated(false);
+                setIsAdmin(false);
+            });
         }
     }, []);
 
