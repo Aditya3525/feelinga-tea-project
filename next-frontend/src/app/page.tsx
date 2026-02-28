@@ -17,6 +17,46 @@ export default function Home() {
     const [bestSellers, setBestSellers] = useState([]);
     const [loadingProducts, setLoadingProducts] = useState(true);
 
+    // Animated counter hook
+    const useCounter = (target: number, suffix = '') => {
+        const [count, setCount] = useState(0);
+        const [started, setStarted] = useState(false);
+        useEffect(() => {
+            if (!started) return;
+            let start = 0;
+            const duration = 2000;
+            const step = (timestamp: number) => {
+                if (!start) start = timestamp;
+                const progress = Math.min((timestamp - start) / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                setCount(Math.floor(eased * target));
+                if (progress < 1) requestAnimationFrame(step);
+            };
+            requestAnimationFrame(step);
+        }, [started, target]);
+        return { count: count + suffix, start: () => setStarted(true) };
+    };
+
+    const estates = useCounter(15, '+');
+    const varieties = useCounter(50, '+');
+    const sippers = useCounter(10, 'K+');
+
+    // Trigger counters when story section is visible
+    useEffect(() => {
+        const el = document.getElementById('story-stats');
+        if (!el) return;
+        const obs = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting) {
+                estates.start();
+                varieties.start();
+                sippers.start();
+                obs.disconnect();
+            }
+        }, { threshold: 0.3 });
+        obs.observe(el);
+        return () => obs.disconnect();
+    }, []);
+
     useEffect(() => {
         async function fetchProducts() {
             try {
@@ -97,7 +137,7 @@ export default function Home() {
                         title="Shop by Mood"
                         description="Let your mood guide you to the perfect cup."
                     />
-                    <div className="mood-grid fade-in">
+                    <div className="mood-grid fade-in" style={{ '--stagger': '0.1s' } as any}>
                         {[
                             { mood: 'energize', icon: '⚡', title: 'Energize', desc: "Start your day with vibrant, uplifting blends." },
                             { mood: 'relax', icon: '🌿', title: 'Relax', desc: "Soothing teas that melt away the day's stress." },
@@ -198,7 +238,7 @@ export default function Home() {
                         title="Tea Master&apos;s Selections"
                         description="Hand-picked by our master taster for exceptional quality and character."
                     />
-                    <div className="curated-grid fade-in">
+                    <div className="curated-grid scale-in">
                         {[
                             { name: 'First Flush Darjeeling', img: '/images/darjeeling-tea.png', desc: '"The champagne of teas — this spring harvest delivers an exquisite muscatel aroma with a light, floral body."', meta: '₹1,299 · Limited Edition', slug: 'darjeeling-first-flush' },
                             { name: 'Silver Needle White', img: '/images/white-tea.png', desc: '"Rare, hand-plucked buds with the most delicate sweetness. Best enjoyed in quiet afternoon solitude."', meta: '₹1,899 · Single Estate', slug: 'silver-needle-white' },
@@ -221,21 +261,21 @@ export default function Home() {
             {/* 5. STORY & ORIGIN */}
             <section className="section section--alt">
                 <div className="container">
-                    <div className="story-grid fade-in">
-                        <div className="story__content">
+                    <div className="story-grid">
+                        <div className="story__content slide-in-left">
                             <p className="overline">Our Story</p>
                             <h2>Born from a Love of Ritual</h2>
                             <p>Feelinga began with a simple belief: that a cup of tea can be a moment of mindfulness in a busy world. We partner directly with small-estate growers across Darjeeling, Assam, and the Nilgiris to bring you teas that are as kind to the earth as they are to your senses.</p>
-                            <div className="story__stats">
-                                <div><div className="story__stat-value">15+</div><div className="story__stat-label">Partner Estates</div></div>
-                                <div><div className="story__stat-value">50+</div><div className="story__stat-label">Tea Varieties</div></div>
-                                <div><div className="story__stat-value">10K+</div><div className="story__stat-label">Happy Sippers</div></div>
+                            <div className="story__stats" id="story-stats">
+                                <div><div className="story__stat-value">{estates.count}</div><div className="story__stat-label">Partner Estates</div></div>
+                                <div><div className="story__stat-value">{varieties.count}</div><div className="story__stat-label">Tea Varieties</div></div>
+                                <div><div className="story__stat-value">{sippers.count}</div><div className="story__stat-label">Happy Sippers</div></div>
                             </div>
                             <div className="mt-xl">
                                 <Link href="/about" className="btn btn--ghost">Learn More About Us</Link>
                             </div>
                         </div>
-                        <div className="story__visual">
+                        <div className="story__visual slide-in-right">
                             <Image src="/images/hero-estate.png" alt="Mist-covered tea gardens" width={600} height={400} className="img-cover-rounded-lg" />
                         </div>
                     </div>
@@ -251,7 +291,7 @@ export default function Home() {
                         title="Learn the Art of Tea"
                         description="Explore guides, stories, and brewing wisdom from our experts."
                     />
-                    <div className="guide-grid fade-in">
+                    <div className="guide-grid fade-in" style={{ '--stagger': '0.15s' } as any}>
                         {[
                             { icon: '🫖', title: 'The Perfect Brew', desc: 'Temperature, timing, and technique — master the art of brewing every tea type.' },
                             { icon: '🌱', title: 'Tea & Wellness', desc: 'How different teas support your immunity, digestion, and mental clarity.' },
@@ -275,7 +315,7 @@ export default function Home() {
                         <p className="overline">Reviews</p>
                         <h2>What Our Sippers Say</h2>
                     </div>
-                    <div className="testimonials-track fade-in">
+                    <div className="testimonials-track blur-in">
                         {[
                             { text: '"The Darjeeling First Flush is absolutely divine. It\'s like sipping on liquid sunshine — delicate, fragrant, and utterly refreshing. Best tea I\'ve had in years."', author: 'Priya Sharma', role: 'Tea Enthusiast, Mumbai' },
                             { text: '"I ordered the Wellness Ritual gift box for my mother and she was overjoyed. The packaging is gorgeous and the teas are exceptionally fresh. Will order again!"', author: 'Arjun Mehta', role: 'Repeat Customer, Delhi' },
@@ -297,7 +337,7 @@ export default function Home() {
             {/* 8. NEWSLETTER */}
             <section className="section">
                 <div className="container">
-                    <div className="newsletter fade-in">
+                    <div className="newsletter scale-in">
                         <h3>Join the Tea Circle</h3>
                         <p>Get early access to new arrivals, brewing tips, and 10% off your first order.</p>
                         <form className="newsletter__form" onSubmit={async (e) => {

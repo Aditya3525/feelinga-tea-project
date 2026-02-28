@@ -74,16 +74,65 @@
 }
 
 .admin__sidebar-header {
-    padding: var(--space-lg) var(--space-lg);
+    padding: var(--space-lg);
     border-bottom: 1px solid var(--color-border);
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
+    justify-content: center;
 }
 
 .admin__logo {
     font-family: var(--font-serif);
     font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.admin__logo-img {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.admin__user-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md) var(--space-lg);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.admin__user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: var(--text-sm);
+    flex-shrink: 0;
+}
+
+.admin__user-meta {
+    min-width: 0;
+}
+
+.admin__user-name {
+    font-weight: 600;
+    font-size: var(--text-sm);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.admin__user-role {
+    font-size: var(--text-xs);
+    color: var(--color-text-light);
 }
 
 .admin__badge {
@@ -359,8 +408,124 @@
 .admin__card-title {
     font-family: var(--font-serif);
     font-size: var(--text-base);
+    font-weight: 600;
     padding: var(--space-md) var(--space-lg);
     border-bottom: 1px solid var(--color-border);
+}
+
+.admin__card-body {
+    padding: var(--space-md) var(--space-lg);
+}
+
+/* Overview cards spacing */
+.overview-card {
+    margin-top: var(--space-xl);
+}
+
+/* Status chips */
+.overview-status-grid {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+}
+
+.overview-status-chip {
+    padding: 6px 14px;
+    border-radius: 20px;
+    color: #fff;
+    font-weight: 600;
+    font-size: var(--text-sm);
+    white-space: nowrap;
+}
+
+.overview-status-chip--sm {
+    padding: 3px 10px;
+    font-size: var(--text-xs);
+}
+
+/* Revenue bar chart */
+.overview-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 200px;
+    padding-top: var(--space-sm);
+}
+
+.overview-chart__col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.overview-chart__value {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.overview-chart__bar {
+    width: 100%;
+    max-width: 48px;
+    background: linear-gradient(to top, #8b6f47, #c4a265);
+    border-radius: 4px 4px 0 0;
+    transition: height 0.5s ease;
+}
+
+.overview-chart__label {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+}
+
+/* Low stock alert card */
+.overview-card--warning {
+    border-color: #f59e0b;
+}
+
+.overview-card-title--warning {
+    color: #b45309;
+}
+
+.overview-lowstock {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.overview-lowstock__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: #fffbeb;
+    border-radius: var(--radius-sm);
+}
+
+.overview-lowstock__row--critical {
+    background: #fef2f2;
+}
+
+.overview-lowstock__name {
+    font-weight: 600;
+}
+
+.overview-lowstock__count {
+    font-weight: 700;
+    color: #d97706;
+    font-size: 0.9rem;
+}
+
+.overview-lowstock__count--critical {
+    color: #dc2626;
+}
+
+/* Export buttons row */
+.overview-export {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
 }
 
 .admin__empty {

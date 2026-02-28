@@ -43,7 +43,7 @@ export default function Layout({ children }) {
             <header className="header" id="header">
                 <div className="header__inner">
                     <Link href="/" className="header__logo" aria-label="Feelinga Home">
-                        <Image src="/images/logo.png" alt="" width={36} height={36} className="header__logo-img" priority />
+                        <Image src="/images/logo.png" alt="" width={42} height={42} className="header__logo-img" priority />
                         <span className="header__logo-text">Feelinga<span>.</span></span>
                     </Link>
                     <nav className="header__nav" aria-label="Main navigation">
@@ -138,7 +138,7 @@ export default function Layout({ children }) {
                     <div className="footer__grid">
                         <div className="footer__brand">
                             <Link href="/" className="header__logo footer__logo-link">
-                                <Image src="/images/logo.png" alt="" width={32} height={32} className="header__logo-img footer__logo-img" />
+                                <Image src="/images/logo.png" alt="" width={38} height={38} className="header__logo-img footer__logo-img" />
                                 <span className="header__logo-text">Feelinga<span>.</span></span>
                             </Link>
                             <p>happiness is here. Sourced with care from India&apos;s finest estates, delivered fresh to your doorstep.</p>

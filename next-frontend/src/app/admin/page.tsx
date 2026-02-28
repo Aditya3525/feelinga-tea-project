@@ -435,7 +435,7 @@ export default function Admin() {
         return (
             <div className="admin-gate" id="adminGate">
                 <div className="admin-gate__card" style={{ textAlign: 'center' }}>
-                    <img src="/images/logo.png" alt="Feelinga" style={{ width: 64, height: 64, borderRadius: '50%', margin: '0 auto var(--space-md)', display: 'block', objectFit: 'cover' }} />
+                    <img src="/images/logo.png" alt="Feelinga" style={{ width: 72, height: 72, borderRadius: '50%', margin: '0 auto var(--space-md)', display: 'block', objectFit: 'cover' }} />
                     <p style={{ color: 'var(--color-text-muted)' }}>Verifying session…</p>
                 </div>
             </div>
@@ -447,7 +447,7 @@ export default function Admin() {
         return (
             <div className="admin-gate" id="adminGate">
                 <div className="admin-gate__card">
-                    <img src="/images/logo.png" alt="Feelinga" style={{ width: 64, height: 64, borderRadius: '50%', margin: '0 auto var(--space-md)', display: 'block', objectFit: 'cover' }} />
+                    <img src="/images/logo.png" alt="Feelinga" style={{ width: 72, height: 72, borderRadius: '50%', margin: '0 auto var(--space-md)', display: 'block', objectFit: 'cover' }} />
                     <h1>🔐 Admin Access</h1>
                     <p>Sign in with your admin credentials</p>
                     {gateError && <div className="admin-gate__error" id="gateError">{gateError}</div>}
@@ -477,11 +477,14 @@ export default function Admin() {
             {/* Sidebar */}
             <aside className="admin__sidebar" id="adminSidebar">
                 <div className="admin__sidebar-header">
-                    <div className="admin__logo" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                        <img src="/images/logo.png" alt="" style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover' }} />
+                    <div className="admin__logo">
+                        <img src="/images/logo.png" alt="" className="admin__logo-img" />
                         <span>Feelinga<span style={{ color: 'var(--color-accent)' }}>.</span> admin</span>
                     </div>
-                    <div className="admin__user-info">
+                </div>
+                <div className="admin__user-info">
+                    <div className="admin__user-avatar">{currentUser.name?.charAt(0)?.toUpperCase()}</div>
+                    <div className="admin__user-meta">
                         <div className="admin__user-name">{currentUser.name}</div>
                         <div className="admin__user-role">Administrator</div>
                     </div>
@@ -505,89 +508,121 @@ export default function Admin() {
                     {/* OVERVIEW */}
                     {activeSection === 'overview' && overview && (
                         <div className="admin__section active" id="sectionOverview">
-                            <div className="admin__kpis">
-                                <div className="kpi-card"><div className="kpi-card__value">{overview.totals.users}</div><div className="kpi-card__label">Total Users</div></div>
-                                <div className="kpi-card"><div className="kpi-card__value">{overview.totals.products}</div><div className="kpi-card__label">Products</div></div>
-                                <div className="kpi-card"><div className="kpi-card__value">{overview.totals.orders}</div><div className="kpi-card__label">Orders</div></div>
-                                <div className="kpi-card"><div className="kpi-card__value">₹{(overview.totals.revenue || 0).toLocaleString()}</div><div className="kpi-card__label">Revenue</div></div>
+                            {/* KPI Stats */}
+                            <div className="admin__stats">
+                                <div className="stat-card">
+                                    <div className="stat-card__icon" style={{ background: '#eff6ff', color: '#3b82f6', fontSize: '1.4rem' }}>👥</div>
+                                    <div><span className="stat-card__value">{overview.totals.users}</span><span className="stat-card__label">Total Users</span></div>
+                                </div>
+                                <div className="stat-card">
+                                    <div className="stat-card__icon" style={{ background: '#f0fdf4', color: '#22c55e', fontSize: '1.4rem' }}>🍵</div>
+                                    <div><span className="stat-card__value">{overview.totals.products}</span><span className="stat-card__label">Products</span></div>
+                                </div>
+                                <div className="stat-card">
+                                    <div className="stat-card__icon" style={{ background: '#fefce8', color: '#eab308', fontSize: '1.4rem' }}>📦</div>
+                                    <div><span className="stat-card__value">{overview.totals.orders}</span><span className="stat-card__label">Orders</span></div>
+                                </div>
+                                <div className="stat-card">
+                                    <div className="stat-card__icon" style={{ background: '#fdf4f3', color: '#8b6f47', fontSize: '1.4rem' }}>💰</div>
+                                    <div><span className="stat-card__value">₹{(overview.totals.revenue || 0).toLocaleString()}</span><span className="stat-card__label">Revenue</span></div>
+                                </div>
                             </div>
 
-                            {overview.statusBreakdown && Object.keys(overview.statusBreakdown).length > 0 && (
-                                <div className="admin__card" style={{ marginTop: 'var(--space-xl)' }}>
-                                    <h3>Order Status Breakdown</h3>
-                                    <div style={{ display: 'flex', gap: 'var(--space-md)', flexWrap: 'wrap', marginTop: 'var(--space-md)' }}>
-                                        {Object.entries(overview.statusBreakdown).map(([status, count]) => (
-                                            <div key={status} style={{ padding: '8px 16px', borderRadius: 'var(--radius-sm)', background: statusColors[status] || '#888', color: '#fff', fontWeight: 600 }}>
-                                                {capitalize(status)}: {count}
+                            {/* Two-column insights row */}
+                            <div className="admin__insights">
+                                {/* Order Status Breakdown */}
+                                {overview.statusBreakdown && Object.keys(overview.statusBreakdown).length > 0 && (
+                                    <div className="admin__card">
+                                        <div className="admin__card-title">Order Status Breakdown</div>
+                                        <div className="admin__card-body">
+                                            <div className="overview-status-grid">
+                                                {Object.entries(overview.statusBreakdown).map(([status, count]) => (
+                                                    <div key={status} className="overview-status-chip" style={{ background: statusColors[status] || '#888' }}>
+                                                        {capitalize(status)}: {count as number}
+                                                    </div>
+                                                ))}
                                             </div>
-                                        ))}
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                )}
 
+                                {/* Revenue Chart */}
+                                {overview.monthlyRevenue?.length > 0 && (
+                                    <div className="admin__card">
+                                        <div className="admin__card-title">Monthly Revenue</div>
+                                        <div className="admin__card-body">
+                                            <div className="overview-chart">
+                                                {(() => {
+                                                    const maxR = Math.max(...overview.monthlyRevenue.map(m => m.revenue), 1);
+                                                    const months = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                                                    return overview.monthlyRevenue.map((m, i) => (
+                                                        <div key={i} className="overview-chart__col">
+                                                            <span className="overview-chart__value">₹{(m.revenue / 1000).toFixed(1)}k</span>
+                                                            <div
+                                                                className="overview-chart__bar"
+                                                                style={{ height: `${Math.max((m.revenue / maxR) * 140, 4)}px` }}
+                                                                title={`₹${m.revenue.toLocaleString()} (${m.orders} orders)`}
+                                                            />
+                                                            <span className="overview-chart__label">{months[m._id.month]}</span>
+                                                        </div>
+                                                    ));
+                                                })()}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Recent Orders */}
                             {overview.recentOrders?.length > 0 && (
-                                <div className="admin__card" style={{ marginTop: 'var(--space-xl)' }}>
-                                    <h3>Recent Orders</h3>
-                                    <table className="admin__table" style={{ marginTop: 'var(--space-md)' }}>
-                                        <thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead>
-                                        <tbody>
-                                            {overview.recentOrders.map(order => (
-                                                <tr key={order._id}>
-                                                    <td>{order.orderNumber}</td>
-                                                    <td>{order.user?.name || 'N/A'}</td>
-                                                    <td>₹{order.total}</td>
-                                                    <td><span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '0.8rem', background: statusColors[order.status] || '#888', color: '#fff' }}>{order.status}</span></td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            )}
-
-                            {/* Revenue Chart */}
-                            {overview.monthlyRevenue?.length > 0 && (
-                                <div className="admin__card" style={{ marginTop: 'var(--space-xl)' }}>
-                                    <h3>Monthly Revenue</h3>
-                                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 180, marginTop: 'var(--space-md)', padding: '0 var(--space-sm)' }}>
-                                        {(() => {
-                                            const maxR = Math.max(...overview.monthlyRevenue.map(m => m.revenue), 1);
-                                            const months = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                                            return overview.monthlyRevenue.map((m, i) => (
-                                                <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                                                    <span style={{ fontSize: '0.7rem', fontWeight: 600 }}>₹{(m.revenue / 1000).toFixed(1)}k</span>
-                                                    <div style={{ width: '100%', maxWidth: 48, background: 'linear-gradient(to top, #8b6f47, #c4a265)', borderRadius: '4px 4px 0 0', height: `${Math.max((m.revenue / maxR) * 140, 4)}px`, transition: 'height 0.5s ease' }} title={`₹${m.revenue.toLocaleString()} (${m.orders} orders)`} />
-                                                    <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>{months[m._id.month]}</span>
-                                                </div>
-                                            ));
-                                        })()}
+                                <div className="admin__card overview-card">
+                                    <div className="admin__card-title">Recent Orders</div>
+                                    <div className="admin__table-wrap">
+                                        <table className="admin__table">
+                                            <thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead>
+                                            <tbody>
+                                                {overview.recentOrders.map(order => (
+                                                    <tr key={order._id}>
+                                                        <td>{order.orderNumber}</td>
+                                                        <td>{order.user?.name || 'N/A'}</td>
+                                                        <td>₹{order.total?.toLocaleString()}</td>
+                                                        <td><span className="overview-status-chip overview-status-chip--sm" style={{ background: statusColors[order.status] || '#888' }}>{order.status}</span></td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             )}
 
                             {/* Low-Stock Alerts */}
                             {lowStockProducts.length > 0 && (
-                                <div className="admin__card" style={{ marginTop: 'var(--space-xl)', border: '1px solid #f59e0b', borderRadius: 'var(--radius-md)' }}>
-                                    <h3 style={{ color: '#b45309' }}>⚠️ Low Stock Alert ({lowStockProducts.length} items)</h3>
-                                    <div style={{ marginTop: 'var(--space-md)', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                                        {lowStockProducts.slice(0, 8).map(p => (
-                                            <div key={p._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', background: p.stock <= 3 ? '#fef2f2' : '#fffbeb', borderRadius: 'var(--radius-sm)' }}>
-                                                <span style={{ fontWeight: 600 }}>{p.name}</span>
-                                                <span style={{ fontWeight: 700, color: p.stock <= 3 ? '#dc2626' : '#d97706', fontSize: '0.9rem' }}>
-                                                    {p.stock === 0 ? 'OUT OF STOCK' : `${p.stock} left`}
-                                                </span>
-                                            </div>
-                                        ))}
+                                <div className="admin__card overview-card overview-card--warning">
+                                    <div className="admin__card-title overview-card-title--warning">⚠️ Low Stock Alert ({lowStockProducts.length} items)</div>
+                                    <div className="admin__card-body">
+                                        <div className="overview-lowstock">
+                                            {lowStockProducts.slice(0, 8).map(p => (
+                                                <div key={p._id} className={`overview-lowstock__row ${p.stock <= 3 ? 'overview-lowstock__row--critical' : ''}`}>
+                                                    <span className="overview-lowstock__name">{p.name}</span>
+                                                    <span className={`overview-lowstock__count ${p.stock <= 3 ? 'overview-lowstock__count--critical' : ''}`}>
+                                                        {p.stock === 0 ? 'OUT OF STOCK' : `${p.stock} left`}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
                             )}
 
                             {/* Export Buttons */}
-                            <div className="admin__card" style={{ marginTop: 'var(--space-xl)' }}>
-                                <h3>Export Data</h3>
-                                <div style={{ display: 'flex', gap: 'var(--space-sm)', flexWrap: 'wrap', marginTop: 'var(--space-md)' }}>
-                                    <button className="btn btn--ghost btn--sm" onClick={() => exportCSV('orders')} disabled={!!actionLoading}>{actionLoading === 'export-orders' ? '⏳ Exporting...' : '📥 Export Orders CSV'}</button>
-                                    <button className="btn btn--ghost btn--sm" onClick={() => exportCSV('products')} disabled={!!actionLoading}>{actionLoading === 'export-products' ? '⏳ Exporting...' : '📥 Export Products CSV'}</button>
-                                    <button className="btn btn--ghost btn--sm" onClick={() => exportCSV('users')} disabled={!!actionLoading}>{actionLoading === 'export-users' ? '⏳ Exporting...' : '📥 Export Users CSV'}</button>
+                            <div className="admin__card overview-card">
+                                <div className="admin__card-title">Export Data</div>
+                                <div className="admin__card-body">
+                                    <div className="overview-export">
+                                        <button className="btn btn--ghost btn--sm" onClick={() => exportCSV('orders')} disabled={!!actionLoading}>{actionLoading === 'export-orders' ? '⏳ Exporting...' : '📥 Export Orders CSV'}</button>
+                                        <button className="btn btn--ghost btn--sm" onClick={() => exportCSV('products')} disabled={!!actionLoading}>{actionLoading === 'export-products' ? '⏳ Exporting...' : '📥 Export Products CSV'}</button>
+                                        <button className="btn btn--ghost btn--sm" onClick={() => exportCSV('users')} disabled={!!actionLoading}>{actionLoading === 'export-users' ? '⏳ Exporting...' : '📥 Export Users CSV'}</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
