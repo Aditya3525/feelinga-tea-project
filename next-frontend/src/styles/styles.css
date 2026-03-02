@@ -17,6 +17,10 @@
   --color-gold: #C9A96E;
   --color-success: #5A7A5A;
   --color-error: #B8494A;
+  --color-warning: #946A20;
+  --color-info: #3A78B5;
+  --color-primary: var(--color-accent);
+  --color-error-light: rgba(184, 73, 74, 0.1);
 
   --font-serif: 'Playfair Display', Georgia, serif;
   --font-sans: 'Inter', system-ui, sans-serif;
@@ -74,6 +78,9 @@
   --color-gold: #D4B87E;
   --color-success: #6B9B6B;
   --color-error: #D46B6B;
+  --color-warning: #C89040;
+  --color-info: #5B9BD5;
+  --color-error-light: rgba(212, 107, 107, 0.15);
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25);
   --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.3);
@@ -562,7 +569,7 @@ p {
 }
 
 .product-card__badge--danger {
-  background: #e74c3c;
+  background: var(--color-error);
 }
 
 .skeleton-card {
@@ -807,7 +814,7 @@ p {
 }
 
 .tag-pill--danger {
-  background: #e74c3c;
+  background: var(--color-error);
   color: #fff;
   font-weight: 600;
 }
@@ -1159,7 +1166,7 @@ p {
   transition: width 0.6s ease;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .pdp-grid {
     grid-template-columns: 1fr;
   }
@@ -3190,12 +3197,8 @@ p {
   align-items: center;
 }
 
-.about-section--reverse {
-  direction: rtl;
-}
-
-.about-section--reverse>* {
-  direction: ltr;
+.about-section--reverse > *:first-child {
+  order: 1;
 }
 
 .about-visual {
@@ -3496,7 +3499,14 @@ p {
   opacity: 0.5;
 }
 
-/* ===== RESPONSIVE ===== */
+/* ===== RESPONSIVE =====
+ * Canonical breakpoint scale (CSS vars can't be used in @media — document here):
+ *   480px  → portrait phones       (--breakpoint-sm)
+ *   768px  → tablets / landscape phones (--breakpoint-md)
+ *  1024px  → laptops / small desktops   (--breakpoint-lg)
+ *  1280px  → wide desktops              (--breakpoint-xl)
+ * All @media queries in this file and profile.css / admin.css use ONLY these values.
+ * ============================================================================ */
 @media (max-width: 1024px) {
 
   .mood-grid {
@@ -4815,7 +4825,7 @@ textarea:focus-visible {
   right: 28px !important;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .whatsapp-float {
     width: 50px;
     height: 50px;
@@ -5250,7 +5260,7 @@ textarea:focus-visible {
   gap: var(--space-md);
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .checkout-shipping-form {
     grid-template-columns: 1fr;
   }
@@ -5336,16 +5346,16 @@ textarea:focus-visible {
 
 .wishlist-btn:hover,
 .wishlist-btn.active {
-  background: #fff0f0;
-  border-color: #e74c3c;
+  background: var(--color-error-light);
+  border-color: var(--color-error);
   transform: scale(1.1);
 }
 
 .wishlist-btn.active {
-  color: #e74c3c;
+  color: var(--color-error);
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .pdp-share {
     flex-direction: column;
     align-items: stretch;

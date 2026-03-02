@@ -6,15 +6,18 @@ import Image from 'next/image';
 import Layout from '../../../../components/Layout';
 import { useAuth } from '../../../../context/AuthContext';
 import { apiRequest } from '../../../../utils/api';
+import { useToast } from '../../../../components/Toast';
 
 export default function OrderDetail() {
     const { id } = useParams();
     const router = useRouter();
     const { isAuthenticated } = useAuth();
+    const { showToast } = useToast();
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [cancelLoading, setCancelLoading] = useState(false);
+    const [cancelConfirm, setCancelConfirm] = useState(false);
 
     useEffect(() => {
         if (!isAuthenticated) {
@@ -36,12 +39,12 @@ export default function OrderDetail() {
 
     const statusColor = (status) => {
         const map = {
-            pending: '#f39c12',
-            confirmed: '#3498db',
-            processing: '#9b59b6',
-            shipped: '#2ecc71',
-            delivered: '#27ae60',
-            cancelled: '#e74c3c',
+            pending:    'var(--color-warning)',
+            confirmed:  'var(--color-info)',
+            processing: '#8b5cf6',
+            shipped:    'var(--color-success)',
+            delivered:  'var(--color-success)',
+            cancelled:  'var(--color-error)',
         };
         return map[status] || '#999';
     };
@@ -49,7 +52,8 @@ export default function OrderDetail() {
     const canCancel = order && ['pending', 'confirmed'].includes(order.status);
 
     const handleCancel = async () => {
-        if (!confirm('Are you sure you want to cancel this order?')) return;
+        if (!cancelConfirm) { setCancelConfirm(true); return; }
+        setCancelConfirm(false);
         setCancelLoading(true);
         try {
             await apiRequest(`/orders/${id}/cancel`, {
@@ -59,7 +63,7 @@ export default function OrderDetail() {
             const data = await apiRequest(`/orders/${id}`);
             setOrder(data.data);
         } catch (err: any) {
-            alert(err.message || 'Failed to cancel order');
+            showToast(err.message || 'Failed to cancel order', 'error');
         } finally {
             setCancelLoading(false);
         }
@@ -122,16 +126,25 @@ export default function OrderDetail() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div style={{ display: 'flex', gap: 'var(--space-md)', marginBottom: 'var(--space-lg)', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', gap: 'var(--space-md)', marginBottom: 'var(--space-lg)', flexWrap: 'wrap', alignItems: 'center' }}>
                         {canCancel && (
-                            <button
-                                className="btn btn--ghost btn--sm"
-                                style={{ color: 'var(--color-error)', borderColor: 'var(--color-error)' }}
-                                onClick={handleCancel}
-                                disabled={cancelLoading}
-                            >
-                                {cancelLoading ? '⏳ Cancelling...' : '✕ Cancel Order'}
-                            </button>
+                            cancelConfirm ? (
+                                <>
+                                    <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>Cancel this order?</span>
+                                    <button className="btn btn--sm" style={{ background: 'var(--color-error)', color: '#fff', borderColor: 'var(--color-error)' }} onClick={handleCancel} disabled={cancelLoading}>
+                                        {cancelLoading ? 'Cancelling…' : 'Yes, cancel'}
+                                    </button>
+                                    <button className="btn btn--ghost btn--sm" onClick={() => setCancelConfirm(false)}>Keep order</button>
+                                </>
+                            ) : (
+                                <button
+                                    className="btn btn--ghost btn--sm"
+                                    style={{ color: 'var(--color-error)', borderColor: 'var(--color-error)' }}
+                                    onClick={handleCancel}
+                                >
+                                    ✕ Cancel Order
+                                </button>
+                            )
                         )}
                         <button
                             className="btn btn--ghost btn--sm"
@@ -150,7 +163,7 @@ export default function OrderDetail() {
                                     a.click();
                                     URL.revokeObjectURL(url);
                                 } catch {
-                                    alert('Failed to download invoice');
+                                    showToast('Failed to download invoice', 'error');
                                 }
                             }}
                         >

@@ -1,12 +1,15 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
 import { apiRequest } from '../../utils/api';
+import { useToast } from '../../components/Toast';
 import '../../styles/admin.css';
 
 export default function Admin() {
-    const { isAuthenticated, isAdmin, user, authReady, login: authLogin } = useAuth();
+    const { isAuthenticated, isAdmin, user, authReady, login: authLogin, logout } = useAuth();
+    const { showToast } = useToast();
     const [currentUser, setCurrentUser] = useState(null);
     const [gateError, setGateError] = useState('');
     const [activeSection, setActiveSection] = useState('overview');
@@ -117,7 +120,6 @@ export default function Admin() {
         else if (activeSection === 'newsletter') loadSubscribers();
         else if (activeSection === 'coupons') loadCoupons();
         else if (activeSection === 'testimonials') loadTestimonials();
-        else if (activeSection === 'testimonials') loadTestimonials();
     }, [activeSection, currentUser]);
 
     const loadOverview = async () => {
@@ -225,7 +227,7 @@ export default function Admin() {
             setEditingTestimonial(null);
             setTestimonialForm(emptyTestimonial);
             loadTestimonials();
-        } catch (err) { alert(err.message); }
+        } catch (err) { showToast(err.message || 'Failed to save testimonial', 'error'); }
     };
 
     const deleteTestimonial = async (id) => {
@@ -233,7 +235,7 @@ export default function Admin() {
         try {
             await adminApi(`/admin/testimonials/${id}`, { method: 'DELETE' });
             loadTestimonials();
-        } catch (err) { alert(err.message); }
+        } catch (err) { showToast(err.message || 'Failed to delete testimonial', 'error'); }
     };
 
     const toggleTestimonialApproval = async (testimonial) => {
@@ -243,7 +245,7 @@ export default function Admin() {
                 body: JSON.stringify({ approved: !testimonial.approved }),
             });
             loadTestimonials();
-        } catch (err) { alert(err.message); }
+        } catch (err) { showToast(err.message || 'Failed to update testimonial', 'error'); }
     };
 
     const toggleTestimonialFeatured = async (testimonial) => {
@@ -253,7 +255,7 @@ export default function Admin() {
                 body: JSON.stringify({ featured: !testimonial.featured }),
             });
             loadTestimonials();
-        } catch (err) { alert(err.message); }
+        } catch (err) { showToast(err.message || 'Failed to update testimonial', 'error'); }
     };
 
     const openEditTestimonial = (t) => {
@@ -294,7 +296,7 @@ export default function Admin() {
             setEditingCoupon(null);
             setCouponForm(emptyCoupon);
             loadCoupons();
-        } catch (err) { alert(err.message); }
+        } catch (err) { showToast(err.message || 'Failed to save coupon', 'error'); }
     };
 
     const deleteCoupon = async (id) => {
@@ -302,7 +304,7 @@ export default function Admin() {
         try {
             await adminApi(`/admin/coupons/${id}`, { method: 'DELETE' });
             loadCoupons();
-        } catch (err) { alert(err.message); }
+        } catch (err) { showToast(err.message || 'Failed to delete coupon', 'error'); }
     };
 
     const openEditCoupon = (c) => {
@@ -328,7 +330,7 @@ export default function Admin() {
         try {
             await adminApi(`/admin/users/${userId}/role`, { method: 'PATCH', body: JSON.stringify({ role: newRole }) });
             loadUsers(userPagination.page, userSearch);
-        } catch (err) { alert(err.message); }
+        } catch (err) { showToast(err.message || 'Failed to change role', 'error'); }
         finally { setActionLoading(null); }
     };
 
@@ -347,7 +349,7 @@ export default function Admin() {
             a.download = `${type}-${Date.now()}.csv`;
             a.click();
             URL.revokeObjectURL(url);
-        } catch (err) { alert(err.message); }
+        } catch (err) { showToast(err.message || 'Export failed', 'error'); }
         finally { setActionLoading(null); }
     };
 
@@ -366,7 +368,7 @@ export default function Admin() {
             a.download = `invoice-${orderId}.pdf`;
             a.click();
             URL.revokeObjectURL(url);
-        } catch (err) { alert(err.message); }
+        } catch (err) { showToast(err.message || 'Failed to generate invoice', 'error'); }
         finally { setActionLoading(null); }
     };
 
@@ -375,7 +377,7 @@ export default function Admin() {
         try {
             await adminApi(`/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) });
             loadOrders(orderPagination.page);
-        } catch (err) { alert(err.message); }
+        } catch (err) { showToast(err.message || 'Failed to update status', 'error'); }
         finally { setActionLoading(null); }
     };
 
@@ -387,7 +389,7 @@ export default function Admin() {
                 body: JSON.stringify({ trackingNumber, trackingUrl }),
             });
             loadOrders(orderPagination.page);
-        } catch (err) { alert(err.message); }
+        } catch (err) { showToast(err.message || 'Failed to update tracking', 'error'); }
         finally { setActionLoading(null); }
     };
 
@@ -397,7 +399,7 @@ export default function Admin() {
         try {
             await adminApi(`/products/${id}`, { method: 'DELETE' });
             loadProducts(productPagination.page);
-        } catch (err) { alert(err.message); }
+        } catch (err) { showToast(err.message || 'Failed to delete product', 'error'); }
         finally { setActionLoading(null); }
     };
 
@@ -459,7 +461,7 @@ export default function Admin() {
             if (!res.ok) throw new Error(data.message || 'Upload failed');
             setProductForm(prev => ({ ...prev, images: [...prev.images, ...data.data.urls] }));
         } catch (err) {
-            alert(err.message);
+            showToast(err.message || 'Upload failed', 'error');
         } finally {
             setUploading(false);
         }
@@ -509,20 +511,26 @@ export default function Admin() {
             setShowProductForm(false);
             loadProducts(productPagination.page);
         } catch (err) {
-            alert(err.message);
+            showToast(err.message || 'Failed to save product', 'error');
         }
     };
 
     const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
-    const statusColors = { pending: '#f59e0b', confirmed: '#3b82f6', processing: '#8b5cf6', shipped: '#6366f1', delivered: '#10b981', cancelled: '#ef4444' };
+    const statusColors = { pending: 'var(--color-warning)', confirmed: 'var(--color-info)', processing: '#8b5cf6', shipped: 'var(--color-success)', delivered: 'var(--color-success)', cancelled: 'var(--color-error)' };
 
     // Loading while verifying session
     if (!authReady) {
         return (
             <div className="admin-gate" id="adminGate">
-                <div className="admin-gate__card" style={{ textAlign: 'center' }}>
-                    <Image src="/images/logo.png" alt="Feelinga" width={72} height={72} style={{ borderRadius: '50%', margin: '0 auto var(--space-md)', display: 'block', objectFit: 'cover' }} />
-                    <p style={{ color: 'var(--color-text-muted)' }}>Verifying session…</p>
+                <div className="admin-gate__panel--brand">
+                    <Image src="/images/logo.png" alt="Feelinga" width={88} height={88} className="admin-gate__brand-logo" />
+                    <div className="admin-gate__brand-name">Feelinga<span className="admin-gate__brand-dot">.</span></div>
+                    <p className="admin-gate__brand-tagline">Happiness is here — manage your tea universe</p>
+                </div>
+                <div className="admin-gate__panel--form">
+                    <div className="admin-gate__form-inner" style={{ textAlign: 'center' }}>
+                        <p style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-sans)' }}>Verifying session…</p>
+                    </div>
                 </div>
             </div>
         );
@@ -532,16 +540,34 @@ export default function Admin() {
     if (!currentUser) {
         return (
             <div className="admin-gate" id="adminGate">
-                <div className="admin-gate__card">
-                    <Image src="/images/logo.png" alt="Feelinga" width={72} height={72} style={{ borderRadius: '50%', margin: '0 auto var(--space-md)', display: 'block', objectFit: 'cover' }} />
-                    <h1>🔐 Admin Access</h1>
-                    <p>Sign in with your admin credentials</p>
-                    {gateError && <div className="admin-gate__error" id="gateError">{gateError}</div>}
-                    <form id="adminLoginForm" onSubmit={handleAdminLogin}>
-                        <input type="email" placeholder="Admin email" required value={loginEmail} onChange={e => setLoginEmail(e.target.value)} />
-                        <input type="password" placeholder="Password" required value={loginPassword} onChange={e => setLoginPassword(e.target.value)} />
-                        <button type="submit" className="btn btn--primary" style={{ width: '100%' }}>Sign In</button>
-                    </form>
+                {/* Brand panel */}
+                <div className="admin-gate__panel--brand">
+                    <Image src="/images/logo.png" alt="Feelinga" width={88} height={88} className="admin-gate__brand-logo" />
+                    <div className="admin-gate__brand-name">Feelinga<span className="admin-gate__brand-dot">.</span></div>
+                    <p className="admin-gate__brand-tagline">Happiness is here — manage your tea universe</p>
+                    <span className="admin-gate__brand-badge">Admin Console</span>
+                </div>
+
+                {/* Form panel */}
+                <div className="admin-gate__panel--form">
+                    <div className="admin-gate__form-inner">
+                        <p className="admin-gate__eyebrow">Secure Access</p>
+                        <h1 className="admin-gate__title">Welcome back</h1>
+                        <p className="admin-gate__subtitle">Sign in with your admin credentials to continue.</p>
+                        {gateError && <div className="admin-gate__error" id="gateError" role="alert">{gateError}</div>}
+                        <form id="adminLoginForm" onSubmit={handleAdminLogin}>
+                            <div className="admin-gate__field">
+                                <label htmlFor="adminEmail" className="admin-gate__label">Email</label>
+                                <input id="adminEmail" type="email" className="admin-gate__input" placeholder="admin@feelinga.com" required value={loginEmail} onChange={e => setLoginEmail(e.target.value)} autoComplete="email" />
+                            </div>
+                            <div className="admin-gate__field">
+                                <label htmlFor="adminPassword" className="admin-gate__label">Password</label>
+                                <input id="adminPassword" type="password" className="admin-gate__input" placeholder="••••••••••" required value={loginPassword} onChange={e => setLoginPassword(e.target.value)} autoComplete="current-password" />
+                            </div>
+                            <button type="submit" className="btn btn--primary" style={{ width: '100%', marginTop: 'var(--space-sm)' }}>Sign In</button>
+                        </form>
+                        <Link href="/" className="admin-gate__back">← Back to store</Link>
+                    </div>
                 </div>
             </div>
         );
@@ -583,6 +609,14 @@ export default function Admin() {
                         </button>
                     ))}
                 </nav>
+                <div className="admin__sidebar-footer">
+                    <Link href="/" className="admin__nav-item" style={{ display: 'flex', gap: '0.5em', textDecoration: 'none' }}>
+                        <span>🏪</span> Back to Store
+                    </Link>
+                    <button className="admin__nav-item" style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-error)' }} onClick={logout}>
+                        <span>🚪</span> Logout
+                    </button>
+                </div>
             </aside>
 
             {/* Main Content */}

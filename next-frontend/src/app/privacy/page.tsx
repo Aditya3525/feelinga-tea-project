@@ -36,12 +36,12 @@ export default function Privacy() {
 
                 <h2 style={{ marginBottom: 'var(--space-md)' }}>5. Your Rights</h2>
                 <p style={{ lineHeight: 1.8, marginBottom: 'var(--space-lg)' }}>
-                    You have the right to access, update, or delete your personal information at any time through your account settings. You may also unsubscribe from marketing emails using the link provided in each email. For data deletion requests, please contact us at <a href="mailto:privacy@feelinga.in">privacy@feelinga.in</a>.
+                    You have the right to access, update, or delete your personal information at any time through your account settings. You may also unsubscribe from marketing emails using the link provided in each email. For data deletion requests, please contact us at <a href="mailto:hello@feelinga.com">hello@feelinga.com</a>.
                 </p>
 
                 <h2 style={{ marginBottom: 'var(--space-md)' }}>6. Contact Us</h2>
                 <p style={{ lineHeight: 1.8, marginBottom: 'var(--space-xl)' }}>
-                    If you have questions about this privacy policy or our data practices, please reach out to us at <a href="mailto:privacy@feelinga.in">privacy@feelinga.in</a> or through our <Link href="/contact">contact page</Link>.
+                    If you have questions about this privacy policy or our data practices, please reach out to us at <a href="mailto:hello@feelinga.com">hello@feelinga.com</a> or through our <Link href="/contact">contact page</Link>.
                 </p>
             </div>
         </Layout>

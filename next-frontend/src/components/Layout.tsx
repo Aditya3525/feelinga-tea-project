@@ -124,7 +124,7 @@ export default function Layout({ children }) {
                                         <span>{item.qty}</span>
                                         <button onClick={() => updateQty(item.key, item.qty + 1)}>+</button>
                                     </div>
-                                    <div className="cart-item__remove" onClick={() => removeFromCart(item.key)}>Remove</div>
+                                    <button type="button" className="cart-item__remove" onClick={() => removeFromCart(item.key)} aria-label={`Remove ${item.name} from cart`}>Remove</button>
                                 </div>
                             </div>
                         ))

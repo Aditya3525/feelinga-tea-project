@@ -1,14 +1,18 @@
 'use client';
 import Layout from '../../components/Layout';
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth } from '../../context/AuthContext';
+import Image from 'next/image';
+import { useState, useEffect, useCallback } from 'react';
 import { apiRequest } from '../../utils/api';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../components/Toast';
+import EmptyState from '../../components/EmptyState';
 import '../../styles/profile.css';
 
 export default function Profile() {
     const { user, isAuthenticated, isAdmin, openAuthModal, logout, updateProfile, setUser } = useAuth();
+    const { showToast } = useToast();
     const router = useRouter();
     const [activeTab, setActiveTab] = useState('info');
     const [profileMsg, setProfileMsg] = useState({ text: '', type: '' });
@@ -87,17 +91,16 @@ export default function Profile() {
             e.target.reset();
             setShowAddressForm(false);
         } catch (err) {
-            alert(err.message);
+            showToast(err.message || 'Failed to save address', 'error');
         }
     };
 
     const deleteAddress = async (id) => {
-        if (!confirm('Remove this address?')) return;
         try {
             const data = await apiRequest(`/auth/me/addresses/${id}`, { method: 'DELETE' });
             setUser(prev => ({ ...prev, addresses: data.data.addresses }));
         } catch (err) {
-            alert(err.message);
+            showToast(err.message || 'Failed to remove address', 'error');
         }
     };
 
@@ -107,15 +110,13 @@ export default function Profile() {
     };
 
     const [showAddressForm, setShowAddressForm] = useState(false);
+    const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
     if (!isAuthenticated) {
         return (
             <Layout>
-                <div style={{ padding: 'var(--space-4xl) 0', textAlign: 'center' }}>
-                    <div style={{ fontSize: '3rem', marginBottom: 'var(--space-lg)' }}>👤</div>
-                    <h2>Please log in to view your profile</h2>
-                    <p style={{ marginTop: 'var(--space-md)', color: 'var(--color-text-muted)' }}>Sign in to access your orders, addresses, and account settings.</p>
-                    <button className="btn btn--primary" style={{ marginTop: 'var(--space-xl)' }} onClick={openAuthModal}>Sign In</button>
+                <div className="container section">
+                    <EmptyState icon="👤" iconSize="lg" title="Please sign in" message="Sign in to access your orders, addresses, and account settings." actionLabel="Sign In" onAction={openAuthModal} />
                 </div>
             </Layout>
         );
@@ -208,7 +209,14 @@ export default function Profile() {
                                                     <strong>{addr.label}</strong> {addr.isDefault && <span style={{ fontSize: '0.75rem', background: 'var(--color-primary)', color: '#fff', padding: '2px 8px', borderRadius: '12px', marginLeft: 8 }}>Default</span>}
                                                     <p style={{ marginTop: 4, lineHeight: 1.6 }}>{addr.fullName}<br />{addr.addressLine1}{addr.addressLine2 && `, ${addr.addressLine2}`}<br />{addr.city}, {addr.state} - {addr.pincode}<br />📞 {addr.phone}</p>
                                                 </div>
-                                                <button className="btn btn--ghost btn--sm" style={{ color: 'var(--color-error)' }} onClick={() => deleteAddress(addr._id)}>Remove</button>
+                                                {pendingDeleteId === (addr._id || String(i)) ? (
+                                                    <div style={{ display: 'flex', gap: 'var(--space-xs)', flexShrink: 0 }}>
+                                                        <button className="btn btn--sm" style={{ background: 'var(--color-error)', color: '#fff', border: 'none' }} onClick={() => { deleteAddress(addr._id); setPendingDeleteId(null); }}>Confirm</button>
+                                                        <button className="btn btn--ghost btn--sm" onClick={() => setPendingDeleteId(null)}>Cancel</button>
+                                                    </div>
+                                                ) : (
+                                                    <button className="btn btn--ghost btn--sm" style={{ color: 'var(--color-error)' }} onClick={() => setPendingDeleteId(addr._id || String(i))}>Remove</button>
+                                                )}
                                             </div>
                                         ))
                                     )}

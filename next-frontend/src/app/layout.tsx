@@ -15,11 +15,13 @@ export const metadata = {
         siteName: 'Feelinga',
         title: 'Feelinga — happiness is here',
         description: 'Discover premium loose leaf teas sourced from the finest Indian estates.',
+        images: [{ url: '/images/tea-lifestyle.png', width: 1200, height: 630, alt: 'Feelinga — premium teas from India' }],
     },
     twitter: {
         card: 'summary_large_image',
         title: 'Feelinga — happiness is here',
         description: 'Premium loose leaf teas from India\'s finest estates.',
+        images: ['/images/tea-lifestyle.png'],
     },
     robots: {
         index: true,

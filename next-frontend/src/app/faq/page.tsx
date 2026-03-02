@@ -34,9 +34,9 @@ const faqData = [
 ];
 
 export default function FAQ() {
-    const [openItems, setOpenItems] = useState({});
+    const [openItems, setOpenItems] = useState<Record<string, boolean>>({});
 
-    const toggle = (key) => {
+    const toggle = (key: string) => {
         setOpenItems(prev => ({ ...prev, [key]: !prev[key] }));
     };
 
@@ -60,12 +60,21 @@ export default function FAQ() {
                                 const key = `${si}-${qi}`;
                                 return (
                                     <div key={key} className="faq-item" style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: 'var(--space-md)', marginBottom: 'var(--space-md)' }}>
-                                        <button className="faq-item__question" onClick={() => toggle(key)} style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none', padding: 'var(--space-sm) 0', fontSize: '1rem', fontWeight: 600, cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--color-text)' }}>
+                                        <button
+                                        className="faq-question"
+                                        aria-expanded={!!openItems[key]}
+                                        aria-controls={`faq-answer-${key}`}
+                                        onClick={() => toggle(key)}
+                                        style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none', padding: 'var(--space-sm) 0', fontSize: '1rem', fontWeight: 600, cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--color-text)' }}>
                                             {item.q}
                                             <span style={{ transition: 'transform 0.3s', transform: openItems[key] ? 'rotate(45deg)' : 'rotate(0)' }}>+</span>
                                         </button>
                                         {openItems[key] && (
-                                            <div className="faq-item__answer" style={{ padding: 'var(--space-sm) 0', color: 'var(--color-text-muted)', lineHeight: 1.7 }}>
+                                            <div
+                                            id={`faq-answer-${key}`}
+                                            role="region"
+                                            className="faq-answer"
+                                            style={{ padding: 'var(--space-sm) 0', color: 'var(--color-text-muted)', lineHeight: 1.7 }}>
                                                 {item.a}
                                             </div>
                                         )}

@@ -41,9 +41,9 @@ export default function CookieConsent() {
                 zIndex: 9999,
                 width: '94%',
                 maxWidth: '520px',
-                background: 'var(--card-bg, #fff)',
-                color: 'var(--text, #222)',
-                border: '1px solid var(--border, #e0d6ca)',
+                background: 'var(--color-surface)',
+                color: 'var(--color-text)',
+                border: '1px solid var(--color-border)',
                 borderRadius: '14px',
                 padding: '1.25rem 1.5rem',
                 boxShadow: '0 8px 32px rgba(0,0,0,.12)',
@@ -63,7 +63,7 @@ export default function CookieConsent() {
                     onClick={decline}
                     style={{
                         background: 'transparent',
-                        border: '1px solid var(--border, #ccc)',
+                        border: '1px solid var(--color-border)',
                         borderRadius: '8px',
                         padding: '0.45rem 1rem',
                         cursor: 'pointer',
@@ -76,7 +76,7 @@ export default function CookieConsent() {
                 <button
                     onClick={accept}
                     style={{
-                        background: 'var(--accent, #6b8f71)',
+                        background: 'var(--color-accent)',
                         color: '#fff',
                         border: 'none',
                         borderRadius: '8px',

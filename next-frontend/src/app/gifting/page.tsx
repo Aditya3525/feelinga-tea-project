@@ -2,14 +2,18 @@
 import Layout from '../../components/Layout';
 import Link from 'next/link';
 import Image from 'next/image';
+import ProductCard from '../../components/ProductCard';
+import SectionHeader from '../../components/SectionHeader';
 import { useToast } from '../../components/Toast';
 
 const giftSets = [
-    { name: 'Spring Festival Tea Box', desc: '5 curated teas in a premium gift box', price: 1499, img: '/images/gift-box.png' },
-    { name: 'Wellness Ritual Box', desc: '3 wellness blends with bamboo infuser', price: 999, img: '/images/gift-box.png' },
-    { name: "Connoisseur's Collection", desc: '8 rare teas with teaware in wooden chest', price: 3999, img: '/images/gift-box.png' },
-    { name: 'Tea & Honey Pairing Set', desc: '2 teas paired with artisanal honey', price: 799, img: '/images/herbal-tea.png' },
+    { name: 'Spring Festival Tea Box', type: 'Gift Collection', note: '5 curated teas in a premium gift box', price: 1499, img: '/images/gift-box.png', stars: 5, reviews: 45 },
+    { name: 'Wellness Ritual Box', type: 'Gift Collection', note: '3 wellness blends with bamboo infuser', price: 999, img: '/images/gift-box.png', stars: 5, reviews: 67 },
+    { name: "Connoisseur's Collection", type: 'Luxury Hamper', note: '8 rare teas with teaware in wooden chest', price: 3999, img: '/images/gift-box.png', stars: 5, reviews: 28 },
+    { name: 'Tea & Honey Pairing Set', type: 'Gift Collection', note: '2 teas paired with artisanal honey', price: 799, img: '/images/herbal-tea.png', stars: 4, reviews: 34 },
 ];
+
+import { renderStars } from '../../utils/renderStars';
 
 export default function Gifting() {
     const { showToast } = useToast();
@@ -28,26 +32,26 @@ export default function Gifting() {
             {/* Gift Sets */}
             <section className="section">
                 <div className="container">
-                    <div className="section-header fade-in">
-                        <p className="overline">Gift Collections</p>
-                        <h2>Curated Gift Sets</h2>
-                    </div>
+                    <SectionHeader overline="Gift Collections" title="Curated Gift Sets" className="fade-in" />
                     <div className="product-grid fade-in">
                         {giftSets.map((g, i) => (
-                            <div className="product-card" key={i}>
-                                <span className="product-card__badge" style={{ background: 'var(--color-success)' }}>Gift Set</span>
-                                <div className="product-card__img"><Image src={g.img} alt={g.name} width={280} height={280} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
-                                <div className="product-card__body">
-                                    <div className="product-card__type">Gift Collection</div>
-                                    <div className="product-card__name">{g.name}</div>
-                                    <div className="product-card__note">{g.desc}</div>
-                                    <div className="product-card__bottom">
-                                        <div className="product-card__price">₹{g.price.toLocaleString()}</div>
-                                        <div className="product-card__rating">★★★★★</div>
-                                    </div>
-                                    <Link href="/contact" className="btn btn--primary btn--sm" style={{ width: '100%', marginTop: '12px', textAlign: 'center' }} onClick={() => showToast('Contact us to order this gift set!', 'info')}>Enquire Now</Link>
-                                </div>
-                            </div>
+                            <ProductCard
+                                key={i}
+                                product={g}
+                                badge="Gift Set"
+                                badgeClass="product-card__badge--success"
+                                renderStars={renderStars}
+                                linkHref="/gifting"
+                                footer={
+                                    <Link
+                                        href="/contact"
+                                        className="btn btn--primary btn--sm btn-block mt-12"
+                                        onClick={() => showToast('Contact us to order this gift set!', 'info')}
+                                    >
+                                        Enquire Now
+                                    </Link>
+                                }
+                            />
                         ))}
                     </div>
                 </div>

@@ -8,6 +8,7 @@ type EmptyStateProps = {
     message: string;
     actionLabel?: string;
     actionHref?: string;
+    onAction?: () => void;
     className?: string;
 };
 
@@ -18,6 +19,7 @@ export default function EmptyState({
     message,
     actionLabel,
     actionHref,
+    onAction,
     className,
 }: EmptyStateProps) {
     const iconClass = iconSize === 'lg' ? 'state-emoji-xl mb-lg' : 'state-emoji';
@@ -30,6 +32,9 @@ export default function EmptyState({
             <p className="mt-md state-text">{message}</p>
             {actionLabel && actionHref && (
                 <Link href={actionHref} className={actionClass}>{actionLabel}</Link>
+            )}
+            {actionLabel && onAction && !actionHref && (
+                <button className={actionClass} onClick={onAction}>{actionLabel}</button>
             )}
         </div>
     );

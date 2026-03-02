@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import { useToast } from '../../components/Toast';
 import { apiRequest } from '../../utils/api';
+import EmptyState from '../../components/EmptyState';
 
 export default function Wishlist() {
     const { isAuthenticated, openAuthModal } = useAuth();
@@ -63,11 +64,8 @@ export default function Wishlist() {
                         <h1>My Wishlist</h1>
                     </div>
                 </div>
-                <div className="container section" style={{ textAlign: 'center', padding: 'var(--space-4xl) 0' }}>
-                    <div style={{ fontSize: '3rem', marginBottom: 'var(--space-lg)' }}>❤️</div>
-                    <h2>Please sign in to view your wishlist</h2>
-                    <p style={{ marginTop: 'var(--space-md)', color: 'var(--color-text-muted)' }}>Save your favourite teas and find them here anytime.</p>
-                    <button className="btn btn--primary" style={{ marginTop: 'var(--space-xl)' }} onClick={openAuthModal}>Sign In</button>
+                <div className="container section">
+                    <EmptyState icon="❤️" iconSize="lg" title="Please sign in to view your wishlist" message="Save your favourite teas and find them here anytime." actionLabel="Sign In" onAction={openAuthModal} />
                 </div>
             </Layout>
         );
@@ -105,7 +103,7 @@ export default function Wishlist() {
                                 const img = p.images?.[0] || '/images/darjeeling-tea.png';
                                 return (
                                     <div className="product-card" key={p._id}>
-                                        {!p.inStock && <span className="product-card__badge" style={{ background: '#e74c3c' }}>Sold Out</span>}
+                                        {!p.inStock && <span className="product-card__badge" style={{ background: 'var(--color-error)' }}>Sold Out</span>}
                                         <Link href={`/product/${p.slug}`}>
                                             <div className="product-card__img">
                                                 <Image src={img} alt={p.name} width={300} height={300} style={{ objectFit: 'contain', width: '100%', height: 'auto' }} />

@@ -88,7 +88,7 @@ export default function Contact() {
                                 <div className="contact-info__icon">📧</div>
                                 <div className="contact-info__text">
                                     <h4>Email</h4>
-                                    <p><a href="mailto:kailasmane777@gmail.com" style={{ color: 'var(--color-accent)' }}>kailasmane777@gmail.com</a></p>
+                                    <p><a href="mailto:hello@feelinga.com" style={{ color: 'var(--color-accent)' }}>hello@feelinga.com</a></p>
                                 </div>
                             </div>
                             <div className="contact-info__item">

@@ -1,54 +1,219 @@
 ﻿/* ===== ADMIN DASHBOARD ===== */
 
-/* Auth Gate */
+/* ── Auth Gate — Split Panel ── */
 .admin-gate {
     min-height: 100vh;
     display: flex;
+}
+
+/* Brand / decorative left panel */
+.admin-gate__panel--brand {
+    width: 42%;
+    background: var(--color-accent);
+    display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: var(--color-bg-alt);
-    padding: var(--space-lg);
+    padding: var(--space-2xl);
+    position: relative;
+    overflow: hidden;
 }
 
-.admin-gate__card {
+.admin-gate__panel--brand::before {
+    content: '';
+    position: absolute;
+    top: -80px;
+    right: -80px;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.admin-gate__panel--brand::after {
+    content: '';
+    position: absolute;
+    bottom: -60px;
+    left: -60px;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.admin-gate__brand-logo {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid rgba(255, 255, 255, 0.35);
+    margin-bottom: var(--space-lg);
+    position: relative;
+    z-index: 1;
+}
+
+.admin-gate__brand-name {
+    font-family: var(--font-serif);
+    font-size: 2.6rem;
+    color: #fff;
+    margin-bottom: var(--space-xs);
+    letter-spacing: -0.01em;
+    position: relative;
+    z-index: 1;
+}
+
+.admin-gate__brand-dot {
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.admin-gate__brand-tagline {
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+    max-width: 240px;
+    line-height: 1.6;
+    position: relative;
+    z-index: 1;
+}
+
+.admin-gate__brand-badge {
+    margin-top: var(--space-xl);
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 999px;
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.85);
+    position: relative;
+    z-index: 1;
+}
+
+/* Form right panel */
+.admin-gate__panel--form {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: var(--color-surface);
     padding: var(--space-2xl) var(--space-xl);
-    border-radius: var(--radius-lg);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+.admin-gate__form-inner {
     width: 100%;
-    max-width: 400px;
-    text-align: center;
+    max-width: 380px;
 }
 
-.admin-gate__logo {
-    font-family: var(--font-serif);
-    font-size: 1.8rem;
-    margin-bottom: var(--space-sm);
-}
-
-.admin-gate__title {
+.admin-gate__eyebrow {
     font-family: var(--font-sans);
-    font-size: var(--text-lg);
-    font-weight: 600;
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-accent);
     margin-bottom: var(--space-xs);
 }
 
+.admin-gate__title {
+    font-family: var(--font-serif);
+    font-size: 2rem;
+    color: var(--color-text);
+    margin-bottom: var(--space-xs);
+    line-height: 1.2;
+}
+
 .admin-gate__subtitle {
+    font-family: var(--font-sans);
     font-size: var(--text-sm);
     color: var(--color-text-muted);
-    margin-bottom: var(--space-lg);
+    margin-bottom: var(--space-xl);
+    line-height: 1.5;
+}
+
+.admin-gate__field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: var(--space-md);
+}
+
+.admin-gate__label {
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-text);
+}
+
+.admin-gate__input {
+    padding: 12px 14px;
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-base);
+    font-family: var(--font-sans);
+    background: var(--color-bg);
+    color: var(--color-text);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.admin-gate__input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-light);
 }
 
 .admin-gate__error {
-    display: none;
-    padding: 10px;
+    padding: 10px 14px;
     background: rgba(184, 73, 74, 0.08);
     border: 1px solid rgba(184, 73, 74, 0.2);
     border-radius: var(--radius-sm);
     color: var(--color-error);
     font-size: var(--text-sm);
+    font-family: var(--font-sans);
     margin-bottom: var(--space-md);
     text-align: left;
+}
+
+.admin-gate__back {
+    display: block;
+    text-align: center;
+    margin-top: var(--space-lg);
+    font-size: var(--text-sm);
+    font-family: var(--font-sans);
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.admin-gate__back:hover {
+    color: var(--color-accent);
+}
+
+@media (max-width: 768px) {
+    .admin-gate {
+        flex-direction: column;
+    }
+
+    .admin-gate__panel--brand {
+        width: 100%;
+        padding: var(--space-xl);
+        min-height: 220px;
+    }
+
+    .admin-gate__brand-name {
+        font-size: 2rem;
+    }
+
+    .admin-gate__panel--form {
+        padding: var(--space-xl) var(--space-md);
+    }
 }
 
 /* Dashboard Layout */
@@ -481,11 +646,11 @@
 
 /* Low stock alert card */
 .overview-card--warning {
-    border-color: #f59e0b;
+    border-color: var(--color-warning);
 }
 
 .overview-card-title--warning {
-    color: #b45309;
+    color: var(--color-warning);
 }
 
 .overview-lowstock {
@@ -504,7 +669,7 @@
 }
 
 .overview-lowstock__row--critical {
-    background: #fef2f2;
+    background: var(--color-error-light);
 }
 
 .overview-lowstock__name {
@@ -518,7 +683,7 @@
 }
 
 .overview-lowstock__count--critical {
-    color: #dc2626;
+    color: var(--color-error);
 }
 
 /* Export buttons row */
@@ -620,7 +785,7 @@
 
 .status-badge--confirmed {
     background: rgba(90, 122, 90, 0.12);
-    color: #5A7A5A;
+    color: var(--color-success);
 }
 
 .status-badge--processing {
@@ -639,8 +804,8 @@
 }
 
 .status-badge--cancelled {
-    background: rgba(184, 73, 74, 0.1);
-    color: #B8494A;
+    background: var(--color-error-light);
+    color: var(--color-error);
 }
 
 /* Action buttons */
@@ -878,11 +1043,11 @@
 }
 
 .admin-toast--success {
-    border-left-color: #5A7A5A;
+    border-left-color: var(--color-success);
 }
 
 .admin-toast--error {
-    border-left-color: #B8494A;
+    border-left-color: var(--color-error);
 }
 
 /* ===== RESPONSIVE ===== */

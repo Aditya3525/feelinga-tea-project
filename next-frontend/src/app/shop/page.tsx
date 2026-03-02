@@ -6,6 +6,7 @@ import Layout from '../../components/Layout';
 import ProductCard from '../../components/ProductCard';
 import EmptyState from '../../components/EmptyState';
 import { useCart } from '../../context/CartContext';
+import { renderStars } from '../../utils/renderStars';
 
 function ShopInner() {
     const { addToCart } = useCart();
@@ -73,7 +74,7 @@ function ShopInner() {
                         reviews: p.reviewCount || 0,
                         stars: Math.round(p.rating || 0) || 5,
                         badge: !p.inStock ? 'Sold Out' : null,
-                        badgeColor: !p.inStock ? '#e74c3c' : undefined,
+                        badgeColor: !p.inStock ? 'var(--color-error)' : undefined,
                         inStock: p.inStock,
                     })));
                     setTotalPages(data.pagination?.totalPages || 1);
@@ -95,7 +96,6 @@ function ShopInner() {
 
     const handleSortChange = (val) => { setSort(val); setPage(1); };
 
-    const renderStars = (count) => '★'.repeat(count) + (count < 5 ? '☆'.repeat(5 - count) : '');
 
     const filterGroups = [
         { key: 'type', title: 'Tea Type', options: [{ value: 'green', label: 'Green Tea' }, { value: 'black', label: 'Black Tea' }, { value: 'white', label: 'White Tea' }, { value: 'oolong', label: 'Oolong' }, { value: 'herbal', label: 'Herbal & Tisane' }, { value: 'chai', label: 'Masala Chai' }] },

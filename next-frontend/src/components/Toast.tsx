@@ -15,7 +15,7 @@ export function ToastProvider({ children }) {
     return (
         <ToastContext.Provider value={{ showToast }}>
             {children}
-            <div className="toast-container">
+            <div className="toast-container" aria-live="polite" aria-atomic="true">
                 {toasts.map(t => (
                     <div key={t.id} className={`toast toast--${t.type}`}>
                         {t.img && <img src={t.img} alt="" width={32} height={32} style={{ width: 32, height: 32, borderRadius: 6, objectFit: 'cover' }} />}

@@ -2,6 +2,7 @@
 import Layout from '../../components/Layout';
 import Link from 'next/link';
 import Image from 'next/image';
+import SectionHeader from '../../components/SectionHeader';
 
 export default function About() {
     return (
@@ -51,10 +52,7 @@ export default function About() {
             {/* Values */}
             <section className="section">
                 <div className="container">
-                    <div className="section-header fade-in">
-                        <p className="overline">What We Stand For</p>
-                        <h2>Our Values</h2>
-                    </div>
+                    <SectionHeader overline="What We Stand For" title="Our Values" className="fade-in" />
                     <div className="values-grid fade-in">
                         {[
                             { icon: '🌱', title: 'Sustainability', desc: 'Biodegradable packaging, carbon-offset shipping, and support for regenerative farming practices across our partner estates.' },
@@ -74,10 +72,7 @@ export default function About() {
             {/* Timeline */}
             <section className="section section--alt">
                 <div className="container">
-                    <div className="section-header fade-in">
-                        <p className="overline">Milestones</p>
-                        <h2>Our Journey</h2>
-                    </div>
+                    <SectionHeader overline="Milestones" title="Our Journey" className="fade-in" />
                     <div className="timeline fade-in">
                         {[
                             { year: '2019', text: 'Feelinga founded in Darjeeling. First collection of 12 single-origin teas launched online.' },

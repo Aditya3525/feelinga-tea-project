@@ -6,8 +6,8 @@ import { useRouter } from 'next/navigation';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../components/Toast';
+import EmptyState from '../../components/EmptyState';
 import { apiRequest } from '../../utils/api';
-
 export default function Checkout() {
     const { cart, subtotal, shipping, clearCart } = useCart();
     const { isAuthenticated, openAuthModal, user } = useAuth();
@@ -107,10 +107,8 @@ export default function Checkout() {
     if (cart.length === 0 && step < 4) {
         return (
             <Layout>
-                <div className="container section" style={{ textAlign: 'center', padding: 'var(--space-4xl) 0' }}>
-                    <h2>Your cart is empty</h2>
-                    <p style={{ marginTop: 'var(--space-md)', marginBottom: 'var(--space-xl)' }}>Add some teas to get started!</p>
-                    <Link href="/shop" className="btn btn--primary">Shop Teas</Link>
+                <div className="container section">
+                    <EmptyState icon="🛒" iconSize="lg" title="Your cart is empty" message="Add some teas to get started!" actionLabel="Shop Teas" actionHref="/shop" />
                 </div>
             </Layout>
         );

@@ -7,6 +7,7 @@ import ProductCard from '../components/ProductCard';
 import ProductGridSkeleton from '../components/ProductGridSkeleton';
 import SectionHeader from '../components/SectionHeader';
 import { useCart } from '../context/CartContext';
+import { renderStars } from '../utils/renderStars';
 
 export default function Home() {
     const [activeTab, setActiveTab] = useState('new');
@@ -122,7 +123,6 @@ export default function Home() {
         addToCart({ id: p.id, slug: p.slug, name: p.name, price: p.price, size: '100g', img: p.img });
     };
 
-    const renderStars = (count) => '★'.repeat(count) + (count < 5 ? '☆'.repeat(5 - count) : '');
 
 
     const seasonalGifts = [
@@ -193,7 +193,7 @@ export default function Home() {
                     />
                     <div className="commerce-tabs fade-in" role="tablist">
                         {[{ key: 'new', label: 'New Arrivals' }, { key: 'best', label: 'Best Sellers' }, { key: 'seasonal', label: 'Seasonal Gifts' }].map(t => (
-                            <button key={t.key} className={`commerce-tab ${activeTab === t.key ? 'active' : ''}`} role="tab" aria-selected={activeTab === t.key} onClick={() => setActiveTab(t.key)}>{t.label}</button>
+                            <button key={t.key} className={`commerce-tab ${activeTab === t.key ? 'active' : ''}`} role="tab" id={`htab-${t.key}`} aria-selected={activeTab === t.key} aria-controls={`hpanel-${t.key}`} onClick={() => setActiveTab(t.key)}>{t.label}</button>
                         ))}
                     </div>
 
@@ -202,7 +202,7 @@ export default function Home() {
                     ) : (
                         <>
                             {/* New Arrivals */}
-                            <div className={`product-grid fade-in ${activeTab === 'new' ? '' : 'product-grid--hidden'}`}>
+                            <div role="tabpanel" id="hpanel-new" aria-labelledby="htab-new" className={`product-grid fade-in ${activeTab === 'new' ? '' : 'product-grid--hidden'}`}>
                                 {newArrivals.map(p => (
                                     <ProductCard
                                         key={p.id}
@@ -215,7 +215,7 @@ export default function Home() {
                             </div>
 
                             {/* Best Sellers */}
-                            <div className={`product-grid ${activeTab === 'best' ? '' : 'product-grid--hidden'}`}>
+                            <div role="tabpanel" id="hpanel-best" aria-labelledby="htab-best" className={`product-grid ${activeTab === 'best' ? '' : 'product-grid--hidden'}`}>
                                 {bestSellers.map(p => (
                                     <ProductCard
                                         key={p.id}
@@ -231,22 +231,19 @@ export default function Home() {
                     )}
 
                     {/* Seasonal Gifts — static */}
-                    <div className={`product-grid ${activeTab === 'seasonal' ? '' : 'product-grid--hidden'}`}>
+                    <div role="tabpanel" id="hpanel-seasonal" aria-labelledby="htab-seasonal" className={`product-grid ${activeTab === 'seasonal' ? '' : 'product-grid--hidden'}`}>
                         {seasonalGifts.map((p, i) => (
-                            <div className="product-card" key={i}>
-                                <span className="product-card__badge product-card__badge--success">Gift Set</span>
-                                <div className="product-card__img"><Image src={p.img} alt={p.name} width={300} height={300} className="img-contain-full" /></div>
-                                <div className="product-card__body">
-                                    <div className="product-card__type">{p.type}</div>
-                                    <div className="product-card__name">{p.name}</div>
-                                    <div className="product-card__note">{p.note}</div>
-                                    <div className="product-card__bottom">
-                                        <div className="product-card__price">₹{p.price.toLocaleString()}</div>
-                                        <div className="product-card__rating">{renderStars(p.stars)} <span>({p.reviews})</span></div>
-                                    </div>
+                            <ProductCard
+                                key={i}
+                                product={p}
+                                badge="Gift Set"
+                                badgeClass="product-card__badge--success"
+                                renderStars={renderStars}
+                                linkHref="/gifting"
+                                footer={
                                     <Link href="/gifting" className="btn btn--ghost btn--sm btn-block mt-12">View Gift Sets</Link>
-                                </div>
-                            </div>
+                                }
+                            />
                         ))}
                     </div>
 
@@ -338,10 +335,7 @@ export default function Home() {
             {/* 7. TESTIMONIALS */}
             <section className="section section--alt">
                 <div className="container">
-                    <div className="section-header fade-in">
-                        <p className="overline">Reviews</p>
-                        <h2>What Our Sippers Say</h2>
-                    </div>
+                    <SectionHeader overline="Reviews" title="What Our Sippers Say" className="fade-in" />
                     <div className="testimonials-wrapper">
                         <button className="testimonials-arrow testimonials-arrow--left" aria-label="Scroll left" onClick={() => { const track = document.querySelector('.testimonials-track'); if (track) track.scrollBy({ left: -400, behavior: 'smooth' }); }}>&#8249;</button>
                         <div className="testimonials-track blur-in">

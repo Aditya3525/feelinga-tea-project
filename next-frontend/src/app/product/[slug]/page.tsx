@@ -430,10 +430,14 @@ export default function ProductDetail() {
 
                 {/* Tabs: Description / Brewing / Reviews */}
                 <div className="pdp-tabs">
-                    <div className="pdp-tablist">
+                    <div className="pdp-tablist" role="tablist" aria-label="Product information">
                         {['description', 'brewing', 'reviews'].map(tab => (
                             <button
                                 key={tab}
+                                role="tab"
+                                id={`pdp-tab-${tab}`}
+                                aria-selected={activeTab === tab}
+                                aria-controls={`pdp-panel-${tab}`}
                                 onClick={() => setActiveTab(tab)}
                                 className={`pdp-tab ${activeTab === tab ? 'active' : ''}`}
                             >
@@ -444,7 +448,7 @@ export default function ProductDetail() {
 
                     {/* Description Tab */}
                     {activeTab === 'description' && (
-                        <div className="pdp-tabpanel pdp-tabpanel--narrow">
+                        <div role="tabpanel" id="pdp-panel-description" aria-labelledby="pdp-tab-description" className="pdp-tabpanel pdp-tabpanel--narrow">
                             <p className="pdp-body">{product.description}</p>
                             {product.origin && (
                                 <div className="pdp-origin">
@@ -459,7 +463,7 @@ export default function ProductDetail() {
 
                     {/* Brewing Tab */}
                     {activeTab === 'brewing' && (
-                        <div className="pdp-tabpanel">
+                        <div role="tabpanel" id="pdp-panel-brewing" aria-labelledby="pdp-tab-brewing" className="pdp-tabpanel">
                             {product.brewingInstructions ? (
                                 <div>
                                     <div className="pdp-brew-grid">
@@ -497,7 +501,7 @@ export default function ProductDetail() {
 
                     {/* Reviews Tab */}
                     {activeTab === 'reviews' && (
-                        <div className="pdp-tabpanel">
+                        <div role="tabpanel" id="pdp-panel-reviews" aria-labelledby="pdp-tab-reviews" className="pdp-tabpanel">
                             {/* Rating Summary */}
                             {reviews.length > 0 && (
                                 <div className="pdp-rating-summary">

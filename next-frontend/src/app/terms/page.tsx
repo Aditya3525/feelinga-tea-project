@@ -26,7 +26,7 @@ export default function Terms() {
 
                 <h2 style={{ marginBottom: 'var(--space-md)' }}>3. Shipping & Delivery</h2>
                 <p style={{ lineHeight: 1.8, marginBottom: 'var(--space-lg)' }}>
-                    We ship across India. Orders above ₹999 qualify for free shipping. Standard delivery takes 5-7 business days. Delivery timelines are estimates and may vary based on location and availability. We are not responsible for delays caused by shipping carriers or force majeure events.
+                    We ship across India. Orders above ₹999 qualify for free shipping. Standard delivery takes 3–5 business days. Delivery timelines are estimates and may vary based on location and availability. We are not responsible for delays caused by shipping carriers or force majeure events.
                 </p>
 
                 <h2 style={{ marginBottom: 'var(--space-md)' }}>4. Cancellations & Returns</h2>
@@ -51,7 +51,7 @@ export default function Terms() {
 
                 <h2 style={{ marginBottom: 'var(--space-md)' }}>8. Contact</h2>
                 <p style={{ lineHeight: 1.8, marginBottom: 'var(--space-xl)' }}>
-                    For questions about these terms, please contact us at <a href="mailto:legal@feelinga.in">legal@feelinga.in</a> or through our <Link href="/contact">contact page</Link>.
+                    For questions about these terms, please contact us at <a href="mailto:hello@feelinga.com">hello@feelinga.com</a> or through our <Link href="/contact">contact page</Link>.
                 </p>
             </div>
         </Layout>
