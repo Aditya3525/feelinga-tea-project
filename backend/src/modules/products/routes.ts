@@ -27,6 +27,11 @@ const createProductSchema = z.object({
     caffeine: z.enum(['none', 'low', 'medium', 'high']).optional(),
     tastingNotes: z.array(z.string()).optional(),
     images: z.array(z.string()).optional(),
+    brewingInstructions: z.object({
+        temperature: z.string().max(50).optional(),
+        steepTime: z.string().max(50).optional(),
+        amount: z.string().max(50).optional(),
+    }).optional(),
 });
 
 const bulkStockSchema = z.object({
@@ -60,6 +65,12 @@ router.get('/', async (req, res, next) => {
         }
         if (isNewArrival === 'true') filter.isNewArrival = true;
         if (isBestSeller === 'true') filter.isBestSeller = true;
+
+        // Origin filter (case-insensitive partial match)
+        const { origin } = req.query;
+        if (origin) {
+            filter.origin = new RegExp(escapeRegex(String(origin)), 'i');
+        }
 
         // Full-text search
         if (q) {
@@ -280,6 +291,11 @@ const updateProductSchema = z.object({
     isBestSeller: z.boolean().optional(),
     isNewArrival: z.boolean().optional(),
     tags: z.array(z.string()).optional(),
+    brewingInstructions: z.object({
+        temperature: z.string().max(50).optional(),
+        steepTime: z.string().max(50).optional(),
+        amount: z.string().max(50).optional(),
+    }).optional(),
 }).strict();
 
 // PATCH /products/:id (admin only) — validated

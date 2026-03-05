@@ -43,7 +43,8 @@ export default function Checkout() {
     }, [isAuthenticated, user]);
 
     const discount = couponApplied?.discount || 0;
-    const tax = Math.round((subtotal - discount) * 0.05);
+    // Tax on pre-discount subtotal (matches backend: Math.round(subtotal * 0.05))
+    const tax = Math.round(subtotal * 0.05);
     const total = subtotal + shipping + tax - discount;
 
     const handleApplyCoupon = async () => {
@@ -254,15 +255,7 @@ export default function Checkout() {
                             </div>
                         )}
 
-                        {/* Step 4: Confirmation */}
-                        {step === 4 && (
-                            <div style={{ textAlign: 'center', padding: 'var(--space-3xl) 0' }}>
-                                <div style={{ fontSize: '4rem', marginBottom: 'var(--space-lg)' }}>🎉</div>
-                                <h2>Order Placed!</h2>
-                                <p style={{ marginTop: 'var(--space-md)', color: 'var(--color-text-muted)' }}>Thank you for your order. We&apos;ll send you a confirmation email shortly.</p>
-                                <Link href="/shop" className="btn btn--primary" style={{ marginTop: 'var(--space-xl)', display: 'inline-block' }}>Continue Shopping</Link>
-                            </div>
-                        )}
+                        {/* Order placed — user is redirected to /order-confirm immediately */}
                     </div>
 
                     {/* Order Summary Sidebar */}

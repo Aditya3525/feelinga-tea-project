@@ -56,6 +56,10 @@ function ShopInner() {
                     else if (filters.price[0] === '500-999') { params.set('minPrice', '500'); params.set('maxPrice', '999'); }
                     else if (filters.price[0] === '1000-plus') params.set('minPrice', '1000');
                 }
+                // Origin filter
+                if (filters.origin.length === 1) {
+                    params.set('origin', filters.origin[0]);
+                }
 
                 const res = await fetch(`/api/v1/products?${params}`);
                 const data = await res.json().catch(() => ({}));

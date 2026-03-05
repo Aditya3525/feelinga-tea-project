@@ -255,7 +255,7 @@ router.patch('/users/:id/role', async (req, res, next) => {
 router.get('/low-stock', async (req, res, next) => {
     try {
         const threshold = parseInt(String(req.query.threshold), 10) || 10;
-        const products = await Product.find({ stock: { $lte: threshold } })
+        const products = await Product.find({ stock: { $lte: threshold }, deletedAt: null })
             .select('name slug stock type images prices')
             .sort({ stock: 1 })
             .lean();

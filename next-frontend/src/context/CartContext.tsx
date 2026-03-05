@@ -100,13 +100,13 @@ export function CartProvider({ children }) {
         }
     }, [fetchServerCart]);
 
-    const addToCart = async ({ id, slug, name, price, size = '100g', img }) => {
+    const addToCart = async ({ id, slug, name, price, size = '100g', img, qty: addQty = 1 }) => {
         const key = `${id}_${size}`;
         // Optimistic local update
         setCart(prev => {
             const existing = prev.find(i => i.key === key);
-            if (existing) return prev.map(i => i.key === key ? { ...i, qty: i.qty + 1 } : i);
-            return [...prev, { key, id, slug, name, price, size, img, qty: 1 }];
+            if (existing) return prev.map(i => i.key === key ? { ...i, qty: i.qty + addQty } : i);
+            return [...prev, { key, id, slug, name, price, size, img, qty: addQty }];
         });
         setCartOpen(true);
 
@@ -115,7 +115,7 @@ export function CartProvider({ children }) {
             try {
                 await apiRequest('/cart/items', {
                     method: 'POST',
-                    body: JSON.stringify({ productId: id, size, qty: 1 }),
+                    body: JSON.stringify({ productId: id, size, qty: addQty }),
                 });
                 await fetchServerCart();
             } catch {

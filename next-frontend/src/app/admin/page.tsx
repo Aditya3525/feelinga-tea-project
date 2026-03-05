@@ -63,7 +63,8 @@ export default function Admin() {
         name: '', slug: '', type: 'Black Tea', description: '', shortDescription: '', origin: '',
         'price50g': '', 'price100g': '', 'price200g': '',
         stock: 100, caffeine: 'medium', tastingNotes: '', tags: '', images: [],
-        moods: [], isBestSeller: false, isNewArrival: true, inStock: true
+        moods: [], isBestSeller: false, isNewArrival: true, inStock: true,
+        brewTemp: '', brewSteep: '', brewAmount: '',
     };
     const [productForm, setProductForm] = useState(emptyProduct);
     const [uploading, setUploading] = useState(false);
@@ -425,6 +426,9 @@ export default function Admin() {
             caffeine: p.caffeine || 'medium',
             tastingNotes: (p.tastingNotes || []).join(', '),
             tags: (p.tags || []).join(', '),
+            brewTemp: p.brewingInstructions?.temperature || '',
+            brewSteep: p.brewingInstructions?.steepTime || '',
+            brewAmount: p.brewingInstructions?.amount || '',
             images: p.images || [],
             moods: p.moods || [],
             isBestSeller: p.isBestSeller || false,
@@ -496,6 +500,11 @@ export default function Admin() {
             caffeine: productForm.caffeine,
             tastingNotes: productForm.tastingNotes ? productForm.tastingNotes.split(',').map(s => s.trim()).filter(Boolean) : [],
             tags: productForm.tags ? productForm.tags.split(',').map(s => s.trim()).filter(Boolean) : [],
+            brewingInstructions: {
+                temperature: productForm.brewTemp.trim() || undefined,
+                steepTime: productForm.brewSteep.trim() || undefined,
+                amount: productForm.brewAmount.trim() || undefined,
+            },
             images: productForm.images,
             moods: productForm.moods,
             isBestSeller: productForm.isBestSeller,
@@ -791,6 +800,9 @@ export default function Admin() {
                                                 </select>
                                             </div>
                                             <div><label>Tasting Notes</label><input type="text" placeholder="floral, citrus, malty" value={productForm.tastingNotes} onChange={e => handleProductFormChange('tastingNotes', e.target.value)} style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
+                                            <div><label>Brewing Temperature</label><input type="text" placeholder="e.g. 85°C" value={productForm.brewTemp} onChange={e => handleProductFormChange('brewTemp', e.target.value)} style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
+                                            <div><label>Steep Time</label><input type="text" placeholder="e.g. 2-3 minutes" value={productForm.brewSteep} onChange={e => handleProductFormChange('brewSteep', e.target.value)} style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
+                                            <div><label>Tea Amount</label><input type="text" placeholder="e.g. 1 tsp per 200ml" value={productForm.brewAmount} onChange={e => handleProductFormChange('brewAmount', e.target.value)} style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
                                             <div><label>Tags</label><input type="text" placeholder="premium, bestseller" value={productForm.tags} onChange={e => handleProductFormChange('tags', e.target.value)} style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
                                             <div style={{ gridColumn: '1 / -1' }}>
                                                 <label style={{ display: 'block', marginBottom: 'var(--space-xs)' }}>Product Images</label>

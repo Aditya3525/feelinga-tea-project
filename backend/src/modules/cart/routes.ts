@@ -170,13 +170,16 @@ router.post('/sync', authenticate, async (req, res, next) => {
             }
             if (!product) continue;
 
-            const existing = cart.items.find(i => i.product.toString() === product!._id.toString());
+            const itemSize = item.size || '100g';
+            const existing = cart.items.find(
+                i => i.product.toString() === product!._id.toString() && i.size === itemSize,
+            );
             if (existing) {
                 existing.qty = Math.max(existing.qty, item.qty || 1);
             } else {
                 cart.items.push({
                     product: product._id,
-                    size: item.size || '100g',
+                    size: itemSize,
                     qty: item.qty || 1,
                 } as any);
             }

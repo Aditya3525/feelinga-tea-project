@@ -170,17 +170,16 @@ export default function ProductDetail() {
     }, [product, slug]);
 
     const handleAddToCart = () => {
-        for (let i = 0; i < qty; i++) {
-            addToCart({
-                id: product._id,
-                slug: product.slug,
-                name: product.name,
-                price: currentPrice,
-                size: selectedSize,
-                img: product.images?.[0] || '/images/darjeeling-tea.png',
-            });
-        }
-        showToast(`${product.name} (${selectedSize}) added to cart!`, 'success');
+        addToCart({
+            id: product._id,
+            slug: product.slug,
+            name: product.name,
+            price: currentPrice,
+            size: selectedSize,
+            img: product.images?.[0] || '/images/darjeeling-tea.png',
+            qty,
+        });
+        showToast(`${product.name} (${selectedSize}) × ${qty} added to cart!`, 'success');
     };
 
     const handleReviewSubmit = async (e) => {
