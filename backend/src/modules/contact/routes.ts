@@ -4,29 +4,10 @@ import mongoose from 'mongoose';
 import crypto from 'crypto';
 import { validate } from '../../middleware/validate.js';
 import { authenticate, authorize } from '../../middleware/auth.js';
+import ContactMessage from '../../models/ContactMessage.js';
+import NewsletterSubscriber from '../../models/NewsletterSubscriber.js';
 
 const router = Router();
-
-// ===== Contact Message Schema =====
-const contactMessageSchema = new mongoose.Schema({
-    name: { type: String, required: true, trim: true },
-    email: { type: String, required: true, trim: true, lowercase: true },
-    subject: { type: String, default: 'General Inquiry' },
-    message: { type: String, required: true },
-    status: { type: String, enum: ['new', 'read', 'replied'], default: 'new' },
-}, { timestamps: true });
-
-const ContactMessage = mongoose.model('ContactMessage', contactMessageSchema);
-
-// ===== Newsletter Subscriber Schema =====
-const newsletterSchema = new mongoose.Schema({
-    email: { type: String, required: true, unique: true, trim: true, lowercase: true },
-    subscribedAt: { type: Date, default: Date.now },
-    active: { type: Boolean, default: true },
-    unsubscribeToken: { type: String, unique: true, sparse: true },
-}, { timestamps: true });
-
-const NewsletterSubscriber = mongoose.model('NewsletterSubscriber', newsletterSchema);
 
 // ===== Validation =====
 const contactSchema = z.object({
