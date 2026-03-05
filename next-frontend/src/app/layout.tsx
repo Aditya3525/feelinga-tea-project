@@ -1,7 +1,10 @@
 import Providers from '../components/Providers';
 import '../styles/styles.css';
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+
 export const metadata = {
+    metadataBase: new URL(siteUrl),
     title: {
         default: 'Feelinga — happiness is here',
         template: '%s | Feelinga',

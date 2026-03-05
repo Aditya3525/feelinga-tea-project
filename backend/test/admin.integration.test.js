@@ -88,14 +88,14 @@ beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create();
     process.env.MONGODB_URI = mongoServer.getUri();
 
-    ({ default: app } = await import('../src/app.js'));
-    ({ default: User } = await import('../src/models/User.js'));
-    ({ default: Product } = await import('../src/models/Product.js'));
-    ({ default: Order } = await import('../src/models/Order.js'));
-    ({ default: AuditLog } = await import('../src/models/AuditLog.js'));
+    ({ default: app } = await import('../src/app.ts'));
+    ({ default: User } = await import('../src/models/User.ts'));
+    ({ default: Product } = await import('../src/models/Product.ts'));
+    ({ default: Order } = await import('../src/models/Order.ts'));
+    ({ default: AuditLog } = await import('../src/models/AuditLog.ts'));
 
     await mongoose.connect(process.env.MONGODB_URI);
-});
+}, 600000);
 
 beforeEach(async () => {
     await Promise.all([
@@ -108,7 +108,9 @@ beforeEach(async () => {
 
 afterAll(async () => {
     await mongoose.disconnect();
-    await mongoServer.stop();
+    if (mongoServer) {
+        await mongoServer.stop();
+    }
 });
 
 describe('Admin Dashboard Integration', () => {

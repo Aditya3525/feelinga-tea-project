@@ -104,6 +104,7 @@ export default function Admin() {
     };
 
     // Load only overview data when we have an admin user
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         if (!currentUser) return;
         loadOverview();
@@ -111,6 +112,7 @@ export default function Admin() {
     }, [currentUser]);
 
     // Lazy-load tab data when tab changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         if (!currentUser) return;
         if (activeSection === 'products') loadProducts();

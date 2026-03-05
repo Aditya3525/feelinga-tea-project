@@ -90,7 +90,7 @@ function OrderConfirmInner() {
 
                 {/* CTAs */}
                 <div style={{ display: 'flex', gap: 'var(--space-md)', justifyContent: 'center', flexWrap: 'wrap' }}>
-                    <Link href="/profile" className="btn btn--ghost">View My Orders</Link>
+                    <Link href="/profile?tab=orders" className="btn btn--ghost">View My Orders</Link>
                     <Link href="/shop" className="btn btn--primary">Continue Shopping</Link>
                 </div>
             </div>

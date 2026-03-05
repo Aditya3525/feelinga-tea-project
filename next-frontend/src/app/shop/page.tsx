@@ -28,6 +28,13 @@ function ShopInner() {
         if (moodParam) setFilters(prev => ({ ...prev, mood: [moodParam] }));
         const qParam = searchParams.get('q');
         if (qParam) setSearchQuery(qParam);
+        // Support direct type param from footer links (e.g. ?type=Green+Tea)
+        const typeParam = searchParams.get('type');
+        if (typeParam) {
+            const reverseTypeMap: Record<string, string> = { 'Green Tea': 'green', 'Black Tea': 'black', 'White Tea': 'white', 'Oolong': 'oolong', 'Herbal': 'herbal', 'Herbal Infusion': 'herbal', 'Masala Chai': 'chai' };
+            const key = reverseTypeMap[typeParam];
+            if (key) setFilters(prev => ({ ...prev, type: [key] }));
+        }
     }, [searchParams]);
 
     // Fetch products from API

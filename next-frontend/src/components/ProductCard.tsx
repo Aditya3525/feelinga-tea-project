@@ -46,7 +46,7 @@ export default function ProductCard({
                 <Link href={href} className="product-card__name">{product.name}</Link>
                 <div className="product-card__note">{product.note}</div>
                 <div className="product-card__bottom">
-                    <div className="product-card__price">₹{product.price.toLocaleString()}</div>
+                    <div className="product-card__price">₹{(product.price ?? 0).toLocaleString()}</div>
                     {product.stars != null && (
                         <div className="product-card__rating">{renderStars(product.stars)} <span>({product.reviews})</span></div>
                     )}

@@ -6,9 +6,9 @@ import Link from 'next/link';
 const faqData = [
     {
         category: 'Ordering', items: [
-            { q: 'How do I place an order?', a: 'Browse our shop, add items to your cart, and proceed to checkout. You can pay via COD, UPI, or card.' },
+            { q: 'How do I place an order?', a: 'Browse our shop, add items to your cart, and proceed to checkout. You can pay via Cash on Delivery (COD) or Pay on WhatsApp.' },
             { q: 'Can I modify my order after placing it?', a: 'Orders can be modified within 2 hours of placement. Please contact us at hello@feelinga.com.' },
-            { q: 'What payment methods do you accept?', a: 'We accept Cash on Delivery (COD), UPI, and all major credit/debit cards.' },
+            { q: 'What payment methods do you accept?', a: 'We currently accept Cash on Delivery (COD) and Pay on WhatsApp.' },
         ]
     },
     {

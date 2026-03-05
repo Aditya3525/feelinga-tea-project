@@ -49,7 +49,7 @@ export default function Layout({ children }) {
                     </Link>
                     <nav className="header__nav" aria-label="Main navigation">
                         {navLinks.map(l => (
-                            <Link key={l.href} href={l.href} className={pathname === l.href ? 'active' : ''}>{l.label}</Link>
+                            <Link key={l.href} href={l.href} className={(l.href.includes('#') ? pathname === '/' : pathname === l.href) ? 'active' : ''}>{l.label}</Link>
                         ))}
                     </nav>
                     <div className="header__actions">
@@ -156,7 +156,7 @@ export default function Layout({ children }) {
                         </div>
                         <div>
                             <h4 className="footer__heading">Shop</h4>
-                            <div className="footer__links"><Link href="/shop">All Teas</Link><Link href="/shop">Green Tea</Link><Link href="/shop">Black Tea</Link><Link href="/shop">Herbal &amp; Wellness</Link><Link href="/gifting">Gift Sets</Link></div>
+                            <div className="footer__links"><Link href="/shop">All Teas</Link><Link href="/shop?type=Green+Tea">Green Tea</Link><Link href="/shop?type=Black+Tea">Black Tea</Link><Link href="/shop?type=Herbal">Herbal &amp; Wellness</Link><Link href="/gifting">Gift Sets</Link></div>
                         </div>
                         <div>
                             <h4 className="footer__heading">Company</h4>
@@ -164,7 +164,7 @@ export default function Layout({ children }) {
                         </div>
                         <div>
                             <h4 className="footer__heading">Help</h4>
-                            <div className="footer__links"><Link href="/faq#shipping">Shipping &amp; Returns</Link><Link href="/profile">Track Order</Link><Link href="/privacy">Privacy Policy</Link><Link href="/terms">Terms of Service</Link></div>
+                            <div className="footer__links"><Link href="/faq#shipping">Shipping &amp; Returns</Link><Link href="/profile?tab=orders">Track Order</Link><Link href="/privacy">Privacy Policy</Link><Link href="/terms">Terms of Service</Link></div>
                         </div>
                     </div>
                     <div className="footer__bottom">

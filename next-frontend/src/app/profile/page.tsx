@@ -19,19 +19,23 @@ export default function Profile() {
     const [passwordMsg, setPasswordMsg] = useState({ text: '', type: '' });
     const [orders, setOrders] = useState([]);
 
+    // Read ?tab= query param for deep-linking (e.g. footer "Track Order")
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('tab') === 'orders') setActiveTab('orders');
+    }, []);
+
     useEffect(() => {
         if (!isAuthenticated) return;
-        loadOrders();
+        (async () => {
+            try {
+                const data = await apiRequest('/orders');
+                setOrders(data.data || []);
+            } catch (err) {
+                console.error('Failed to load orders:', err);
+            }
+        })();
     }, [isAuthenticated]);
-
-    const loadOrders = async () => {
-        try {
-            const data = await apiRequest('/orders');
-            setOrders(data.data || []);
-        } catch (err) {
-            console.error('Failed to load orders:', err);
-        }
-    };
 
     const handleProfileUpdate = async (e) => {
         e.preventDefault();
@@ -40,7 +44,14 @@ export default function Profile() {
             const name = e.target.profileName.value.trim();
             const email = e.target.profileEmail.value.trim();
             const phone = e.target.profilePhone.value.trim();
-            await updateProfile({ name, email, phone });
+            const updates: any = { name, email, phone };
+            // Backend requires currentPassword when changing email
+            if (email !== user?.email) {
+                const pw = e.target.profileCurrentPassword?.value;
+                if (!pw) { setProfileMsg({ text: 'Current password is required to change email', type: 'error' }); return; }
+                updates.currentPassword = pw;
+            }
+            await updateProfile(updates);
             setProfileMsg({ text: 'Profile updated!', type: 'success' });
         } catch (err) {
             setProfileMsg({ text: err.message, type: 'error' });
@@ -153,6 +164,10 @@ export default function Profile() {
                                     <div><label>Full Name</label><input type="text" name="profileName" defaultValue={user?.name || ''} style={{ width: '100%', padding: '10px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
                                     <div><label>Email</label><input type="email" name="profileEmail" defaultValue={user?.email || ''} style={{ width: '100%', padding: '10px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
                                     <div><label>Phone</label><input type="tel" name="profilePhone" defaultValue={user?.phone || ''} style={{ width: '100%', padding: '10px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
+                                    <div>
+                                        <label>Current Password <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', fontWeight: 400 }}>(required to change email)</span></label>
+                                        <input type="password" name="profileCurrentPassword" placeholder="Enter only if changing email" style={{ width: '100%', padding: '10px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} />
+                                    </div>
                                     {profileMsg.text && <div className={`profile__msg ${profileMsg.type}`}>{profileMsg.text}</div>}
                                     <button type="submit" className="btn btn--primary">Save Changes</button>
                                 </form>

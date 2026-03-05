@@ -1,10 +1,10 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Layout from '../../components/Layout';
 
-export default function VerifyEmail() {
+function VerifyEmailInner() {
     const searchParams = useSearchParams();
     const token = searchParams.get('token');
     const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
@@ -66,5 +66,13 @@ export default function VerifyEmail() {
                 </div>
             </div>
         </Layout>
+    );
+}
+
+export default function VerifyEmail() {
+    return (
+        <Suspense fallback={<Layout><div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><p>Loading...</p></div></Layout>}>
+            <VerifyEmailInner />
+        </Suspense>
     );
 }

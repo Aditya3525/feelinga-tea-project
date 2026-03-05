@@ -97,9 +97,7 @@ export default function ProductDetail() {
         async function fetchProduct() {
             try {
                 setLoading(true);
-                const res = await fetch(`/api/v1/products/${slug}`);
-                const data = await res.json().catch(() => ({}) as any);
-                if (!res.ok) throw new Error(data.message || 'Product not found');
+                const data = await apiRequest(`/products/${slug}`);
                 setProduct(data.data);
                 // Set default size to first available
                 const sizes = Object.entries(data.data.prices || {}).filter(([, v]) => v);
@@ -148,8 +146,7 @@ export default function ProductDetail() {
         async function fetchReviews() {
             setReviewsLoading(true);
             try {
-                const res = await fetch(`/api/v1/reviews?productId=${product._id}&limit=10`);
-                const data = await res.json().catch(() => ({}));
+                const data = await apiRequest(`/reviews?productId=${product._id}&limit=10`);
                 setReviews(data.data || []);
             } catch { /* silent */ } finally {
                 setReviewsLoading(false);
@@ -159,8 +156,7 @@ export default function ProductDetail() {
         // Fetch related products (same type, different slug)
         async function fetchRelated() {
             try {
-                const res = await fetch(`/api/v1/products?type=${encodeURIComponent(product.type)}&limit=4`);
-                const data = await res.json().catch(() => ({}));
+                const data = await apiRequest(`/products?type=${encodeURIComponent(product.type)}&limit=4`);
                 setRelated((data.data || []).filter(p => p.slug !== slug).slice(0, 3));
             } catch { /* silent */ }
         }
@@ -294,7 +290,7 @@ export default function ProductDetail() {
                             {/* Wishlist button */}
                             <button
                                 className={`wishlist-btn pdp-wishlist ${wishlisted ? 'active' : ''}`}
-                                onClick={toggleWishlist}
+                                onClick={(e) => { e.stopPropagation(); toggleWishlist(); }}
                                 aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
                                 title={wishlisted ? 'Remove from wishlist' : 'Save to wishlist'}
                             >
@@ -363,7 +359,7 @@ export default function ProductDetail() {
                             <div className="pdp-qty-control">
                                 <button className="pdp-qty-btn" onClick={() => setQty(Math.max(1, qty - 1))}>−</button>
                                 <span className="pdp-qty-count">{qty}</span>
-                                <button className="pdp-qty-btn" onClick={() => setQty(qty + 1)}>+</button>
+                                <button className="pdp-qty-btn" onClick={() => setQty(Math.min(product.stock || 99, qty + 1))}>+</button>
                             </div>
                         </div>
 

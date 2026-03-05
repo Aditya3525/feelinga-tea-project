@@ -59,7 +59,7 @@ function ResetPasswordForm() {
                         <div style={{ fontSize: '3rem', marginBottom: 'var(--space-lg)' }}>✅</div>
                         <h2>Password Reset!</h2>
                         <p style={{ color: 'var(--color-text-muted)', marginTop: 'var(--space-md)' }}>
-                            Your password has been updated. Redirecting to login...
+                            Your password has been updated. Redirecting to homepage...
                         </p>
                     </div>
                 ) : (
