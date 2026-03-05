@@ -97,6 +97,12 @@ export default function Checkout() {
             const uniqueItems = cart.reduce((n, i) => n + i.qty, 0);
             clearCart();
             showToast('Order placed! 🎉', 'success');
+            if (paymentMethod === 'whatsapp') {
+                const waMsg = encodeURIComponent(
+                    `Hi! I just placed an order on Feelinga Tea.\n\nOrder No: ${orderNumber}\nTotal: ₹${total}\n\nKindly confirm my order and guide me for payment. Thank you!`
+                );
+                window.open(`https://wa.me/919673592818?text=${waMsg}`, '_blank');
+            }
             router.push(`/order-confirm?order=${encodeURIComponent(orderNumber)}&items=${uniqueItems}&total=${total}`);
         } catch (err: any) {
             showToast(err?.message || 'Failed to place order', 'error');
@@ -222,10 +228,13 @@ export default function Checkout() {
                             <div>
                                 <h2 style={{ marginBottom: 'var(--space-lg)' }}>Payment Method</h2>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
-                                    {[{ value: 'cod', label: '💰 Cash on Delivery' }, { value: 'upi', label: '📱 UPI' }, { value: 'card', label: '💳 Credit/Debit Card' }].map(pm => (
-                                        <label key={pm.value} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)', padding: 'var(--space-md)', border: `2px solid ${paymentMethod === pm.value ? 'var(--color-primary)' : 'var(--color-border)'}`, borderRadius: 'var(--radius-md)', cursor: 'pointer' }}>
-                                            <input type="radio" name="payment" value={pm.value} checked={paymentMethod === pm.value} onChange={() => setPaymentMethod(pm.value)} />
-                                            {pm.label}
+                                    {[{ value: 'cod', label: '💰 Cash on Delivery', desc: 'Pay in cash when your order arrives.' }, { value: 'whatsapp', label: '💬 Pay on WhatsApp', desc: 'Place your order and complete payment via WhatsApp.' }].map(pm => (
+                                        <label key={pm.value} style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-md)', padding: 'var(--space-md)', border: `2px solid ${paymentMethod === pm.value ? 'var(--color-primary)' : 'var(--color-border)'}`, borderRadius: 'var(--radius-md)', cursor: 'pointer' }}>
+                                            <input type="radio" name="payment" value={pm.value} checked={paymentMethod === pm.value} onChange={() => setPaymentMethod(pm.value)} style={{ marginTop: 3 }} />
+                                            <div>
+                                                <div style={{ fontWeight: 600 }}>{pm.label}</div>
+                                                <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginTop: 2 }}>{pm.desc}</div>
+                                            </div>
                                         </label>
                                     ))}
                                 </div>
@@ -246,7 +255,7 @@ export default function Checkout() {
                                     <p>{address.firstName} {address.lastName}<br />{address.line1}{address.line2 && `, ${address.line2}`}<br />{address.city}, {address.state} - {address.pincode}<br />📞 {address.phone}</p>
                                 </div>
                                 <div style={{ marginBottom: 'var(--space-lg)' }}>
-                                    <h3>Payment: {paymentMethod.toUpperCase()}</h3>
+                                    <h3>Payment: {paymentMethod === 'cod' ? '💰 Cash on Delivery' : '💬 Pay on WhatsApp'}</h3>
                                 </div>
                                 <div style={{ display: 'flex', gap: 'var(--space-md)', marginTop: 'var(--space-xl)' }}>
                                     <button className="btn btn--ghost" onClick={() => setStep(2)}>← Back</button>
