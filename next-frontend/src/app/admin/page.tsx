@@ -457,7 +457,7 @@ export default function Admin() {
                 headers: { Authorization: `Bearer ${tkn}` },
                 body: formData,
             });
-            const data = await res.json();
+            const data = await res.json().catch(() => ({}));
             if (!res.ok) throw new Error(data.message || 'Upload failed');
             setProductForm(prev => ({ ...prev, images: [...prev.images, ...data.data.urls] }));
         } catch (err) {

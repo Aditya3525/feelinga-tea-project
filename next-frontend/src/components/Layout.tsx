@@ -78,7 +78,7 @@ export default function Layout({ children }) {
                                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                             </button>
                         )}
-                        <button aria-label="Cart" id="cartBtn" onClick={() => setCartOpen(true)}>
+                        <button aria-label="Cart" id="cartBtn" onClick={() => setCartOpen(o => !o)}>
                             <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
                             {mounted && itemCount > 0 && <span className="cart-count" id="cartCount">{itemCount}</span>}
                         </button>
@@ -105,7 +105,7 @@ export default function Layout({ children }) {
             <aside className={`cart-drawer ${cartOpen ? 'active' : ''}`} id="cartDrawer" aria-label="Shopping cart">
                 <div className="cart-drawer__header">
                     <h3>Your Cart</h3>
-                    <button id="cartClose" aria-label="Close cart" onClick={() => setCartOpen(false)}>
+                    <button type="button" id="cartClose" aria-label="Close cart" onClick={() => setCartOpen(false)}>
                         <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12" /></svg>
                     </button>
                 </div>

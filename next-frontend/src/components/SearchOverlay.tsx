@@ -26,7 +26,7 @@ export default function SearchOverlay({ isOpen, onClose }) {
         try {
             // Use autocomplete endpoint for fast prefix-match suggestions
             const res = await fetch(`/api/v1/products/autocomplete?q=${encodeURIComponent(val)}`);
-            const data = await res.json();
+            const data = await res.json().catch(() => ({}));
             setResults(data.data || []);
         } catch { setResults([]); }
     };

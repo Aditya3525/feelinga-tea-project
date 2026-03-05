@@ -46,7 +46,8 @@ router.get('/', async (req, res, next) => {
         if (cached) return res.json(cached);
 
         const { type, mood, caffeine, minPrice, maxPrice,
-            sort = '-createdAt', page = 1, limit = 12, q } = req.query;
+            sort = '-createdAt', page = 1, limit = 12, q,
+            isNewArrival, isBestSeller } = req.query;
 
         const filter: Record<string, any> = {};
         if (type) filter.type = type;
@@ -57,6 +58,8 @@ router.get('/', async (req, res, next) => {
             if (minPrice) filter['prices.100g'].$gte = Number(minPrice);
             if (maxPrice) filter['prices.100g'].$lte = Number(maxPrice);
         }
+        if (isNewArrival === 'true') filter.isNewArrival = true;
+        if (isBestSeller === 'true') filter.isBestSeller = true;
 
         // Full-text search
         if (q) {

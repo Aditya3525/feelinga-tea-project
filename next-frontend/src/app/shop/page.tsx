@@ -58,7 +58,7 @@ function ShopInner() {
                 }
 
                 const res = await fetch(`/api/v1/products?${params}`);
-                const data = await res.json();
+                const data = await res.json().catch(() => ({}));
                 if (data.data) {
                     setProducts(data.data.map(p => ({
                         id: p._id,
@@ -128,6 +128,17 @@ function ShopInner() {
             <div className="container">
                 <div className="plp-layout section">
                     <aside className={`plp-sidebar ${mobileFilterOpen ? 'active' : ''}`}>
+                        <div className="plp-sidebar__header">
+                            <span className="plp-sidebar__title">Filters</span>
+                            <button
+                                type="button"
+                                className="plp-sidebar__close"
+                                aria-label="Close filters"
+                                onClick={() => setMobileFilterOpen(false)}
+                            >
+                                <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12" /></svg>
+                            </button>
+                        </div>
                         {filterGroups.map(group => (
                             <div className="filter-group" key={group.key}>
                                 <div className="filter-group__title">{group.title}</div>

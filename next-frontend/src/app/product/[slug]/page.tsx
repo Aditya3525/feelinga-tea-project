@@ -98,7 +98,7 @@ export default function ProductDetail() {
             try {
                 setLoading(true);
                 const res = await fetch(`/api/v1/products/${slug}`);
-                const data = await res.json();
+                const data = await res.json().catch(() => ({}) as any);
                 if (!res.ok) throw new Error(data.message || 'Product not found');
                 setProduct(data.data);
                 // Set default size to first available
@@ -149,7 +149,7 @@ export default function ProductDetail() {
             setReviewsLoading(true);
             try {
                 const res = await fetch(`/api/v1/reviews?productId=${product._id}&limit=10`);
-                const data = await res.json();
+                const data = await res.json().catch(() => ({}));
                 setReviews(data.data || []);
             } catch { /* silent */ } finally {
                 setReviewsLoading(false);
@@ -160,7 +160,7 @@ export default function ProductDetail() {
         async function fetchRelated() {
             try {
                 const res = await fetch(`/api/v1/products?type=${encodeURIComponent(product.type)}&limit=4`);
-                const data = await res.json();
+                const data = await res.json().catch(() => ({}));
                 setRelated((data.data || []).filter(p => p.slug !== slug).slice(0, 3));
             } catch { /* silent */ }
         }

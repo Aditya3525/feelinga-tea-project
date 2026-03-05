@@ -71,11 +71,17 @@ export default function Home() {
         async function fetchProducts() {
             try {
                 const [newRes, bestRes] = await Promise.all([
-                    fetch('/api/v1/products?limit=4&sort=-createdAt'),
-                    fetch('/api/v1/products?limit=4&sort=-reviewCount'),
+                    fetch('/api/v1/products?limit=4&isNewArrival=true&sort=-createdAt'),
+                    fetch('/api/v1/products?limit=4&isBestSeller=true&sort=-reviewCount'),
                 ]);
-                const newData = await newRes.json();
-                const bestData = await bestRes.json();
+                const newData = await newRes.json().catch(() => ({}));
+                let bestData = await bestRes.json().catch(() => ({}));
+
+                // Fallback: if no products are flagged as best sellers, use top-rated
+                if (!bestData.data || bestData.data.length === 0) {
+                    const fallbackRes = await fetch('/api/v1/products?limit=4&sort=-rating');
+                    bestData = await fallbackRes.json().catch(() => ({}));
+                }
 
                 const mapProduct = (p) => ({
                     id: p._id,
@@ -106,7 +112,7 @@ export default function Home() {
         async function fetchTestimonials() {
             try {
                 const res = await fetch('/api/v1/testimonials');
-                const data = await res.json();
+                const data = await res.json().catch(() => ({}));
                 if (data.data && data.data.length > 0) {
                     setTestimonials(data.data);
                 } else {
@@ -126,10 +132,10 @@ export default function Home() {
 
 
     const seasonalGifts = [
-        { name: 'Spring Festival Tea Box', type: 'Gift Collection', price: 1499, img: '/images/gift-box.png', note: '5 curated teas in a premium gift box', reviews: 45, stars: 5 },
-        { name: 'Wellness Ritual Box', type: 'Gift Collection', price: 999, img: '/images/gift-box.png', note: '3 wellness blends with infuser', reviews: 67, stars: 5 },
-        { name: "Connoisseur's Collection", type: 'Luxury Hamper', price: 3999, img: '/images/gift-box.png', note: '8 rare teas with teaware in wooden chest', reviews: 28, stars: 5 },
-        { name: 'Tea & Honey Pairing Set', type: 'Gift Collection', price: 799, img: '/images/herbal-tea.png', note: '2 teas paired with artisanal honey', reviews: 34, stars: 4 },
+        { name: 'Spring Festival Tea Box', type: 'Gift Collection', price: 1499, img: '/images/gift-box.png', note: '5 curated teas in a premium gift box', reviews: 45, stars: 5, inStock: true },
+        { name: 'Wellness Ritual Box', type: 'Gift Collection', price: 999, img: '/images/gift-box.png', note: '3 wellness blends with infuser', reviews: 67, stars: 5, inStock: true },
+        { name: "Connoisseur's Collection", type: 'Luxury Hamper', price: 3999, img: '/images/gift-box.png', note: '8 rare teas with teaware in wooden chest', reviews: 28, stars: 5, inStock: true },
+        { name: 'Tea & Honey Pairing Set', type: 'Gift Collection', price: 799, img: '/images/herbal-tea.png', note: '2 teas paired with artisanal honey', reviews: 34, stars: 4, inStock: true },
     ];
 
     return (
@@ -202,8 +208,10 @@ export default function Home() {
                     ) : (
                         <>
                             {/* New Arrivals */}
-                            <div role="tabpanel" id="hpanel-new" aria-labelledby="htab-new" className={`product-grid fade-in ${activeTab === 'new' ? '' : 'product-grid--hidden'}`}>
-                                {newArrivals.map(p => (
+                            <div role="tabpanel" id="hpanel-new" aria-labelledby="htab-new" className={`product-grid tab-panel ${activeTab === 'new' ? 'tab-panel--active' : 'product-grid--hidden'}`}>
+                                {newArrivals.length === 0 ? (
+                                    <p className="tab-panel__empty">No new arrivals at the moment. <Link href="/shop">Browse all teas</Link></p>
+                                ) : newArrivals.map(p => (
                                     <ProductCard
                                         key={p.id}
                                         product={p}
@@ -215,8 +223,10 @@ export default function Home() {
                             </div>
 
                             {/* Best Sellers */}
-                            <div role="tabpanel" id="hpanel-best" aria-labelledby="htab-best" className={`product-grid ${activeTab === 'best' ? '' : 'product-grid--hidden'}`}>
-                                {bestSellers.map(p => (
+                            <div role="tabpanel" id="hpanel-best" aria-labelledby="htab-best" className={`product-grid tab-panel ${activeTab === 'best' ? 'tab-panel--active' : 'product-grid--hidden'}`}>
+                                {bestSellers.length === 0 ? (
+                                    <p className="tab-panel__empty">Check back soon for our top picks. <Link href="/shop">Browse all teas</Link></p>
+                                ) : bestSellers.map(p => (
                                     <ProductCard
                                         key={p.id}
                                         product={p}
@@ -231,7 +241,7 @@ export default function Home() {
                     )}
 
                     {/* Seasonal Gifts — static */}
-                    <div role="tabpanel" id="hpanel-seasonal" aria-labelledby="htab-seasonal" className={`product-grid ${activeTab === 'seasonal' ? '' : 'product-grid--hidden'}`}>
+                    <div role="tabpanel" id="hpanel-seasonal" aria-labelledby="htab-seasonal" className={`product-grid tab-panel ${activeTab === 'seasonal' ? 'tab-panel--active' : 'product-grid--hidden'}`}>
                         {seasonalGifts.map((p, i) => (
                             <ProductCard
                                 key={i}
@@ -365,8 +375,8 @@ export default function Home() {
                             const email = (e.target as any).elements[0].value.trim();
                             try {
                                 const res = await fetch('/api/v1/newsletter', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
-                                const data = await res.json();
-                                if (!res.ok) throw new Error(data.message);
+                                const data = await res.json().catch(() => ({}) as any);
+                                if (!res.ok) throw new Error(data.message || `Request failed (${res.status})`);
                                 setNlStatus({ text: data.message || 'Subscribed!', type: 'success' });
                                 (e.target as any).reset();
                             } catch (err: any) {

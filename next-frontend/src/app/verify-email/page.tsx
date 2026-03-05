@@ -23,7 +23,7 @@ export default function VerifyEmail() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ token }),
                 });
-                const data = await res.json();
+                const data = await res.json().catch(() => ({}) as any);
                 if (!res.ok) throw new Error(data.message || 'Verification failed');
                 setStatus('success');
                 setMessage(data.message || 'Email verified successfully!');

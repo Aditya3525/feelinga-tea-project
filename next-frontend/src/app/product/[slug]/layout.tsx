@@ -6,7 +6,7 @@ async function fetchProduct(slug: string) {
             next: { revalidate: 3600 },
         });
         if (!res.ok) return null;
-        const json = await res.json();
+        const json = await res.json().catch(() => ({}));
         return json.data ?? null;
     } catch {
         return null;
