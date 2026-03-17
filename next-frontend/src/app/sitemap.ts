@@ -1,6 +1,8 @@
 import { MetadataRoute } from 'next';
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.feelinga.com';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL
+    || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://www.feelinga.com');
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000').replace(/\/$/, '');
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Static pages
@@ -19,8 +21,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Fetch all product slugs from API
     let productPages: MetadataRoute.Sitemap = [];
     try {
-        const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000';
-        const res = await fetch(`${apiBase}/api/v1/products?limit=500`, {
+        const res = await fetch(`${API_BASE_URL}/api/v1/products?limit=500`, {
             next: { revalidate: 3600 }, // revalidate every hour
         });
         if (res.ok) {

@@ -24,7 +24,8 @@ export default function About() {
                             <p className="overline">The Beginning</p>
                             <h2>A Founder's Journey</h2>
                             <p>Feelinga was born when our founder & managing director, Kailas Ishwar Mane, decided to share his passion for premium Indian teas with the world. A B.Sc. Agriculture graduate from VNMKV, Parbhani, Kailas brings a deep understanding of cultivation, soil science, and sustainable farming to every cup of tea we offer.</p>
-                            <p>Growing up in Pandharpur, Maharashtra, he developed a deep appreciation for authentic flavours and the simple joy that a perfect cup of tea can bring. Driven by the belief that happiness can be found in everyday moments, Kailas set out to build a brand that celebrates the art of tea — fresh, honest, and crafted to bring a smile to every sip.</p>
+                            <p>Raised in Pandharpur, Maharashtra — the spiritual heartland of the Deccan — Kailas developed a deep appreciation for authentic flavours and the simple joy that a perfect cup of tea can bring. In January 2025 he turned this passion into a venture, incorporating <strong>Vithubadayaji Industries Private Limited</strong> and launching the Feelinga brand to bring India&apos;s finest teas to every doorstep.</p>
+                            <p>Standing alongside Kailas is his co-director <strong>Jagabai Ishwar Mane</strong>, whose unwavering support and shared belief in the brand has been a cornerstone of Feelinga&apos;s journey from day one.</p>
                             <p>"I wanted people to experience tea the way it's meant to be — not just a drink, but a daily dose of happiness." — <em>Kailas Ishwar Mane, Founder & Managing Director</em></p>
                         </div>
                         <div className="about-visual" style={{ display: 'flex', justifyContent: 'center' }}>
@@ -75,13 +76,12 @@ export default function About() {
                     <SectionHeader overline="Milestones" title="Our Journey" className="fade-in" />
                     <div className="timeline fade-in">
                         {[
-                            { year: '2019', text: 'Feelinga founded in Darjeeling. First collection of 12 single-origin teas launched online.' },
-                            { year: '2020', text: 'Expanded to 30+ varieties. Launched wellness blends and herbal infusion line.' },
-                            { year: '2021', text: 'Reached 5,000 customers. Featured in Vogue India and Elle Decor.' },
-                            { year: '2022', text: 'Partnered with 15 estates. Launched gifting collection and corporate program.' },
-                            { year: '2023', text: '10,000+ customers. Switched to fully biodegradable packaging.' },
-                            { year: '2024', text: "Launched Tea Master's Selection and began exporting to UAE & Singapore." },
-                            { year: '2026', text: '50+ varieties, 15,000+ happy sippers, and growing with gratitude every day.' },
+                            { year: '2025', text: 'Vithubadayaji Industries Pvt. Ltd. incorporated in January 2025. Feelinga brand launched from Pandharpur, Maharashtra with a curated collection of premium Indian teas.' },
+                            { year: '2025', text: 'Obtained Shop Establishment Certificate and Udyam (MSME) registration. First 12 single-origin teas listed online.' },
+                            { year: '2025', text: 'Expanded to 30+ varieties. Launched wellness blends, herbal infusions, and the gifting collection.' },
+                            { year: '2026', text: 'Reached 5,000+ customers. Partnered with 15+ tea estates across Darjeeling, Assam, Nilgiris & Kangra Valley.' },
+                            { year: '2026', text: 'Switched to fully biodegradable packaging. Began exporting to UAE & Singapore.' },
+                            { year: '2026', text: '50+ varieties, 10,000+ happy sippers, and growing with gratitude every day.' },
                         ].map((t, i) => (
                             <div className="timeline-item" key={i}>
                                 <div className="timeline-item__year">{t.year}</div>

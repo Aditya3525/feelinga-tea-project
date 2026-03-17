@@ -3,30 +3,41 @@ import Layout from '../../components/Layout';
 import Link from 'next/link';
 import { useState } from 'react';
 import { apiRequest } from '../../utils/api';
+import type { FormEvent } from 'react';
+
+type FormStatus = {
+    text: string;
+    type: '' | 'success' | 'error';
+};
+
+function getErrorMessage(err: unknown, fallback: string): string {
+    return err instanceof Error ? err.message : fallback;
+}
 
 export default function Contact() {
-    const [formStatus, setFormStatus] = useState({ text: '', type: '' });
+    const [formStatus, setFormStatus] = useState<FormStatus>({ text: '', type: '' });
     const [submitting, setSubmitting] = useState(false);
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setSubmitting(true);
         setFormStatus({ text: '', type: '' });
+        const formData = new FormData(e.currentTarget);
         try {
             const body = {
-                name: e.target.contactName.value.trim(),
-                email: e.target.contactEmail.value.trim(),
-                subject: e.target.contactSubject.value,
-                message: e.target.contactMsg.value.trim(),
+                name: String(formData.get('contactName') || '').trim(),
+                email: String(formData.get('contactEmail') || '').trim(),
+                subject: String(formData.get('contactSubject') || ''),
+                message: String(formData.get('contactMsg') || '').trim(),
             };
             const data = await apiRequest('/contact', {
                 method: 'POST',
                 body: JSON.stringify(body),
             });
             setFormStatus({ text: data.message || "Thank you! We'll get back to you within 24 hours.", type: 'success' });
-            e.target.reset();
+            e.currentTarget.reset();
         } catch (err) {
-            setFormStatus({ text: err.message || 'Something went wrong. Please try again.', type: 'error' });
+            setFormStatus({ text: getErrorMessage(err, 'Something went wrong. Please try again.'), type: 'error' });
         } finally {
             setSubmitting(false);
         }

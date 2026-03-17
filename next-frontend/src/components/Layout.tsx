@@ -8,9 +8,10 @@ import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
 import SearchOverlay from './SearchOverlay';
 import CookieConsent from './CookieConsent';
+import type { AppProviderProps, CartItem } from '../types/app';
 
-export default function Layout({ children }) {
-    const { isAuthenticated, isAdmin, openAuthModal, user } = useAuth();
+export default function Layout({ children }: AppProviderProps) {
+    const { isAuthenticated, isAdmin, openAuthModal } = useAuth();
     const { cart, cartOpen, setCartOpen, removeFromCart, updateQty, itemCount, subtotal } = useCart();
     const { theme, toggleTheme } = useTheme();
     const pathname = usePathname();
@@ -78,7 +79,7 @@ export default function Layout({ children }) {
                                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                             </button>
                         )}
-                        <button aria-label="Cart" id="cartBtn" onClick={() => setCartOpen(o => !o)}>
+                        <button aria-label="Cart" id="cartBtn" onClick={() => setCartOpen((isOpen: boolean) => !isOpen)}>
                             <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
                             {mounted && itemCount > 0 && <span className="cart-count" id="cartCount">{itemCount}</span>}
                         </button>
@@ -88,6 +89,13 @@ export default function Layout({ children }) {
                     </div>
                 </div>
             </header>
+
+            {/* MOBILE NAV BACKDROP — tap outside to close */}
+            <div
+                className={`mobile-nav-overlay ${mobileNav ? 'active' : ''}`}
+                onClick={() => setMobileNav(false)}
+                aria-hidden="true"
+            />
 
             {/* MOBILE NAV */}
             <nav className={`mobile-nav ${mobileNav ? 'active' : ''}`} id="mobileNav" aria-label="Mobile navigation">
@@ -113,7 +121,7 @@ export default function Layout({ children }) {
                     {cart.length === 0 ? (
                         <div className="cart-empty"><div className="icon">🍃</div><p>Your cart is empty</p></div>
                     ) : (
-                        cart.map((item, i) => (
+                        cart.map((item: CartItem) => (
                             <div className="cart-item" key={item.key}>
                                 <div className="cart-item__img">{item.img ? <Image src={item.img} alt={item.name} width={60} height={60} className="cart-item__img-el" style={{ objectFit: 'cover' }} /> : '🍵'}</div>
                                 <div className="cart-item__details">
@@ -171,6 +179,11 @@ export default function Layout({ children }) {
                         <span>© 2026 Feelinga. All rights reserved.</span>
                         <span>Made with 🍃 in India</span>
                         <Link href="/admin" className="footer__admin-link">Admin Access</Link>
+                    </div>
+                    <div className="footer__legal">
+                        <span>Feelinga is a brand of <strong>Vithubadayaji Industries Pvt. Ltd.</strong></span>
+                        <span>Regd. Office: At Sulewadi, Post Piliv, Tal. Malshiras, Solapur, Maharashtra – 413310</span>
+                        <span>Shop Est. No. 2531100320058917 · Incorporated: 23 Jan 2025 · MSME Registered</span>
                     </div>
                 </div>
             </footer>

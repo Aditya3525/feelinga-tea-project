@@ -9,18 +9,47 @@ import SectionHeader from '../components/SectionHeader';
 import { useCart } from '../context/CartContext';
 import { renderStars } from '../utils/renderStars';
 
+type HomeProduct = {
+    id: string;
+    slug: string;
+    name: string;
+    type: string;
+    price: number;
+    img: string;
+    note: string;
+    reviews: number;
+    stars: number;
+    inStock: boolean;
+    typeName?: string;
+    badge?: string | null;
+    badgeColor?: string;
+};
+
+type HomeTestimonial = {
+    _id: string;
+    text: string;
+    author: string;
+    role: string;
+    rating: number;
+};
+
+type NewsletterStatus = {
+    text: string;
+    type: '' | 'success' | 'error';
+};
+
 export default function Home() {
     const [activeTab, setActiveTab] = useState('new');
     const { addToCart } = useCart();
-    const [nlStatus, setNlStatus] = useState({ text: '', type: '' });
+    const [nlStatus, setNlStatus] = useState<NewsletterStatus>({ text: '', type: '' });
 
-    const [newArrivals, setNewArrivals] = useState([]);
-    const [bestSellers, setBestSellers] = useState([]);
+    const [newArrivals, setNewArrivals] = useState<HomeProduct[]>([]);
+    const [bestSellers, setBestSellers] = useState<HomeProduct[]>([]);
     const [loadingProducts, setLoadingProducts] = useState(true);
 
     // Testimonials from API
-    const [testimonials, setTestimonials] = useState([]);
-    const fallbackTestimonials = [
+    const [testimonials, setTestimonials] = useState<HomeTestimonial[]>([]);
+    const fallbackTestimonials: HomeTestimonial[] = [
         { _id: '1', text: 'The Darjeeling First Flush is absolutely divine. It\'s like sipping on liquid sunshine — delicate, fragrant, and utterly refreshing. Best tea I\'ve had in years.', author: 'Priya Sharma', role: 'Tea Enthusiast, Mumbai', rating: 5 },
         { _id: '2', text: 'I ordered the Wellness Ritual gift box for my mother and she was overjoyed. The packaging is gorgeous and the teas are exceptionally fresh. Will order again!', author: 'Arjun Mehta', role: 'Repeat Customer, Delhi', rating: 5 },
         { _id: '3', text: 'Their Heritage Spiced Chai has replaced my morning coffee entirely. The blend of spices is perfectly balanced — warm but never overwhelming. An everyday essential.', author: 'Kavya Nair', role: 'Wellness Coach, Bangalore', rating: 5 },
@@ -28,7 +57,7 @@ export default function Home() {
     ];
 
     // Animated counter hook
-    const useCounter = (target: number, suffix = '') => {
+    const useCounter = (target: number, suffix = ''): { count: string; start: () => void } => {
         const [count, setCount] = useState(0);
         const [started, setStarted] = useState(false);
         useEffect(() => {
@@ -83,7 +112,7 @@ export default function Home() {
                     bestData = await fallbackRes.json().catch(() => ({}));
                 }
 
-                const mapProduct = (p) => ({
+                const mapProduct = (p: any): HomeProduct => ({
                     id: p._id,
                     slug: p.slug,
                     name: p.name,
@@ -125,17 +154,14 @@ export default function Home() {
         fetchTestimonials();
     }, []);
 
-    const handleAddToCart = (p) => {
+    const handleAddToCart = (p: HomeProduct) => {
         addToCart({ id: p.id, slug: p.slug, name: p.name, price: p.price, size: '100g', img: p.img });
     };
-
-
-
-    const seasonalGifts = [
-        { name: 'Spring Festival Tea Box', type: 'Gift Collection', price: 1499, img: '/images/gift-box.png', note: '5 curated teas in a premium gift box', reviews: 45, stars: 5, inStock: true },
-        { name: 'Wellness Ritual Box', type: 'Gift Collection', price: 999, img: '/images/gift-box.png', note: '3 wellness blends with infuser', reviews: 67, stars: 5, inStock: true },
-        { name: "Connoisseur's Collection", type: 'Luxury Hamper', price: 3999, img: '/images/gift-box.png', note: '8 rare teas with teaware in wooden chest', reviews: 28, stars: 5, inStock: true },
-        { name: 'Tea & Honey Pairing Set', type: 'Gift Collection', price: 799, img: '/images/herbal-tea.png', note: '2 teas paired with artisanal honey', reviews: 34, stars: 4, inStock: true },
+    const seasonalGifts: HomeProduct[] = [
+        { id: 'gift-spring-festival-box', slug: 'gift-spring-festival-box', name: 'Spring Festival Tea Box', type: 'Gift Collection', price: 1499, img: '/images/gift-box.png', note: '5 curated teas in a premium gift box', reviews: 45, stars: 5, inStock: true },
+        { id: 'gift-wellness-ritual-box', slug: 'gift-wellness-ritual-box', name: 'Wellness Ritual Box', type: 'Gift Collection', price: 999, img: '/images/gift-box.png', note: '3 wellness blends with infuser', reviews: 67, stars: 5, inStock: true },
+        { id: 'gift-connoisseurs-collection', slug: 'gift-connoisseurs-collection', name: "Connoisseur's Collection", type: 'Luxury Hamper', price: 3999, img: '/images/gift-box.png', note: '8 rare teas with teaware in wooden chest', reviews: 28, stars: 5, inStock: true },
+        { id: 'gift-tea-honey-pairing-set', slug: 'gift-tea-honey-pairing-set', name: 'Tea & Honey Pairing Set', type: 'Gift Collection', price: 799, img: '/images/herbal-tea.png', note: '2 teas paired with artisanal honey', reviews: 34, stars: 4, inStock: true },
     ];
 
     return (

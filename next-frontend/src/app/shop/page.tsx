@@ -7,14 +7,41 @@ import ProductCard from '../../components/ProductCard';
 import EmptyState from '../../components/EmptyState';
 import { useCart } from '../../context/CartContext';
 import { renderStars } from '../../utils/renderStars';
+import type { ChangeEvent } from 'react';
+
+type ShopSort = 'popular' | 'newest' | 'price-asc' | 'price-desc';
+type FilterGroupKey = 'type' | 'mood' | 'origin' | 'price';
+
+type ShopFilters = Record<FilterGroupKey, string[]>;
+
+type ShopProduct = {
+    id: string;
+    slug: string;
+    name: string;
+    type: string;
+    typeName?: string;
+    moods: string[];
+    origin: string;
+    price: number;
+    img: string;
+    note: string;
+    reviews: number;
+    stars: number;
+    badge?: string | null;
+    badgeColor?: string;
+    inStock: boolean;
+};
+
+type FilterOption = { value: string; label: string };
+type FilterGroup = { key: FilterGroupKey; title: string; options: FilterOption[] };
 
 function ShopInner() {
     const { addToCart } = useCart();
     const searchParams = useSearchParams();
-    const [products, setProducts] = useState([]);
+    const [products, setProducts] = useState<ShopProduct[]>([]);
     const [loading, setLoading] = useState(true);
-    const [filters, setFilters] = useState({ type: [], mood: [], origin: [], price: [] });
-    const [sort, setSort] = useState('popular');
+    const [filters, setFilters] = useState<ShopFilters>({ type: [], mood: [], origin: [], price: [] });
+    const [sort, setSort] = useState<ShopSort>('popular');
     const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -48,12 +75,12 @@ function ShopInner() {
                 params.set('page', String(page));
 
                 // Sort
-                const sortMap = { popular: '-reviewCount', newest: '-createdAt', 'price-asc': 'price', 'price-desc': '-price' };
+                const sortMap: Record<ShopSort, string> = { popular: '-reviewCount', newest: '-createdAt', 'price-asc': 'price', 'price-desc': '-price' };
                 params.set('sort', sortMap[sort] || '-reviewCount');
 
                 // Filters
                 if (filters.type.length === 1) {
-                    const typeMap = { green: 'Green Tea', black: 'Black Tea', white: 'White Tea', oolong: 'Oolong', herbal: 'Herbal', chai: 'Masala Chai' };
+                    const typeMap: Record<string, string> = { green: 'Green Tea', black: 'Black Tea', white: 'White Tea', oolong: 'Oolong', herbal: 'Herbal', chai: 'Masala Chai' };
                     if (typeMap[filters.type[0]]) params.set('type', typeMap[filters.type[0]]);
                 }
                 filters.mood.forEach(m => params.append('mood', m));
@@ -71,7 +98,7 @@ function ShopInner() {
                 const res = await fetch(`/api/v1/products?${params}`);
                 const data = await res.json().catch(() => ({}));
                 if (data.data) {
-                    setProducts(data.data.map(p => ({
+                    setProducts(data.data.map((p: any): ShopProduct => ({
                         id: p._id,
                         slug: p.slug,
                         name: p.name,
@@ -100,22 +127,27 @@ function ShopInner() {
         fetchProducts();
     }, [filters, sort, page, searchQuery]);
 
-    const toggleFilter = (group, value) => {
+    const toggleFilter = (group: FilterGroupKey, value: string) => {
         setPage(1); // reset to page 1 on filter change
-        setFilters(prev => ({ ...prev, [group]: prev[group].includes(value) ? prev[group].filter(v => v !== value) : [...prev[group], value] }));
+        setFilters((prev: ShopFilters) => ({
+            ...prev,
+            [group]: prev[group].includes(value)
+                ? prev[group].filter((v: string) => v !== value)
+                : [...prev[group], value],
+        }));
     };
 
-    const handleSortChange = (val) => { setSort(val); setPage(1); };
+    const handleSortChange = (val: ShopSort) => { setSort(val); setPage(1); };
 
 
-    const filterGroups = [
+    const filterGroups: FilterGroup[] = [
         { key: 'type', title: 'Tea Type', options: [{ value: 'green', label: 'Green Tea' }, { value: 'black', label: 'Black Tea' }, { value: 'white', label: 'White Tea' }, { value: 'oolong', label: 'Oolong' }, { value: 'herbal', label: 'Herbal & Tisane' }, { value: 'chai', label: 'Masala Chai' }] },
         { key: 'mood', title: 'Mood / Benefit', options: [{ value: 'energize', label: 'Energize' }, { value: 'relax', label: 'Relax' }, { value: 'focus', label: 'Focus' }, { value: 'detox', label: 'Detox' }, { value: 'glow', label: 'Glow' }] },
         { key: 'origin', title: 'Origin', options: [{ value: 'darjeeling', label: 'Darjeeling' }, { value: 'assam', label: 'Assam' }, { value: 'nilgiri', label: 'Nilgiri' }, { value: 'kangra', label: 'Kangra' }] },
         { key: 'price', title: 'Price Range', options: [{ value: 'under500', label: 'Under ₹500' }, { value: '500-999', label: '₹500 – ₹999' }, { value: '1000-plus', label: '₹1,000+' }] },
     ];
 
-    const handleAddToCart = (p) => {
+    const handleAddToCart = (p: ShopProduct) => {
         addToCart({
             id: p.id,
             slug: p.slug,
@@ -168,7 +200,7 @@ function ShopInner() {
                             <button className="btn btn--sm btn--secondary mobile-filter-toggle" onClick={() => setMobileFilterOpen(!mobileFilterOpen)}>☰ Filters</button>
                             <span className="plp-topbar__count">Showing {products.length} of {total} teas</span>
                             <div className="plp-topbar__sort">
-                                <select value={sort} onChange={(e) => handleSortChange(e.target.value)}>
+                                <select value={sort} onChange={(e: ChangeEvent<HTMLSelectElement>) => handleSortChange(e.target.value as ShopSort)}>
                                     <option value="popular">Sort: Popular</option>
                                     <option value="newest">Newest</option>
                                     <option value="price-asc">Price: Low to High</option>
@@ -176,6 +208,38 @@ function ShopInner() {
                                 </select>
                             </div>
                         </div>
+
+                        {/* Active filter chips — visible on mobile when filters are applied */}
+                        {Object.values(filters).some((arr: string[]) => arr.length > 0) && (
+                            <div className="plp-active-filters">
+                                {filterGroups.flatMap(group =>
+                                    (filters[group.key] as string[]).map(val => {
+                                        const opt = group.options.find(o => o.value === val);
+                                        return opt ? (
+                                            <span key={`${group.key}-${val}`} className="plp-active-filter">
+                                                {opt.label}
+                                                <span
+                                                    className="plp-active-filter__remove"
+                                                    role="button"
+                                                    aria-label={`Remove ${opt.label} filter`}
+                                                    onClick={() => toggleFilter(group.key, val)}
+                                                >✕</span>
+                                            </span>
+                                        ) : null;
+                                    })
+                                )}
+                                <span
+                                    className="plp-active-filter"
+                                    style={{ opacity: 0.7, cursor: 'pointer' }}
+                                    role="button"
+                                    aria-label="Clear all filters"
+                                    onClick={() => { setFilters({ type: [], mood: [], origin: [], price: [] }); setPage(1); }}
+                                >
+                                    Clear all ✕
+                                </span>
+                            </div>
+                        )}
+
                         {loading ? (
                             <div className="state-center py-3xl">
                                 <div className="state-emoji">🍵</div>
@@ -189,7 +253,7 @@ function ShopInner() {
                                         className="py-3xl grid-span-full"
                                     />
                                 ) : (
-                                    products.map((p) => (
+                                    products.map((p: ShopProduct) => (
                                         <ProductCard
                                             key={p.id}
                                             product={p}

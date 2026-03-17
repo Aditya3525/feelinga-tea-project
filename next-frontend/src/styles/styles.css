@@ -2534,6 +2534,19 @@ p {
 }
 
 /* ===== CART DRAWER ===== */
+
+.footer__legal {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: var(--space-md);
+  margin-top: var(--space-md);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.28);
+  text-align: center;
+  line-height: 1.6;
+}
 .cart-overlay {
   position: fixed;
   inset: 0;

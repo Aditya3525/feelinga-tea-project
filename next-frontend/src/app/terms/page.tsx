@@ -14,6 +14,13 @@ export default function Terms() {
             <div className="container section" style={{ maxWidth: 800, margin: '0 auto' }}>
                 <p style={{ color: 'var(--color-text-muted)', marginBottom: 'var(--space-xl)' }}>Last updated: January 2026</p>
 
+                <div style={{ background: 'var(--color-bg-alt)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: 'var(--space-lg)', marginBottom: 'var(--space-xl)', fontSize: '0.9rem', lineHeight: 1.7 }}>
+                    <strong>Legal entity:</strong> Vithubadayaji Industries Private Limited (trading as <strong>Feelinga</strong>)<br />
+                    <strong>Registered office:</strong> At Sulewadi, Post Piliv, Tal. Malshiras, Solapur, Maharashtra &ndash; 413310, India<br />
+                    <strong>Shop Est. No.:</strong> 2531100320058917 &nbsp;&middot;&nbsp; Incorporated: 23 January 2025 under the Companies Act, 2013<br />
+                    <strong>Governing law:</strong> These terms are governed by the laws of India. Disputes shall be subject to the exclusive jurisdiction of courts in Solapur, Maharashtra.
+                </div>
+
                 <h2 style={{ marginBottom: 'var(--space-md)' }}>1. Acceptance of Terms</h2>
                 <p style={{ lineHeight: 1.8, marginBottom: 'var(--space-lg)' }}>
                     By accessing or using the Feelinga website and services, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.
@@ -51,7 +58,7 @@ export default function Terms() {
 
                 <h2 style={{ marginBottom: 'var(--space-md)' }}>8. Contact</h2>
                 <p style={{ lineHeight: 1.8, marginBottom: 'var(--space-xl)' }}>
-                    For questions about these terms, please contact us at <a href="mailto:hello@feelinga.com">hello@feelinga.com</a> or through our <Link href="/contact">contact page</Link>.
+                    For questions about these terms, please contact <strong>Vithubadayaji Industries Private Limited</strong> (Feelinga) at <a href="mailto:hello@feelinga.com">hello@feelinga.com</a>, by phone at <a href="tel:+919673592818">+91 96735 92818</a>, or through our <Link href="/contact">contact page</Link>.
                 </p>
             </div>
         </Layout>

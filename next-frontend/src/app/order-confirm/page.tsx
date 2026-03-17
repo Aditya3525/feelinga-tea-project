@@ -7,8 +7,10 @@ import { useSearchParams } from 'next/navigation';
 function OrderConfirmInner() {
     const searchParams = useSearchParams();
     const orderNumber = searchParams.get('order') || null;
-    const items = searchParams.get('items') ? parseInt(searchParams.get('items')) : null;
-    const total = searchParams.get('total') ? parseInt(searchParams.get('total')) : null;
+    const itemsParam = searchParams.get('items');
+    const totalParam = searchParams.get('total');
+    const items = itemsParam ? parseInt(itemsParam, 10) : null;
+    const total = totalParam ? parseInt(totalParam, 10) : null;
 
     return (
         <Layout>

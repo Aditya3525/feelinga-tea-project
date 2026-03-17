@@ -1,4 +1,4 @@
-﻿import 'dotenv/config';
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -23,9 +23,11 @@ import adminRoutes from './modules/admin/routes.js';
 import contactRoutes from './modules/contact/routes.js';
 import uploadRoutes from './modules/upload/routes.js';
 import testimonialRoutes from './modules/testimonials/routes.js';
+import couponRoutes from './modules/coupons/routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase();
 
 // ===== ENV VALIDATION =====
 const requiredEnvVars = ['MONGODB_URI', 'JWT_SECRET', 'JWT_REFRESH_SECRET'];
@@ -131,38 +133,7 @@ app.use('/api/v1/admin', authenticate, authorize('admin'), adminRoutes);
 app.use('/api/v1/upload', authenticate, authorize('admin'), uploadRoutes);
 app.use('/api/v1/testimonials', testimonialRoutes);
 app.use('/api/v1', contactRoutes);
-
-// Public coupon validation endpoint
-import Coupon from './models/Coupon.js';
-app.post('/api/v1/coupons/validate', authenticate, async (req, res) => {
-    try {
-        const { code, subtotal } = req.body;
-        if (!code) return res.status(400).json({ status: 'error', message: 'Coupon code required' });
-        const coupon = await Coupon.findOne({
-            code: code.toUpperCase(),
-            active: true,
-            validFrom: { $lte: new Date() },
-            validTo: { $gte: new Date() },
-        });
-        if (!coupon) return res.status(404).json({ status: 'error', message: 'Invalid or expired coupon' });
-        if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
-            return res.status(400).json({ status: 'error', message: 'Coupon usage limit reached' });
-        }
-        if (subtotal && subtotal < coupon.minOrderAmount) {
-            return res.status(400).json({ status: 'error', message: `Minimum order ₹${coupon.minOrderAmount}` });
-        }
-        let discount = 0;
-        if (coupon.discountType === 'percentage') {
-            discount = Math.round((subtotal || 0) * coupon.discountValue / 100);
-            if (coupon.maxDiscount) discount = Math.min(discount, coupon.maxDiscount);
-        } else {
-            discount = coupon.discountValue;
-        }
-        res.json({ status: 'success', data: { code: coupon.code, discountType: coupon.discountType, discountValue: coupon.discountValue, discount, description: coupon.description } });
-    } catch (err) {
-        res.status(500).json({ status: 'error', message: 'Server error' });
-    }
-});
+app.use('/api/v1/coupons', couponRoutes);
 
 // ===== SERVE UPLOADED FILES =====
 const __filename = fileURLToPath(import.meta.url);
@@ -186,19 +157,22 @@ app.use(errorHandler);
 const start = async () => {
     await connectDB();
 
-    // Ensure primary admin account has admin role on every startup
-    const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || 'kailasmane777@gmail.com').toLowerCase();
-    try {
-        const result = await User.findOneAndUpdate(
-            { email: ADMIN_EMAIL },
-            { $set: { role: 'admin' } },
-            { new: true }
-        );
-        if (result) {
-            logger.info({ email: ADMIN_EMAIL }, 'Primary admin role confirmed');
+    // Ensure the configured primary admin account has admin role on every startup.
+    if (adminEmail) {
+        try {
+            const result = await User.findOneAndUpdate(
+                { email: adminEmail },
+                { $set: { role: 'admin' } },
+                { new: true }
+            );
+            if (result) {
+                logger.info({ email: adminEmail }, 'Primary admin role confirmed');
+            }
+        } catch (err) {
+            logger.warn({ err, email: adminEmail }, 'Could not enforce admin role at startup');
         }
-    } catch (err) {
-        logger.warn({ err }, 'Could not enforce admin role at startup');
+    } else {
+        logger.warn('ADMIN_EMAIL not set; skipping primary admin enforcement');
     }
 
     app.listen(PORT, () => {

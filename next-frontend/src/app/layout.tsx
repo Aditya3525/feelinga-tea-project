@@ -1,7 +1,9 @@
 import Providers from '../components/Providers';
 import '../styles/styles.css';
+import type { AppProviderProps } from '../types/app';
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
+    || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
 
 export const metadata = {
     metadataBase: new URL(siteUrl),
@@ -36,7 +38,7 @@ export const metadata = {
     },
 };
 
-export default function RootLayout({ children }) {
+export default function RootLayout({ children }: AppProviderProps) {
     return (
         <html lang="en">
             <body>

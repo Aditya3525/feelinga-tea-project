@@ -7,29 +7,42 @@ import Layout from '../../../../components/Layout';
 import { useAuth } from '../../../../context/AuthContext';
 import { apiRequest } from '../../../../utils/api';
 import { useToast } from '../../../../components/Toast';
+import type { OrderDetail, OrderItem } from '../../../../types/app';
+
+function getErrorMessage(err: unknown, fallback: string): string {
+    return err instanceof Error ? err.message : fallback;
+}
 
 export default function OrderDetail() {
-    const { id } = useParams();
+    const params = useParams<{ id: string }>();
+    const id = params?.id;
     const router = useRouter();
     const { isAuthenticated } = useAuth();
     const { showToast } = useToast();
-    const [order, setOrder] = useState(null);
+    const [order, setOrder] = useState<OrderDetail | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState<string | null>(null);
     const [cancelLoading, setCancelLoading] = useState(false);
     const [cancelConfirm, setCancelConfirm] = useState(false);
 
     useEffect(() => {
+        if (!id) {
+            setError('Invalid order id');
+            setLoading(false);
+            return;
+        }
+
         if (!isAuthenticated) {
             router.push('/');
             return;
         }
+
         async function fetchOrder() {
             try {
                 const data = await apiRequest(`/orders/${id}`);
-                setOrder(data.data);
+                setOrder(data.data as OrderDetail);
             } catch (err) {
-                setError(err.message || 'Failed to load order');
+                setError(getErrorMessage(err, 'Failed to load order'));
             } finally {
                 setLoading(false);
             }
@@ -37,8 +50,8 @@ export default function OrderDetail() {
         fetchOrder();
     }, [id, isAuthenticated, router]);
 
-    const statusColor = (status) => {
-        const map = {
+    const statusColor = (status: string) => {
+        const map: Record<string, string> = {
             pending:    'var(--color-warning)',
             confirmed:  'var(--color-info)',
             processing: '#8b5cf6',
@@ -49,9 +62,10 @@ export default function OrderDetail() {
         return map[status] || '#999';
     };
 
-    const canCancel = order && ['pending', 'confirmed'].includes(order.status);
+    const canCancel = Boolean(order && ['pending', 'confirmed'].includes(order.status));
 
     const handleCancel = async () => {
+        if (!id) return;
         if (!cancelConfirm) { setCancelConfirm(true); return; }
         setCancelConfirm(false);
         setCancelLoading(true);
@@ -61,9 +75,9 @@ export default function OrderDetail() {
                 body: JSON.stringify({ reason: 'Customer requested cancellation' }),
             });
             const data = await apiRequest(`/orders/${id}`);
-            setOrder(data.data);
-        } catch (err: any) {
-            showToast(err.message || 'Failed to cancel order', 'error');
+            setOrder(data.data as OrderDetail);
+        } catch (err) {
+            showToast(getErrorMessage(err, 'Failed to cancel order'), 'error');
         } finally {
             setCancelLoading(false);
         }
@@ -189,11 +203,11 @@ export default function OrderDetail() {
                     {/* Items */}
                     <div style={{ background: 'var(--color-bg-alt)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-lg)', marginBottom: 'var(--space-xl)' }}>
                         <h3 style={{ marginBottom: 'var(--space-md)' }}>Items</h3>
-                        {order.items?.map((item, i) => (
+                        {order.items?.map((item: OrderItem, i: number) => (
                             <div key={i} style={{
                                 display: 'flex', alignItems: 'center', gap: 'var(--space-md)',
                                 padding: 'var(--space-md) 0',
-                                borderBottom: i < order.items.length - 1 ? '1px solid var(--color-border)' : 'none',
+                                borderBottom: i < ((order.items?.length || 0) - 1) ? '1px solid var(--color-border)' : 'none',
                             }}>
                                 {item.image && (
                                     <Image src={item.image} alt={item.name} width={60} height={60} style={{ objectFit: 'contain', borderRadius: 'var(--radius-sm)', background: 'var(--color-bg)' }} />
@@ -232,7 +246,7 @@ export default function OrderDetail() {
                                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                     <span>Subtotal</span><span>₹{order.subtotal?.toLocaleString()}</span>
                                 </div>
-                                {order.discount > 0 && (
+                                {(order.discount || 0) > 0 && (
                                     <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--color-success)' }}>
                                         <span>Discount{order.couponCode ? ` (${order.couponCode})` : ''}</span><span>−₹{order.discount?.toLocaleString()}</span>
                                     </div>

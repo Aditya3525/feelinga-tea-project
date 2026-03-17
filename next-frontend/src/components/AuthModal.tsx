@@ -3,15 +3,35 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from './Toast';
 import { apiRequest } from '../utils/api';
+import type { FormEvent } from 'react';
+
+type AuthTab = 'login' | 'signup';
+
+type GoogleCredentialResponse = {
+    credential: string;
+};
 
 declare global {
-    interface Window { google?: any; }
+    interface Window {
+        google?: {
+            accounts: {
+                id: {
+                    initialize: (config: { client_id: string; callback: (response: GoogleCredentialResponse) => void }) => void;
+                    renderButton: (element: HTMLElement, options: Record<string, unknown>) => void;
+                };
+            };
+        };
+    }
+}
+
+function getErrorMessage(err: unknown, fallback: string): string {
+    return err instanceof Error ? err.message : fallback;
 }
 
 export default function AuthModal() {
     const { showAuthModal, closeAuthModal, login, register, googleLogin } = useAuth();
     const { showToast } = useToast();
-    const [activeTab, setActiveTab] = useState('login');
+    const [activeTab, setActiveTab] = useState<AuthTab>('login');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showForgot, setShowForgot] = useState(false);
@@ -19,7 +39,7 @@ export default function AuthModal() {
     const [forgotSent, setForgotSent] = useState(false);
     const dialogRef = useRef<HTMLDivElement>(null);
 
-    const handleGoogleLogin = useCallback(async (response) => {
+    const handleGoogleLogin = useCallback(async (response: GoogleCredentialResponse) => {
         setError('');
         setLoading(true);
         try {
@@ -27,7 +47,7 @@ export default function AuthModal() {
             showToast('Welcome! 🍵', 'success');
             closeAuthModal();
         } catch (err) {
-            setError(err.message || 'Google login failed');
+            setError(getErrorMessage(err, 'Google login failed'));
         } finally {
             setLoading(false);
         }
@@ -46,13 +66,14 @@ export default function AuthModal() {
             script.async = true;
             script.defer = true;
             script.onload = () => {
-                window.google?.accounts.id.initialize({
+                const google = window.google;
+                google?.accounts.id.initialize({
                     client_id: GOOGLE_CLIENT_ID,
                     callback: handleGoogleLogin,
                 });
                 const btnContainer = document.getElementById('google-signin-btn');
-                if (btnContainer) {
-                    window.google.accounts.id.renderButton(btnContainer, {
+                if (btnContainer && google) {
+                    google.accounts.id.renderButton(btnContainer, {
                         theme: 'outline', size: 'large', width: '100%', text: 'continue_with',
                     });
                 }
@@ -108,30 +129,34 @@ export default function AuthModal() {
 
     if (!showAuthModal) return null;
 
-    const handleLogin = async (e) => {
+    const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError('');
         setLoading(true);
+        const formData = new FormData(e.currentTarget);
         try {
-            await login(e.target.email.value, e.target.password.value);
+            await login(String(formData.get('email') || ''), String(formData.get('password') || ''));
             showToast('Welcome back! 🍵', 'success');
             closeAuthModal();
-        } catch (err) { setError(err.message); } finally { setLoading(false); }
+        } catch (err) { setError(getErrorMessage(err, 'Login failed')); } finally { setLoading(false); }
     };
 
-    const handleRegister = async (e) => {
+    const handleRegister = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError('');
-        if (e.target.password.value !== e.target.confirm.value) { setError('Passwords do not match'); return; }
+        const formData = new FormData(e.currentTarget);
+        const password = String(formData.get('password') || '');
+        const confirmPassword = String(formData.get('confirm') || '');
+        if (password !== confirmPassword) { setError('Passwords do not match'); return; }
         setLoading(true);
         try {
-            await register(e.target.name.value, e.target.email.value, e.target.password.value);
+            await register(String(formData.get('name') || ''), String(formData.get('email') || ''), password);
             showToast('Account created! Welcome to Feelinga 🍵', 'success');
             closeAuthModal();
-        } catch (err) { setError(err.message); } finally { setLoading(false); }
+        } catch (err) { setError(getErrorMessage(err, 'Registration failed')); } finally { setLoading(false); }
     };
 
-    const handleForgotPassword = async (e) => {
+    const handleForgotPassword = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
         try {
@@ -146,7 +171,7 @@ export default function AuthModal() {
         } finally { setLoading(false); }
     };
 
-    const switchTab = (tab) => { setActiveTab(tab); setError(''); setShowForgot(false); setForgotSent(false); };
+    const switchTab = (tab: AuthTab) => { setActiveTab(tab); setError(''); setShowForgot(false); setForgotSent(false); };
 
     return (
         <div className="auth-modal active">

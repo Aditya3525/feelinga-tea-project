@@ -6,8 +6,9 @@ import { ToastProvider } from '../components/Toast';
 import AuthModal from '../components/AuthModal';
 import useFadeIn from '../hooks/useFadeIn';
 import { useEffect, useState } from 'react';
+import type { AppProviderProps } from '../types/app';
 
-export default function Providers({ children }) {
+export default function Providers({ children }: AppProviderProps) {
     useFadeIn();
     const [loaded, setLoaded] = useState(false);
 

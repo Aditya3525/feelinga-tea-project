@@ -1,6 +1,7 @@
 'use client';
 import Layout from '../../../components/Layout';
 import { useState, useEffect, useCallback, useRef } from 'react';
+import type { FormEvent } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
@@ -11,11 +12,72 @@ import ProductGridSkeleton from '../../../components/ProductGridSkeleton';
 import EmptyState from '../../../components/EmptyState';
 import { apiRequest } from '../../../utils/api';
 
+type ProductBrewingInstructions = {
+    temperature?: string;
+    steepTime?: string;
+    amount?: string;
+    steps?: string[];
+};
+
+type ProductDetailData = {
+    _id: string;
+    slug: string;
+    name: string;
+    type: string;
+    shortDescription?: string;
+    description?: string;
+    images?: string[];
+    moods?: string[];
+    prices?: Record<string, number>;
+    inStock?: boolean;
+    stock?: number;
+    rating?: number;
+    reviewCount?: number;
+    origin?: string;
+    caffeine?: string;
+    tastingNotes?: string[];
+    brewingInstructions?: ProductBrewingInstructions;
+};
+
+type ReviewItem = {
+    _id: string;
+    rating: number;
+    title?: string;
+    body?: string;
+    createdAt: string;
+    user?: {
+        name?: string;
+    };
+};
+
+type RelatedProduct = {
+    _id: string;
+    slug: string;
+    name: string;
+    type: string;
+    images?: string[];
+    shortDescription?: string;
+    prices?: Record<string, number>;
+    rating?: number;
+    reviewCount?: number;
+};
+
+type ReviewFormState = {
+    rating: number;
+    title: string;
+    body: string;
+};
+
+function getErrorMessage(err: unknown, fallback: string): string {
+    return err instanceof Error ? err.message : fallback;
+}
+
 export default function ProductDetail() {
-    const { slug } = useParams();
-    const [product, setProduct] = useState(null);
+    const params = useParams<{ slug: string }>();
+    const slug = params?.slug;
+    const [product, setProduct] = useState<ProductDetailData | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState<string | null>(null);
     const [selectedSize, setSelectedSize] = useState('100g');
     const [qty, setQty] = useState(1);
     const [selectedImage, setSelectedImage] = useState(0);
@@ -23,87 +85,33 @@ export default function ProductDetail() {
     const [wishlistLoading, setWishlistLoading] = useState(false);
     const [lightboxOpen, setLightboxOpen] = useState(false);
     const [lightboxZoom, setLightboxZoom] = useState(false);
-    const touchStartX = useRef(0);
+    const touchStartX = useRef<number>(0);
 
     // Reviews state
-    const [reviews, setReviews] = useState([]);
+    const [reviews, setReviews] = useState<ReviewItem[]>([]);
     const [reviewsLoading, setReviewsLoading] = useState(false);
-    const [reviewForm, setReviewForm] = useState({ rating: 5, title: '', body: '' });
+    const [reviewForm, setReviewForm] = useState<ReviewFormState>({ rating: 5, title: '', body: '' });
     const [reviewSubmitting, setReviewSubmitting] = useState(false);
     const [activeTab, setActiveTab] = useState('description');
 
     // Related products
-    const [related, setRelated] = useState([]);
+    const [related, setRelated] = useState<RelatedProduct[]>([]);
 
     const { addToCart } = useCart();
     const { isAuthenticated, openAuthModal } = useAuth();
     const { showToast } = useToast();
 
-    // Dynamic document title & JSON-LD structured data
-    useEffect(() => {
-        if (!product) return;
-        document.title = `${product.name} — Premium ${product.type} | Feelinga`;
-        const meta = document.querySelector('meta[name="description"]');
-        const desc = product.shortDescription || (product.description ? product.description.substring(0, 160) : '');
-        if (meta) meta.setAttribute('content', desc);
-        else {
-            const m = document.createElement('meta');
-            m.name = 'description';
-            m.content = desc;
-            document.head.appendChild(m);
-        }
-
-        // JSON-LD Product schema
-        const jsonLd = {
-            '@context': 'https://schema.org',
-            '@type': 'Product',
-            name: product.name,
-            description: product.shortDescription || product.description,
-            image: product.images?.[0] || '',
-            sku: product.slug,
-            brand: { '@type': 'Brand', name: 'Feelinga' },
-            offers: {
-                '@type': 'Offer',
-                priceCurrency: 'INR',
-                price: product.prices?.['100g'] || 0,
-                availability: product.inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-                url: typeof window !== 'undefined' ? window.location.href : '',
-            },
-            ...(product.rating && product.reviewCount > 0 ? {
-                aggregateRating: {
-                    '@type': 'AggregateRating',
-                    ratingValue: product.rating,
-                    reviewCount: product.reviewCount,
-                },
-            } : {}),
-        };
-        let script = document.getElementById('product-jsonld') as HTMLScriptElement;
-        if (!script) {
-            script = document.createElement('script');
-            script.id = 'product-jsonld';
-            script.type = 'application/ld+json';
-            document.head.appendChild(script);
-        }
-        script.textContent = JSON.stringify(jsonLd);
-
-        return () => {
-            document.title = 'Feelinga — happiness is here';
-            const el = document.getElementById('product-jsonld');
-            if (el) el.remove();
-        };
-    }, [product]);
-
     useEffect(() => {
         async function fetchProduct() {
             try {
                 setLoading(true);
-                const data = await apiRequest(`/products/${slug}`);
+                const data = await apiRequest(`/products/${slug}`) as { data: ProductDetailData };
                 setProduct(data.data);
                 // Set default size to first available
                 const sizes = Object.entries(data.data.prices || {}).filter(([, v]) => v);
                 if (sizes.length > 0) setSelectedSize(sizes[0][0]);
-            } catch (err) {
-                setError(err.message);
+            } catch (err: unknown) {
+                setError(getErrorMessage(err, 'Failed to load product'));
             } finally {
                 setLoading(false);
             }
@@ -114,11 +122,13 @@ export default function ProductDetail() {
     // Check if product is already wishlisted
     useEffect(() => {
         if (!product || !isAuthenticated) return;
+        const productId = product._id;
+
         async function checkWishlist() {
             try {
-                const data = await apiRequest('/auth/wishlist');
-                const ids = (data.data || []).map(p => p._id || p);
-                setWishlisted(ids.includes(product._id));
+                const data = await apiRequest('/auth/wishlist') as { data?: Array<{ _id?: string } | string> };
+                const ids = (data.data || []).map((p) => (typeof p === 'string' ? p : p._id || ''));
+                setWishlisted(ids.includes(productId));
             } catch { /* silent */ }
         }
         checkWishlist();
@@ -127,13 +137,14 @@ export default function ProductDetail() {
     const toggleWishlist = async () => {
         if (!isAuthenticated) { openAuthModal(); return; }
         if (wishlistLoading) return;
+        if (!product) return;
         setWishlistLoading(true);
         try {
-            const data = await apiRequest(`/auth/wishlist/${product._id}`, { method: 'POST' });
+            const data = await apiRequest(`/auth/wishlist/${product._id}`, { method: 'POST' }) as { action?: string };
             setWishlisted(data.action === 'added');
             showToast(data.action === 'added' ? '❤️ Added to wishlist' : 'Removed from wishlist', 'success');
-        } catch (err) {
-            showToast(err.message, 'error');
+        } catch (err: unknown) {
+            showToast(getErrorMessage(err, 'Failed to update wishlist'), 'error');
         } finally {
             setWishlistLoading(false);
         }
@@ -141,12 +152,14 @@ export default function ProductDetail() {
 
     useEffect(() => {
         if (!product) return;
+        const productId = product._id;
+        const productType = product.type;
 
         // Fetch reviews
         async function fetchReviews() {
             setReviewsLoading(true);
             try {
-                const data = await apiRequest(`/reviews?productId=${product._id}&limit=10`);
+                const data = await apiRequest(`/reviews?productId=${productId}&limit=10`) as { data?: ReviewItem[] };
                 setReviews(data.data || []);
             } catch { /* silent */ } finally {
                 setReviewsLoading(false);
@@ -156,8 +169,8 @@ export default function ProductDetail() {
         // Fetch related products (same type, different slug)
         async function fetchRelated() {
             try {
-                const data = await apiRequest(`/products?type=${encodeURIComponent(product.type)}&limit=4`);
-                setRelated((data.data || []).filter(p => p.slug !== slug).slice(0, 3));
+                const data = await apiRequest(`/products?type=${encodeURIComponent(productType)}&limit=4`) as { data?: RelatedProduct[] };
+                setRelated((data.data || []).filter((p) => p.slug !== slug).slice(0, 3));
             } catch { /* silent */ }
         }
 
@@ -166,6 +179,8 @@ export default function ProductDetail() {
     }, [product, slug]);
 
     const handleAddToCart = () => {
+        if (!product) return;
+
         addToCart({
             id: product._id,
             slug: product.slug,
@@ -178,20 +193,21 @@ export default function ProductDetail() {
         showToast(`${product.name} (${selectedSize}) × ${qty} added to cart!`, 'success');
     };
 
-    const handleReviewSubmit = async (e) => {
+    const handleReviewSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!isAuthenticated) { openAuthModal(); return; }
+        if (!product) return;
         setReviewSubmitting(true);
         try {
             const data = await apiRequest('/reviews', {
                 method: 'POST',
                 body: JSON.stringify({ productId: product._id, ...reviewForm }),
-            });
-            setReviews(prev => [data.data, ...prev]);
+            }) as { data: ReviewItem };
+            setReviews((prev) => [data.data, ...prev]);
             setReviewForm({ rating: 5, title: '', body: '' });
             showToast('Review posted!', 'success');
-        } catch (err) {
-            showToast(err.message, 'error');
+        } catch (err: unknown) {
+            showToast(getErrorMessage(err, 'Failed to post review'), 'error');
         } finally {
             setReviewSubmitting(false);
         }
@@ -204,7 +220,7 @@ export default function ProductDetail() {
                     <span
                         key={n}
                         className={`pdp-star ${n <= rating ? 'active' : ''}`}
-                        onClick={interactive ? () => onChange(n) : undefined}
+                        onClick={interactive ? () => onChange?.(n) : undefined}
                     >★</span>
                 ))}
             </span>
@@ -214,10 +230,10 @@ export default function ProductDetail() {
     // Lightbox navigation
     const imageCount = product?.images?.length || 0;
     const lightboxNext = useCallback(() => {
-        if (imageCount > 1) setSelectedImage(prev => (prev + 1) % imageCount);
+        if (imageCount > 1) setSelectedImage((prev) => (prev + 1) % imageCount);
     }, [imageCount]);
     const lightboxPrev = useCallback(() => {
-        if (imageCount > 1) setSelectedImage(prev => (prev - 1 + imageCount) % imageCount);
+        if (imageCount > 1) setSelectedImage((prev) => (prev - 1 + imageCount) % imageCount);
     }, [imageCount]);
 
     // Keyboard navigation for lightbox
@@ -260,7 +276,12 @@ export default function ProductDetail() {
 
     const currentPrice = product.prices?.[selectedSize] || product.prices?.['100g'] || 0;
     const availableSizes = product.prices ? Object.entries(product.prices).filter(([, v]) => v) as [string, number][] : [];
-    const avgRating = reviews.length > 0 ? (reviews.reduce((s: number, r: any) => s + r.rating, 0) / reviews.length) : null;
+    const avgRating = reviews.length > 0 ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) : null;
+    const productImages = product.images || [];
+    const tastingNotes = product.tastingNotes || [];
+    const stockCount = product.stock || 0;
+    const brewingInstructions = product.brewingInstructions;
+    const brewingSteps = brewingInstructions?.steps || [];
 
     return (
         <Layout>
@@ -280,7 +301,7 @@ export default function ProductDetail() {
                     <div className="pdp-gallery">
                         <div className="pdp-media" style={{ cursor: 'zoom-in' }} onClick={() => setLightboxOpen(true)}>
                             <Image
-                                src={product.images?.[selectedImage] || product.images?.[0] || '/images/darjeeling-tea.png'}
+                                src={productImages[selectedImage] || productImages[0] || '/images/darjeeling-tea.png'}
                                 alt={product.name}
                                 width={420}
                                 height={420}
@@ -298,9 +319,9 @@ export default function ProductDetail() {
                             </button>
                         </div>
                         {/* Thumbnail gallery */}
-                        {product.images?.length > 1 && (
+                        {productImages.length > 1 && (
                             <div className="pdp-thumbs">
-                                {product.images.map((img, i) => (
+                                {productImages.map((img, i) => (
                                     <button
                                         key={i}
                                         onClick={() => setSelectedImage(i)}
@@ -359,7 +380,7 @@ export default function ProductDetail() {
                             <div className="pdp-qty-control">
                                 <button className="pdp-qty-btn" onClick={() => setQty(Math.max(1, qty - 1))}>−</button>
                                 <span className="pdp-qty-count">{qty}</span>
-                                <button className="pdp-qty-btn" onClick={() => setQty(Math.min(product.stock || 99, qty + 1))}>+</button>
+                                <button className="pdp-qty-btn" onClick={() => setQty(Math.min(stockCount || 99, qty + 1))}>+</button>
                             </div>
                         </div>
 
@@ -379,13 +400,13 @@ export default function ProductDetail() {
                         <div className="pdp-highlights">
                             {product.origin && <div><strong>🗺 Origin</strong><br />{product.origin}</div>}
                             {product.caffeine && <div><strong>☕ Caffeine</strong><br /><span className="pdp-text-cap">{product.caffeine}</span></div>}
-                            {product.tastingNotes?.length > 0 && <div className="pdp-highlight-full"><strong>👅 Tasting Notes</strong><br />{product.tastingNotes.join(' · ')}</div>}
+                            {tastingNotes.length > 0 && <div className="pdp-highlight-full"><strong>👅 Tasting Notes</strong><br />{tastingNotes.join(' · ')}</div>}
                         </div>
 
                         {/* Low stock warning */}
-                        {product.inStock && product.stock > 0 && product.stock <= 10 && (
+                        {product.inStock && stockCount > 0 && stockCount <= 10 && (
                             <div className="pdp-lowstock">
-                                ⚡ Only {product.stock} left — order soon!
+                                ⚡ Only {stockCount} left — order soon!
                             </div>
                         )}
 
@@ -459,13 +480,13 @@ export default function ProductDetail() {
                     {/* Brewing Tab */}
                     {activeTab === 'brewing' && (
                         <div role="tabpanel" id="pdp-panel-brewing" aria-labelledby="pdp-tab-brewing" className="pdp-tabpanel">
-                            {product.brewingInstructions ? (
+                            {brewingInstructions ? (
                                 <div>
                                     <div className="pdp-brew-grid">
                                         {[
-                                            { icon: '🌡️', label: 'Temperature', val: product.brewingInstructions.temperature },
-                                            { icon: '⏱️', label: 'Steep Time', val: product.brewingInstructions.steepTime },
-                                            { icon: '🥄', label: 'Amount', val: product.brewingInstructions.amount },
+                                            { icon: '🌡️', label: 'Temperature', val: brewingInstructions.temperature },
+                                            { icon: '⏱️', label: 'Steep Time', val: brewingInstructions.steepTime },
+                                            { icon: '🥄', label: 'Amount', val: brewingInstructions.amount },
                                         ].filter(x => x.val).map(x => (
                                             <div key={x.label} className="pdp-brew-card">
                                                 <div className="pdp-brew-icon">{x.icon}</div>
@@ -474,11 +495,11 @@ export default function ProductDetail() {
                                             </div>
                                         ))}
                                     </div>
-                                    {product.brewingInstructions.steps?.length > 0 && (
+                                    {brewingSteps.length > 0 && (
                                         <div>
                                             <h3 className="mb-md">Step-by-Step Guide</h3>
                                             <ol className="pdp-steps">
-                                                {product.brewingInstructions.steps.map((step, i) => (
+                                                {brewingSteps.map((step, i) => (
                                                     <li key={i} className="pdp-step">{step}</li>
                                                 ))}
                                             </ol>
@@ -530,14 +551,14 @@ export default function ProductDetail() {
                                     <form onSubmit={handleReviewSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
                                         <div>
                                             <label style={{ display: 'block', fontWeight: 600, marginBottom: 'var(--space-xs)' }}>Your Rating</label>
-                                            {renderStars(reviewForm.rating, true, (n) => setReviewForm(f => ({ ...f, rating: n })))}
+                                            {renderStars(reviewForm.rating, true, (n) => setReviewForm((f) => ({ ...f, rating: n })))}
                                         </div>
                                         <div>
                                             <label style={{ display: 'block', fontWeight: 600, marginBottom: 'var(--space-xs)' }}>Title <span style={{ fontWeight: 400, color: 'var(--color-text-muted)' }}>(optional)</span></label>
                                             <input
                                                 type="text" maxLength={100} placeholder="Summarise your experience"
                                                 value={reviewForm.title}
-                                                onChange={e => setReviewForm(f => ({ ...f, title: e.target.value }))}
+                                                onChange={e => setReviewForm((f) => ({ ...f, title: e.target.value }))}
                                                 style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }}
                                             />
                                         </div>
@@ -546,7 +567,7 @@ export default function ProductDetail() {
                                             <textarea
                                                 rows={4} maxLength={1000} placeholder="Share your experience with this tea..."
                                                 value={reviewForm.body}
-                                                onChange={e => setReviewForm(f => ({ ...f, body: e.target.value }))}
+                                                onChange={e => setReviewForm((f) => ({ ...f, body: e.target.value }))}
                                                 style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', resize: 'vertical' }}
                                             />
                                         </div>
@@ -718,6 +739,21 @@ export default function ProductDetail() {
                     )}
                 </div>
             )}
+
+            {/* ─── STICKY ADD-TO-CART — mobile only, hidden on desktop via CSS ─── */}
+            <div className="pdp-sticky-cta">
+                <div>
+                    <div className="pdp-sticky-cta__price">₹{(currentPrice * qty).toLocaleString('en-IN')}</div>
+                    <div className="pdp-sticky-cta__label">{selectedSize} · Qty {qty}</div>
+                </div>
+                <button
+                    className="btn btn--primary pdp-sticky-cta__btn"
+                    onClick={handleAddToCart}
+                    disabled={!product.inStock}
+                >
+                    {product.inStock ? '🛒 Add to Cart' : 'Out of Stock'}
+                </button>
+            </div>
         </Layout>
     );
 }

@@ -14,6 +14,12 @@ export default function Privacy() {
             <div className="container section" style={{ maxWidth: 800, margin: '0 auto' }}>
                 <p style={{ color: 'var(--color-text-muted)', marginBottom: 'var(--space-xl)' }}>Last updated: January 2026</p>
 
+                <div style={{ background: 'var(--color-bg-alt)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: 'var(--space-lg)', marginBottom: 'var(--space-xl)', fontSize: '0.9rem', lineHeight: 1.7 }}>
+                    <strong>Legal entity:</strong> Vithubadayaji Industries Private Limited (trading as <strong>Feelinga</strong>)<br />
+                    <strong>Registered office:</strong> At Sulewadi, Post Piliv, Tal. Malshiras, Solapur, Maharashtra &ndash; 413310, India<br />
+                    <strong>Contact:</strong> <a href="mailto:hello@feelinga.com">hello@feelinga.com</a> &nbsp;&middot;&nbsp; +91&nbsp;96735&nbsp;92818
+                </div>
+
                 <h2 style={{ marginBottom: 'var(--space-md)' }}>1. Information We Collect</h2>
                 <p style={{ lineHeight: 1.8, marginBottom: 'var(--space-lg)' }}>
                     When you use Feelinga, we collect information you provide directly — such as your name, email address, phone number, shipping address, and payment details when placing an order. We also collect usage data including pages visited, browser type, and device information to improve our services.
@@ -41,7 +47,7 @@ export default function Privacy() {
 
                 <h2 style={{ marginBottom: 'var(--space-md)' }}>6. Contact Us</h2>
                 <p style={{ lineHeight: 1.8, marginBottom: 'var(--space-xl)' }}>
-                    If you have questions about this privacy policy or our data practices, please reach out to us at <a href="mailto:hello@feelinga.com">hello@feelinga.com</a> or through our <Link href="/contact">contact page</Link>.
+                    If you have questions about this privacy policy or our data practices, please contact <strong>Vithubadayaji Industries Private Limited</strong> (Feelinga) at <a href="mailto:hello@feelinga.com">hello@feelinga.com</a>, by phone at <a href="tel:+919673592818">+91 96735 92818</a>, or through our <Link href="/contact">contact page</Link>. Our registered office is at At Sulewadi, Post Piliv, Tal. Malshiras, Solapur, Maharashtra &ndash; 413310, India.
                 </p>
             </div>
         </Layout>

@@ -1,15 +1,16 @@
 'use client';
 import { createContext, useContext, useState, useCallback } from 'react';
+import type { AppProviderProps, ToastContextValue, ToastItem, ToastType } from '../types/app';
 
-const ToastContext = createContext<any>(null);
+const ToastContext = createContext<ToastContextValue | undefined>(undefined);
 
-export function ToastProvider({ children }) {
-    const [toasts, setToasts] = useState([]);
+export function ToastProvider({ children }: AppProviderProps) {
+    const [toasts, setToasts] = useState<ToastItem[]>([]);
 
-    const showToast = useCallback((message, type = 'info', img) => {
+    const showToast = useCallback((message: string, type: ToastType = 'info', img?: string) => {
         const id = Date.now();
-        setToasts(prev => [...prev, { id, message, type, img }]);
-        setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3500);
+        setToasts((prev: ToastItem[]) => [...prev, { id, message, type, img }]);
+        setTimeout(() => setToasts((prev: ToastItem[]) => prev.filter(t => t.id !== id)), 3500);
     }, []);
 
     return (
@@ -27,4 +28,8 @@ export function ToastProvider({ children }) {
     );
 }
 
-export function useToast() { return useContext(ToastContext); }
+export function useToast(): ToastContextValue {
+    const context = useContext(ToastContext);
+    if (!context) throw new Error('useToast must be used within ToastProvider');
+    return context;
+}

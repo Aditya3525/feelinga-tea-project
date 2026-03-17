@@ -2,10 +2,17 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import type { ChangeEvent } from 'react';
+import type { ProductSearchResult } from '../types/app';
 
-export default function SearchOverlay({ isOpen, onClose }) {
+type SearchOverlayProps = {
+    isOpen: boolean;
+    onClose: () => void;
+};
+
+export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
     const [query, setQuery] = useState('');
-    const [results, setResults] = useState([]);
+    const [results, setResults] = useState<ProductSearchResult[]>([]);
     const inputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
 
@@ -14,12 +21,12 @@ export default function SearchOverlay({ isOpen, onClose }) {
     }, [isOpen]);
 
     useEffect(() => {
-        const handler = (e) => { if (e.key === 'Escape') onClose(); };
+        const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
         window.addEventListener('keydown', handler);
         return () => window.removeEventListener('keydown', handler);
     }, [onClose]);
 
-    const handleSearch = async (e) => {
+    const handleSearch = async (e: ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
         setQuery(val);
         if (val.length < 1) { setResults([]); return; }
@@ -33,7 +40,7 @@ export default function SearchOverlay({ isOpen, onClose }) {
 
     const tags = ['Green Tea', 'Darjeeling', 'Herbal', 'Chai', 'Wellness', 'Gift Sets'];
 
-    const handleTagClick = (tag) => {
+    const handleTagClick = (tag: string) => {
         if (tag === 'Gift Sets') {
             router.push('/gifting');
         } else {

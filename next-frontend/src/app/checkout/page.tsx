@@ -8,6 +8,19 @@ import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../components/Toast';
 import EmptyState from '../../components/EmptyState';
 import { apiRequest } from '../../utils/api';
+import type { UserAddress } from '../../types/app';
+
+type PaymentMethod = 'cod' | 'whatsapp';
+
+type CouponApplied = {
+    code: string;
+    discount: number;
+};
+
+function getErrorMessage(err: unknown, fallback: string): string {
+    return err instanceof Error ? err.message : fallback;
+}
+
 export default function Checkout() {
     const { cart, subtotal, shipping, clearCart } = useCart();
     const { isAuthenticated, openAuthModal, user } = useAuth();
@@ -15,18 +28,19 @@ export default function Checkout() {
     const router = useRouter();
     const [step, setStep] = useState(1);
     const [address, setAddress] = useState({ firstName: '', lastName: '', line1: '', line2: '', city: '', state: '', pincode: '', phone: '' });
-    const [paymentMethod, setPaymentMethod] = useState('cod');
+    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod');
     const [notes, setNotes] = useState('');
     const [loading, setLoading] = useState(false);
     const [couponCode, setCouponCode] = useState('');
-    const [couponApplied, setCouponApplied] = useState<any>(null);
+    const [couponApplied, setCouponApplied] = useState<CouponApplied | null>(null);
     const [couponError, setCouponError] = useState('');
     const [couponLoading, setCouponLoading] = useState(false);
+    const savedAddresses = user?.addresses ?? [];
 
     // Pre-fill shipping address from user's default saved address
     useEffect(() => {
-        if (!isAuthenticated || !user?.addresses?.length) return;
-        const defaultAddr = user.addresses.find((a: any) => a.isDefault) || user.addresses[0];
+        if (!isAuthenticated || savedAddresses.length === 0) return;
+        const defaultAddr = savedAddresses.find((a) => a.isDefault) || savedAddresses[0];
         if (defaultAddr && !address.firstName && !address.line1) {
             const nameParts = (defaultAddr.fullName || '').split(' ');
             setAddress({
@@ -40,7 +54,7 @@ export default function Checkout() {
                 phone: defaultAddr.phone || '',
             });
         }
-    }, [isAuthenticated, user]);
+    }, [isAuthenticated, savedAddresses, address.firstName, address.line1]);
 
     const discount = couponApplied?.discount || 0;
     // Tax on pre-discount subtotal (matches backend: Math.round(subtotal * 0.05))
@@ -56,9 +70,9 @@ export default function Checkout() {
                 method: 'POST',
                 body: JSON.stringify({ code: couponCode.trim(), subtotal }),
             });
-            setCouponApplied(data.data);
-        } catch (err: any) {
-            setCouponError(err.message || 'Invalid coupon');
+            setCouponApplied(data.data as CouponApplied);
+        } catch (err) {
+            setCouponError(getErrorMessage(err, 'Invalid coupon'));
             setCouponApplied(null);
         } finally {
             setCouponLoading(false);
@@ -104,8 +118,8 @@ export default function Checkout() {
                 window.open(`https://wa.me/919673592818?text=${waMsg}`, '_blank');
             }
             router.push(`/order-confirm?order=${encodeURIComponent(orderNumber)}&items=${uniqueItems}&total=${total}`);
-        } catch (err: any) {
-            showToast(err?.message || 'Failed to place order', 'error');
+        } catch (err) {
+            showToast(getErrorMessage(err, 'Failed to place order'), 'error');
         } finally {
             setLoading(false);
         }
@@ -181,13 +195,13 @@ export default function Checkout() {
                         {step === 1 && (
                             <div>
                                 <h2 style={{ marginBottom: 'var(--space-lg)' }}>Shipping Address</h2>
-                                {isAuthenticated && user?.addresses?.length > 0 && (
+                                {isAuthenticated && savedAddresses.length > 0 && (
                                     <div style={{ marginBottom: 'var(--space-lg)' }}>
                                         <label style={{ fontWeight: 600, marginBottom: 'var(--space-xs)', display: 'block' }}>Use a saved address</label>
                                         <select
                                             style={{ width: '100%', padding: '10px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }}
                                             onChange={(e) => {
-                                                const addr = user.addresses[parseInt(e.target.value)];
+                                                const addr = savedAddresses[parseInt(e.target.value, 10)] as UserAddress | undefined;
                                                 if (!addr) return;
                                                 const nameParts = (addr.fullName || '').split(' ');
                                                 setAddress({
@@ -201,9 +215,9 @@ export default function Checkout() {
                                                     phone: addr.phone || '',
                                                 });
                                             }}
-                                            defaultValue={user.addresses.findIndex((a: any) => a.isDefault) >= 0 ? user.addresses.findIndex((a: any) => a.isDefault) : 0}
+                                            defaultValue={savedAddresses.findIndex((a) => a.isDefault) >= 0 ? savedAddresses.findIndex((a) => a.isDefault) : 0}
                                         >
-                                            {user.addresses.map((a: any, i: number) => (
+                                            {savedAddresses.map((a: UserAddress, i: number) => (
                                                 <option key={a._id || i} value={i}>{a.label} — {a.fullName}, {a.city}{a.isDefault ? ' (Default)' : ''}</option>
                                             ))}
                                         </select>
@@ -230,7 +244,7 @@ export default function Checkout() {
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
                                     {[{ value: 'cod', label: '💰 Cash on Delivery', desc: 'Pay in cash when your order arrives.' }, { value: 'whatsapp', label: '💬 Pay on WhatsApp', desc: 'Place your order and complete payment via WhatsApp.' }].map(pm => (
                                         <label key={pm.value} style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-md)', padding: 'var(--space-md)', border: `2px solid ${paymentMethod === pm.value ? 'var(--color-primary)' : 'var(--color-border)'}`, borderRadius: 'var(--radius-md)', cursor: 'pointer' }}>
-                                            <input type="radio" name="payment" value={pm.value} checked={paymentMethod === pm.value} onChange={() => setPaymentMethod(pm.value)} style={{ marginTop: 3 }} />
+                                            <input type="radio" name="payment" value={pm.value} checked={paymentMethod === pm.value} onChange={() => setPaymentMethod(pm.value as PaymentMethod)} style={{ marginTop: 3 }} />
                                             <div>
                                                 <div style={{ fontWeight: 600 }}>{pm.label}</div>
                                                 <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginTop: 2 }}>{pm.desc}</div>

@@ -1,23 +1,33 @@
 'use client';
 import Layout from '../../components/Layout';
 import Link from 'next/link';
-import Image from 'next/image';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { apiRequest } from '../../utils/api';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../components/Toast';
 import EmptyState from '../../components/EmptyState';
 import '../../styles/profile.css';
+import type { FormEvent } from 'react';
+import type { OrderSummary, UserAddress, UserProfile } from '../../types/app';
+
+type FormMessage = {
+    text: string;
+    type: '' | 'success' | 'error';
+};
+
+function getErrorMessage(err: unknown, fallback: string): string {
+    return err instanceof Error ? err.message : fallback;
+}
 
 export default function Profile() {
     const { user, isAuthenticated, isAdmin, openAuthModal, logout, updateProfile, setUser } = useAuth();
     const { showToast } = useToast();
     const router = useRouter();
     const [activeTab, setActiveTab] = useState('info');
-    const [profileMsg, setProfileMsg] = useState({ text: '', type: '' });
-    const [passwordMsg, setPasswordMsg] = useState({ text: '', type: '' });
-    const [orders, setOrders] = useState([]);
+    const [profileMsg, setProfileMsg] = useState<FormMessage>({ text: '', type: '' });
+    const [passwordMsg, setPasswordMsg] = useState<FormMessage>({ text: '', type: '' });
+    const [orders, setOrders] = useState<OrderSummary[]>([]);
 
     // Read ?tab= query param for deep-linking (e.g. footer "Track Order")
     useEffect(() => {
@@ -30,40 +40,42 @@ export default function Profile() {
         (async () => {
             try {
                 const data = await apiRequest('/orders');
-                setOrders(data.data || []);
+                setOrders((data.data || []) as OrderSummary[]);
             } catch (err) {
                 console.error('Failed to load orders:', err);
             }
         })();
     }, [isAuthenticated]);
 
-    const handleProfileUpdate = async (e) => {
+    const handleProfileUpdate = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setProfileMsg({ text: '', type: '' });
+        const formData = new FormData(e.currentTarget);
         try {
-            const name = e.target.profileName.value.trim();
-            const email = e.target.profileEmail.value.trim();
-            const phone = e.target.profilePhone.value.trim();
-            const updates: any = { name, email, phone };
+            const name = String(formData.get('profileName') || '').trim();
+            const email = String(formData.get('profileEmail') || '').trim();
+            const phone = String(formData.get('profilePhone') || '').trim();
+            const updates: Record<string, string> = { name, email, phone };
             // Backend requires currentPassword when changing email
             if (email !== user?.email) {
-                const pw = e.target.profileCurrentPassword?.value;
+                const pw = String(formData.get('profileCurrentPassword') || '');
                 if (!pw) { setProfileMsg({ text: 'Current password is required to change email', type: 'error' }); return; }
                 updates.currentPassword = pw;
             }
             await updateProfile(updates);
             setProfileMsg({ text: 'Profile updated!', type: 'success' });
         } catch (err) {
-            setProfileMsg({ text: err.message, type: 'error' });
+            setProfileMsg({ text: getErrorMessage(err, 'Failed to update profile'), type: 'error' });
         }
     };
 
-    const handlePasswordChange = async (e) => {
+    const handlePasswordChange = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setPasswordMsg({ text: '', type: '' });
-        const currentPassword = e.target.currentPassword.value;
-        const newPassword = e.target.newPassword.value;
-        const confirmPassword = e.target.confirmPassword.value;
+        const formData = new FormData(e.currentTarget);
+        const currentPassword = String(formData.get('currentPassword') || '');
+        const newPassword = String(formData.get('newPassword') || '');
+        const confirmPassword = String(formData.get('confirmPassword') || '');
         if (newPassword !== confirmPassword) {
             setPasswordMsg({ text: 'Passwords do not match', type: 'error' });
             return;
@@ -74,44 +86,45 @@ export default function Profile() {
                 body: JSON.stringify({ currentPassword, newPassword }),
             });
             setPasswordMsg({ text: 'Password updated successfully!', type: 'success' });
-            e.target.reset();
+            e.currentTarget.reset();
         } catch (err) {
-            setPasswordMsg({ text: err.message, type: 'error' });
+            setPasswordMsg({ text: getErrorMessage(err, 'Failed to update password'), type: 'error' });
         }
     };
 
-    const handleAddAddress = async (e) => {
+    const handleAddAddress = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        const formData = new FormData(e.currentTarget);
         try {
             const body = {
-                label: e.target.addrLabel.value,
-                fullName: e.target.addrName.value.trim(),
-                phone: e.target.addrPhone.value.trim(),
-                addressLine1: e.target.addrLine1.value.trim(),
-                addressLine2: e.target.addrLine2.value.trim(),
-                city: e.target.addrCity.value.trim(),
-                state: e.target.addrState.value.trim(),
-                pincode: e.target.addrPincode.value.trim(),
-                isDefault: e.target.addrDefault.checked,
+                label: String(formData.get('addrLabel') || ''),
+                fullName: String(formData.get('addrName') || '').trim(),
+                phone: String(formData.get('addrPhone') || '').trim(),
+                addressLine1: String(formData.get('addrLine1') || '').trim(),
+                addressLine2: String(formData.get('addrLine2') || '').trim(),
+                city: String(formData.get('addrCity') || '').trim(),
+                state: String(formData.get('addrState') || '').trim(),
+                pincode: String(formData.get('addrPincode') || '').trim(),
+                isDefault: formData.get('addrDefault') === 'on',
             };
             const data = await apiRequest('/auth/me/addresses', {
                 method: 'POST',
                 body: JSON.stringify(body),
             });
-            setUser(prev => ({ ...prev, addresses: data.data.addresses }));
-            e.target.reset();
+            setUser((prev: UserProfile | null) => (prev ? { ...prev, addresses: data.data.addresses as UserAddress[] } : prev));
+            e.currentTarget.reset();
             setShowAddressForm(false);
         } catch (err) {
-            showToast(err.message || 'Failed to save address', 'error');
+            showToast(getErrorMessage(err, 'Failed to save address'), 'error');
         }
     };
 
-    const deleteAddress = async (id) => {
+    const deleteAddress = async (id: string) => {
         try {
             const data = await apiRequest(`/auth/me/addresses/${id}`, { method: 'DELETE' });
-            setUser(prev => ({ ...prev, addresses: data.data.addresses }));
+            setUser((prev: UserProfile | null) => (prev ? { ...prev, addresses: data.data.addresses as UserAddress[] } : prev));
         } catch (err) {
-            showToast(err.message || 'Failed to remove address', 'error');
+            showToast(getErrorMessage(err, 'Failed to remove address'), 'error');
         }
     };
 
@@ -123,6 +136,25 @@ export default function Profile() {
     const [showAddressForm, setShowAddressForm] = useState(false);
     const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
+    const tabs = [
+        { key: 'info', label: 'Profile', icon: '👤' },
+        { key: 'password', label: 'Password', icon: '🔒' },
+        { key: 'addresses', label: 'Addresses', icon: '📍' },
+        { key: 'orders', label: 'Orders', icon: '📦' },
+    ];
+
+    const formatOrderDate = (value: string) => {
+        try {
+            return new Date(value).toLocaleDateString('en-IN', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+            });
+        } catch {
+            return value;
+        }
+    };
+
     if (!isAuthenticated) {
         return (
             <Layout>
@@ -133,43 +165,69 @@ export default function Profile() {
         );
     }
 
-    const tabs = ['info', 'password', 'addresses', 'orders'];
-
     return (
         <Layout>
+            <div className="page-hero page-hero--compact">
+                <div className="container">
+                    <nav className="breadcrumb" aria-label="Breadcrumb"><Link href="/">Home</Link> <span>/</span> <span>My Account</span></nav>
+                    <p className="overline">Account Center</p>
+                    <h1>My Account</h1>
+                    <p>Manage your profile, addresses, password, and orders in one place.</p>
+                </div>
+            </div>
+
             <div className="container section">
-                <h1 style={{ marginBottom: 'var(--space-xl)' }}>My Account</h1>
+                <div className="profile">
+                    <aside className="profile__sidebar">
+                        <div className="profile__avatar">{(user?.name?.charAt(0) || 'U').toUpperCase()}</div>
+                        <div className="profile__name">{user?.name || 'Guest User'}</div>
+                        <div className="profile__email">{user?.email || 'No email'}</div>
 
-                <div className="profile-layout">
-                    {/* Sidebar Nav */}
-                    <nav className="profile__nav">
-                        {tabs.map(tab => (
-                            <button key={tab} className={`profile__nav-item ${activeTab === tab ? 'active' : ''}`} data-tab={tab} onClick={() => setActiveTab(tab)}>
-                                {tab === 'info' ? '👤 Profile' : tab === 'password' ? '🔒 Password' : tab === 'addresses' ? '📍 Addresses' : '📦 Orders'}
-                            </button>
-                        ))}
-                        {isAdmin && (
-                            <Link href="/admin" className="profile__nav-item" style={{ color: 'var(--color-accent)', fontWeight: 600, textDecoration: 'none', display: 'block' }}>📊 Admin Dashboard</Link>
-                        )}
-                        <button className="profile__nav-item" onClick={handleLogout} id="profileLogout">🚪 Logout</button>
-                    </nav>
+                        <nav className="profile__nav" aria-label="Profile sections">
+                            {tabs.map(tab => (
+                                <button key={tab.key} className={`profile__nav-item ${activeTab === tab.key ? 'active' : ''}`} data-tab={tab.key} onClick={() => setActiveTab(tab.key)}>
+                                    <span>{tab.icon}</span>
+                                    <span>{tab.label}</span>
+                                </button>
+                            ))}
 
-                    {/* Tab Content */}
-                    <div className="profile__content">
+                            {isAdmin && (
+                                <Link href="/admin" className="profile__nav-item">
+                                    <span>📊</span>
+                                    <span>Admin Dashboard</span>
+                                </Link>
+                            )}
+                        </nav>
+
+                        <button className="profile__logout" onClick={handleLogout} id="profileLogout">🚪 Logout</button>
+                    </aside>
+
+                    <div className="profile__main">
                         {/* Profile Info */}
                         {activeTab === 'info' && (
                             <div className="profile__tab active" id="tabInfo">
-                                <h2>Profile Information</h2>
-                                <form id="profileForm" onSubmit={handleProfileUpdate} style={{ maxWidth: 400, display: 'flex', flexDirection: 'column', gap: 'var(--space-md)', marginTop: 'var(--space-lg)' }}>
-                                    <div><label>Full Name</label><input type="text" name="profileName" defaultValue={user?.name || ''} style={{ width: '100%', padding: '10px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
-                                    <div><label>Email</label><input type="email" name="profileEmail" defaultValue={user?.email || ''} style={{ width: '100%', padding: '10px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
-                                    <div><label>Phone</label><input type="tel" name="profilePhone" defaultValue={user?.phone || ''} style={{ width: '100%', padding: '10px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
-                                    <div>
-                                        <label>Current Password <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', fontWeight: 400 }}>(required to change email)</span></label>
-                                        <input type="password" name="profileCurrentPassword" placeholder="Enter only if changing email" style={{ width: '100%', padding: '10px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} />
+                                <h2 className="profile__section-title">Profile Information</h2>
+                                <form id="profileForm" onSubmit={handleProfileUpdate} className="profile__form profile__card">
+                                    <div className="profile__field">
+                                        <label htmlFor="profileName">Full Name</label>
+                                        <input id="profileName" type="text" name="profileName" defaultValue={user?.name || ''} />
+                                    </div>
+                                    <div className="profile__field">
+                                        <label htmlFor="profileEmail">Email</label>
+                                        <input id="profileEmail" type="email" name="profileEmail" defaultValue={user?.email || ''} />
+                                    </div>
+                                    <div className="profile__field">
+                                        <label htmlFor="profilePhone">Phone</label>
+                                        <input id="profilePhone" type="tel" name="profilePhone" defaultValue={user?.phone || ''} />
+                                    </div>
+                                    <div className="profile__field">
+                                        <label htmlFor="profileCurrentPassword">Current Password <span className="profile__hint">(required to change email)</span></label>
+                                        <input id="profileCurrentPassword" type="password" name="profileCurrentPassword" placeholder="Enter only if changing email" />
                                     </div>
                                     {profileMsg.text && <div className={`profile__msg ${profileMsg.type}`}>{profileMsg.text}</div>}
-                                    <button type="submit" className="btn btn--primary">Save Changes</button>
+                                    <div className="profile__form-actions">
+                                        <button type="submit" className="btn btn--primary">Save Changes</button>
+                                    </div>
                                 </form>
                             </div>
                         )}
@@ -177,13 +235,24 @@ export default function Profile() {
                         {/* Password */}
                         {activeTab === 'password' && (
                             <div className="profile__tab active" id="tabPassword">
-                                <h2>Change Password</h2>
-                                <form id="passwordForm" onSubmit={handlePasswordChange} style={{ maxWidth: 400, display: 'flex', flexDirection: 'column', gap: 'var(--space-md)', marginTop: 'var(--space-lg)' }}>
-                                    <div><label>Current Password</label><input type="password" name="currentPassword" required style={{ width: '100%', padding: '10px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
-                                    <div><label>New Password</label><input type="password" name="newPassword" required minLength={8} style={{ width: '100%', padding: '10px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
-                                    <div><label>Confirm New Password</label><input type="password" name="confirmPassword" required minLength={8} style={{ width: '100%', padding: '10px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
+                                <h2 className="profile__section-title">Change Password</h2>
+                                <form id="passwordForm" onSubmit={handlePasswordChange} className="profile__form profile__card">
+                                    <div className="profile__field">
+                                        <label htmlFor="currentPassword">Current Password</label>
+                                        <input id="currentPassword" type="password" name="currentPassword" required />
+                                    </div>
+                                    <div className="profile__field">
+                                        <label htmlFor="newPassword">New Password</label>
+                                        <input id="newPassword" type="password" name="newPassword" required minLength={8} />
+                                    </div>
+                                    <div className="profile__field">
+                                        <label htmlFor="confirmPassword">Confirm New Password</label>
+                                        <input id="confirmPassword" type="password" name="confirmPassword" required minLength={8} />
+                                    </div>
                                     {passwordMsg.text && <div className={`profile__msg ${passwordMsg.type}`}>{passwordMsg.text}</div>}
-                                    <button type="submit" className="btn btn--primary">Update Password</button>
+                                    <div className="profile__form-actions">
+                                        <button type="submit" className="btn btn--primary">Update Password</button>
+                                    </div>
                                 </form>
                             </div>
                         )}
@@ -191,46 +260,85 @@ export default function Profile() {
                         {/* Addresses */}
                         {activeTab === 'addresses' && (
                             <div className="profile__tab active" id="tabAddresses">
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
-                                    <h2>Saved Addresses</h2>
+                                <div className="profile__section-header">
+                                    <h2 className="profile__section-title">Saved Addresses</h2>
                                     <button className="btn btn--primary btn--sm" onClick={() => setShowAddressForm(!showAddressForm)} id="addAddressBtn">+ Add Address</button>
                                 </div>
 
                                 {showAddressForm && (
-                                    <form id="addressForm" onSubmit={handleAddAddress} style={{ background: 'var(--color-bg-alt)', padding: 'var(--space-lg)', borderRadius: 'var(--radius-md)', marginBottom: 'var(--space-lg)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-md)' }}>
-                                        <div><label>Label</label><select name="addrLabel" id="addrLabel" style={{ width: '100%', padding: '10px' }}><option>Home</option><option>Work</option><option>Other</option></select></div>
-                                        <div><label>Full Name</label><input type="text" name="addrName" id="addrName" required style={{ width: '100%', padding: '10px' }} /></div>
-                                        <div><label>Phone</label><input type="tel" name="addrPhone" id="addrPhone" required style={{ width: '100%', padding: '10px' }} /></div>
-                                        <div style={{ gridColumn: '1 / -1' }}><label>Address Line 1</label><input type="text" name="addrLine1" id="addrLine1" required style={{ width: '100%', padding: '10px' }} /></div>
-                                        <div style={{ gridColumn: '1 / -1' }}><label>Address Line 2</label><input type="text" name="addrLine2" id="addrLine2" style={{ width: '100%', padding: '10px' }} /></div>
-                                        <div><label>City</label><input type="text" name="addrCity" id="addrCity" required style={{ width: '100%', padding: '10px' }} /></div>
-                                        <div><label>State</label><input type="text" name="addrState" id="addrState" required style={{ width: '100%', padding: '10px' }} /></div>
-                                        <div><label>Pincode</label><input type="text" name="addrPincode" id="addrPincode" required style={{ width: '100%', padding: '10px' }} /></div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}><input type="checkbox" name="addrDefault" id="addrDefault" /><label htmlFor="addrDefault">Set as default</label></div>
-                                        <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 'var(--space-sm)' }}>
+                                    <div className="profile__address-form">
+                                        <h4>Add New Address</h4>
+                                        <form id="addressForm" onSubmit={handleAddAddress} className="profile__form">
+                                            <div className="profile__form-row">
+                                                <div className="profile__field">
+                                                    <label htmlFor="addrLabel">Label</label>
+                                                    <select name="addrLabel" id="addrLabel"><option>Home</option><option>Work</option><option>Other</option></select>
+                                                </div>
+                                                <div className="profile__field">
+                                                    <label htmlFor="addrName">Full Name</label>
+                                                    <input type="text" name="addrName" id="addrName" required />
+                                                </div>
+                                            </div>
+                                            <div className="profile__form-row">
+                                                <div className="profile__field">
+                                                    <label htmlFor="addrPhone">Phone</label>
+                                                    <input type="tel" name="addrPhone" id="addrPhone" required />
+                                                </div>
+                                                <div className="profile__field">
+                                                    <label htmlFor="addrPincode">Pincode</label>
+                                                    <input type="text" name="addrPincode" id="addrPincode" required />
+                                                </div>
+                                            </div>
+                                            <div className="profile__field">
+                                                <label htmlFor="addrLine1">Address Line 1</label>
+                                                <input type="text" name="addrLine1" id="addrLine1" required />
+                                            </div>
+                                            <div className="profile__field">
+                                                <label htmlFor="addrLine2">Address Line 2</label>
+                                                <input type="text" name="addrLine2" id="addrLine2" />
+                                            </div>
+                                            <div className="profile__form-row">
+                                                <div className="profile__field">
+                                                    <label htmlFor="addrCity">City</label>
+                                                    <input type="text" name="addrCity" id="addrCity" required />
+                                                </div>
+                                                <div className="profile__field">
+                                                    <label htmlFor="addrState">State</label>
+                                                    <input type="text" name="addrState" id="addrState" required />
+                                                </div>
+                                            </div>
+                                            <label className="profile__checkbox"><input type="checkbox" name="addrDefault" id="addrDefault" /><span>Set as default address</span></label>
+                                            <div className="profile__form-actions">
+                                                <button type="button" className="btn btn--ghost btn--sm" onClick={() => setShowAddressForm(false)}>Cancel</button>
                                             <button type="submit" className="btn btn--primary btn--sm">Save Address</button>
-                                            <button type="button" className="btn btn--ghost btn--sm" onClick={() => setShowAddressForm(false)}>Cancel</button>
-                                        </div>
-                                    </form>
+                                            </div>
+                                        </form>
+                                    </div>
                                 )}
 
-                                <div id="addressList">
+                                <div id="addressList" className="profile__addresses">
                                     {(user?.addresses || []).length === 0 ? (
-                                        <p style={{ color: 'var(--color-text-muted)' }}>No saved addresses yet.</p>
+                                        <p className="profile__empty">No saved addresses yet.</p>
                                     ) : (
-                                        user.addresses.map((addr, i) => (
-                                            <div key={addr._id || i} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: 'var(--space-md)', marginBottom: 'var(--space-md)', display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                                        (user?.addresses ?? []).map((addr: UserAddress, i: number) => (
+                                            <div key={addr._id || i} className={`address-card ${addr.isDefault ? 'default' : ''}`}>
                                                 <div>
-                                                    <strong>{addr.label}</strong> {addr.isDefault && <span style={{ fontSize: '0.75rem', background: 'var(--color-primary)', color: '#fff', padding: '2px 8px', borderRadius: '12px', marginLeft: 8 }}>Default</span>}
-                                                    <p style={{ marginTop: 4, lineHeight: 1.6 }}>{addr.fullName}<br />{addr.addressLine1}{addr.addressLine2 && `, ${addr.addressLine2}`}<br />{addr.city}, {addr.state} - {addr.pincode}<br />📞 {addr.phone}</p>
+                                                    <div>
+                                                        <span className="address-card__label">{addr.label}</span>
+                                                        {addr.isDefault && <span className="address-card__default">Default</span>}
+                                                    </div>
+                                                    <div className="address-card__name">{addr.fullName}</div>
+                                                    <p className="address-card__text">{addr.addressLine1}{addr.addressLine2 && `, ${addr.addressLine2}`}<br />{addr.city}, {addr.state} - {addr.pincode}<br />📞 {addr.phone}</p>
                                                 </div>
                                                 {pendingDeleteId === (addr._id || String(i)) ? (
-                                                    <div style={{ display: 'flex', gap: 'var(--space-xs)', flexShrink: 0 }}>
-                                                        <button className="btn btn--sm" style={{ background: 'var(--color-error)', color: '#fff', border: 'none' }} onClick={() => { deleteAddress(addr._id); setPendingDeleteId(null); }}>Confirm</button>
-                                                        <button className="btn btn--ghost btn--sm" onClick={() => setPendingDeleteId(null)}>Cancel</button>
+                                                    <div className="address-card__actions">
+                                                        <button className="address-card__btn address-card__btn--delete" onClick={() => { if (addr._id) deleteAddress(addr._id); setPendingDeleteId(null); }}>Confirm</button>
+                                                        <button className="address-card__btn" onClick={() => setPendingDeleteId(null)}>Cancel</button>
                                                     </div>
                                                 ) : (
-                                                    <button className="btn btn--ghost btn--sm" style={{ color: 'var(--color-error)' }} onClick={() => setPendingDeleteId(addr._id || String(i))}>Remove</button>
+                                                    <div className="address-card__actions">
+                                                        <button className="address-card__btn address-card__btn--delete" onClick={() => setPendingDeleteId(addr._id || String(i))}>Remove</button>
+                                                    </div>
                                                 )}
                                             </div>
                                         ))
@@ -242,22 +350,24 @@ export default function Profile() {
                         {/* Orders */}
                         {activeTab === 'orders' && (
                             <div className="profile__tab active" id="tabOrders">
-                                <h2>Order History</h2>
+                                <h2 className="profile__section-title">Order History</h2>
                                 {orders.length === 0 ? (
-                                    <p style={{ marginTop: 'var(--space-lg)', color: 'var(--color-text-muted)' }}>No orders yet.</p>
+                                    <p className="profile__empty">No orders yet.</p>
                                 ) : (
-                                    <div style={{ marginTop: 'var(--space-lg)', display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
-                                        {orders.map(order => (
-                                            <div key={order._id} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: 'var(--space-lg)' }}>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--space-sm)' }}>
-                                                    <strong>{order.orderNumber}</strong>
-                                                    <span className={`badge badge--${order.status}`} style={{ padding: '4px 12px', borderRadius: '12px', fontSize: '0.8rem', textTransform: 'capitalize', background: order.status === 'delivered' ? 'var(--color-success)' : order.status === 'cancelled' ? 'var(--color-error)' : 'var(--color-primary)', color: '#fff' }}>{order.status}</span>
-                                                </div>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                    <div style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
-                                                        {order.items?.length || 0} items · ₹{order.total} · {new Date(order.createdAt).toLocaleDateString('en-IN')}
+                                    <div>
+                                        {orders.map((order: OrderSummary) => (
+                                            <div key={order._id} className="order-card">
+                                                <div className="order-card__header">
+                                                    <div>
+                                                        <div className="order-card__number">{order.orderNumber}</div>
+                                                        <div className="order-card__date">{formatOrderDate(order.createdAt)}</div>
                                                     </div>
-                                                    <button className="btn btn--ghost btn--sm" onClick={() => router.push(`/profile/orders/${order._id}`)} style={{ fontSize: '0.85rem' }}>View Details →</button>
+                                                    <span className={`order-status order-status--${order.status}`}>{order.status}</span>
+                                                </div>
+                                                <div className="order-card__items">{order.items?.length || 0} items</div>
+                                                <div className="order-card__footer">
+                                                    <div className="order-card__total">₹{order.total}</div>
+                                                    <button className="btn btn--ghost btn--sm" onClick={() => router.push(`/profile/orders/${order._id}`)}>View Details →</button>
                                                 </div>
                                             </div>
                                         ))}

@@ -5,68 +5,78 @@ import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
 import { apiRequest } from '../../utils/api';
 import { useToast } from '../../components/Toast';
-import '../../styles/admin.css';
+
+type AdminRecord = Record<string, any>;
+type AdminList = AdminRecord[];
+type AdminPagination = {
+    page: number;
+    totalPages: number;
+};
+type AdminUserPagination = AdminPagination & {
+    total: number;
+};
 
 export default function Admin() {
     const { isAuthenticated, isAdmin, user, authReady, login: authLogin, logout } = useAuth();
     const { showToast } = useToast();
-    const [currentUser, setCurrentUser] = useState(null);
+    const [currentUser, setCurrentUser] = useState<AdminRecord | null>(null);
     const [gateError, setGateError] = useState('');
     const [activeSection, setActiveSection] = useState('overview');
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     // Dashboard data
-    const [overview, setOverview] = useState(null);
-    const [products, setProducts] = useState([]);
-    const [productPagination, setProductPagination] = useState({ page: 1, totalPages: 1 });
-    const [orders, setOrders] = useState([]);
-    const [orderPagination, setOrderPagination] = useState({ page: 1, totalPages: 1 });
+    const [overview, setOverview] = useState<AdminRecord | null>(null);
+    const [products, setProducts] = useState<AdminList>([]);
+    const [productPagination, setProductPagination] = useState<AdminPagination>({ page: 1, totalPages: 1 });
+    const [orders, setOrders] = useState<AdminList>([]);
+    const [orderPagination, setOrderPagination] = useState<AdminPagination>({ page: 1, totalPages: 1 });
     const [orderSearch, setOrderSearch] = useState('');
     const [orderStatusFilter, setOrderStatusFilter] = useState('');
-    const [activity, setActivity] = useState([]);
+    const [activity, setActivity] = useState<AdminList>([]);
 
     // Users state
-    const [users, setUsers] = useState([]);
-    const [userPagination, setUserPagination] = useState({ page: 1, totalPages: 1, total: 0 });
+    const [users, setUsers] = useState<AdminList>([]);
+    const [userPagination, setUserPagination] = useState<AdminUserPagination>({ page: 1, totalPages: 1, total: 0 });
     const [userSearch, setUserSearch] = useState('');
 
     // Low-stock alerts
-    const [lowStockProducts, setLowStockProducts] = useState([]);
+    const [lowStockProducts, setLowStockProducts] = useState<AdminList>([]);
 
     // Messages (contact submissions)
-    const [messages, setMessages] = useState([]);
+    const [messages, setMessages] = useState<AdminList>([]);
     const [messagesLoading, setMessagesLoading] = useState(false);
 
     // Newsletter subscribers
-    const [subscribers, setSubscribers] = useState([]);
+    const [subscribers, setSubscribers] = useState<AdminList>([]);
     const [subscribersLoading, setSubscribersLoading] = useState(false);
 
     // Coupons
-    const [coupons, setCoupons] = useState([]);
+    const [coupons, setCoupons] = useState<AdminList>([]);
     const [couponsLoading, setCouponsLoading] = useState(false);
     const [showCouponForm, setShowCouponForm] = useState(false);
-    const [editingCoupon, setEditingCoupon] = useState(null);
-    const emptyCoupon = { code: '', discountType: 'percentage', discountValue: '', minOrderAmount: '', maxDiscount: '', usageLimit: '', perUserLimit: '', validFrom: '', validTo: '', active: true };
-    const [couponForm, setCouponForm] = useState(emptyCoupon);
+    const [editingCoupon, setEditingCoupon] = useState<AdminRecord | null>(null);
+    const emptyCoupon: AdminRecord = { code: '', discountType: 'percentage', discountValue: '', minOrderAmount: '', maxDiscount: '', usageLimit: '', perUserLimit: '', validFrom: '', validTo: '', active: true };
+    const [couponForm, setCouponForm] = useState<AdminRecord>(emptyCoupon);
 
     // Testimonials
-    const [testimonials, setTestimonials] = useState([]);
+    const [testimonials, setTestimonials] = useState<AdminList>([]);
     const [testimonialsLoading, setTestimonialsLoading] = useState(false);
     const [showTestimonialForm, setShowTestimonialForm] = useState(false);
-    const [editingTestimonial, setEditingTestimonial] = useState(null);
-    const emptyTestimonial = { author: '', role: '', text: '', rating: 5, approved: false, featured: false, order: 0 };
-    const [testimonialForm, setTestimonialForm] = useState(emptyTestimonial);
+    const [editingTestimonial, setEditingTestimonial] = useState<AdminRecord | null>(null);
+    const emptyTestimonial: AdminRecord = { author: '', role: '', text: '', rating: 5, approved: false, featured: false, order: 0 };
+    const [testimonialForm, setTestimonialForm] = useState<AdminRecord>(emptyTestimonial);
 
     // Product form state
     const [showProductForm, setShowProductForm] = useState(false);
-    const [editingProduct, setEditingProduct] = useState(null);
-    const emptyProduct = {
+    const [editingProduct, setEditingProduct] = useState<AdminRecord | null>(null);
+    const emptyProduct: AdminRecord = {
         name: '', slug: '', type: 'Black Tea', description: '', shortDescription: '', origin: '',
         'price50g': '', 'price100g': '', 'price200g': '',
-        stock: 100, caffeine: 'medium', tastingNotes: '', tags: '', images: [],
-        moods: [], isBestSeller: false, isNewArrival: true, inStock: true,
+        stock: 100, caffeine: 'medium', tastingNotes: '', tags: '', images: [] as string[],
+        moods: [] as string[], isBestSeller: false, isNewArrival: true, inStock: true,
         brewTemp: '', brewSteep: '', brewAmount: '',
     };
-    const [productForm, setProductForm] = useState(emptyProduct);
+    const [productForm, setProductForm] = useState<AdminRecord>(emptyProduct);
     const [uploading, setUploading] = useState(false);
     const [dragOver, setDragOver] = useState(false);
 
@@ -75,7 +85,7 @@ export default function Admin() {
     const [loginPassword, setLoginPassword] = useState('');
     const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-    const adminApi = useCallback(async (path: string, options: any = {}) => {
+    const adminApi = useCallback(async (path: string, options: Record<string, unknown> = {}): Promise<any> => {
         return apiRequest(path, options);
     }, []);
 
@@ -91,14 +101,14 @@ export default function Admin() {
         }
     }, [authReady, isAuthenticated, isAdmin, user]);
 
-    const handleAdminLogin = async (e) => {
+    const handleAdminLogin = async (e: any) => {
         e.preventDefault();
         setGateError('');
         try {
             const data = await authLogin(loginEmail, loginPassword);
             if (data.data.user.role !== 'admin') throw new Error('Admin access required');
             setCurrentUser(data.data.user);
-        } catch (err) {
+        } catch (err: any) {
             setGateError(err.message);
         }
     };
@@ -209,7 +219,7 @@ export default function Admin() {
         finally { setTestimonialsLoading(false); }
     };
 
-    const handleTestimonialSubmit = async (e) => {
+    const handleTestimonialSubmit = async (e: any) => {
         e.preventDefault();
         const body = {
             author: testimonialForm.author.trim(),
@@ -230,38 +240,38 @@ export default function Admin() {
             setEditingTestimonial(null);
             setTestimonialForm(emptyTestimonial);
             loadTestimonials();
-        } catch (err) { showToast(err.message || 'Failed to save testimonial', 'error'); }
+        } catch (err: any) { showToast(err.message || 'Failed to save testimonial', 'error'); }
     };
 
-    const deleteTestimonial = async (id) => {
+    const deleteTestimonial = async (id: string) => {
         if (!confirm('Delete this testimonial?')) return;
         try {
             await adminApi(`/admin/testimonials/${id}`, { method: 'DELETE' });
             loadTestimonials();
-        } catch (err) { showToast(err.message || 'Failed to delete testimonial', 'error'); }
+        } catch (err: any) { showToast(err.message || 'Failed to delete testimonial', 'error'); }
     };
 
-    const toggleTestimonialApproval = async (testimonial) => {
+    const toggleTestimonialApproval = async (testimonial: AdminRecord) => {
         try {
             await adminApi(`/admin/testimonials/${testimonial._id}`, {
                 method: 'PATCH',
                 body: JSON.stringify({ approved: !testimonial.approved }),
             });
             loadTestimonials();
-        } catch (err) { showToast(err.message || 'Failed to update testimonial', 'error'); }
+        } catch (err: any) { showToast(err.message || 'Failed to update testimonial', 'error'); }
     };
 
-    const toggleTestimonialFeatured = async (testimonial) => {
+    const toggleTestimonialFeatured = async (testimonial: AdminRecord) => {
         try {
             await adminApi(`/admin/testimonials/${testimonial._id}`, {
                 method: 'PATCH',
                 body: JSON.stringify({ featured: !testimonial.featured }),
             });
             loadTestimonials();
-        } catch (err) { showToast(err.message || 'Failed to update testimonial', 'error'); }
+        } catch (err: any) { showToast(err.message || 'Failed to update testimonial', 'error'); }
     };
 
-    const openEditTestimonial = (t) => {
+    const openEditTestimonial = (t: AdminRecord) => {
         setEditingTestimonial(t);
         setTestimonialForm({
             author: t.author || '',
@@ -275,7 +285,7 @@ export default function Admin() {
         setShowTestimonialForm(true);
     };
 
-    const handleCouponSubmit = async (e) => {
+    const handleCouponSubmit = async (e: any) => {
         e.preventDefault();
         const body = {
             code: couponForm.code.toUpperCase().trim(),
@@ -299,18 +309,18 @@ export default function Admin() {
             setEditingCoupon(null);
             setCouponForm(emptyCoupon);
             loadCoupons();
-        } catch (err) { showToast(err.message || 'Failed to save coupon', 'error'); }
+        } catch (err: any) { showToast(err.message || 'Failed to save coupon', 'error'); }
     };
 
-    const deleteCoupon = async (id) => {
+    const deleteCoupon = async (id: string) => {
         if (!confirm('Delete this coupon?')) return;
         try {
             await adminApi(`/admin/coupons/${id}`, { method: 'DELETE' });
             loadCoupons();
-        } catch (err) { showToast(err.message || 'Failed to delete coupon', 'error'); }
+        } catch (err: any) { showToast(err.message || 'Failed to delete coupon', 'error'); }
     };
 
-    const openEditCoupon = (c) => {
+    const openEditCoupon = (c: AdminRecord) => {
         setEditingCoupon(c);
         setCouponForm({
             code: c.code || '',
@@ -327,17 +337,17 @@ export default function Admin() {
         setShowCouponForm(true);
     };
 
-    const changeUserRole = async (userId, newRole) => {
+    const changeUserRole = async (userId: string, newRole: string) => {
         if (!confirm(`Change this user's role to "${newRole}"?`)) return;
         setActionLoading(`role-${userId}`);
         try {
             await adminApi(`/admin/users/${userId}/role`, { method: 'PATCH', body: JSON.stringify({ role: newRole }) });
             loadUsers(userPagination.page, userSearch);
-        } catch (err) { showToast(err.message || 'Failed to change role', 'error'); }
+        } catch (err: any) { showToast(err.message || 'Failed to change role', 'error'); }
         finally { setActionLoading(null); }
     };
 
-    const exportCSV = async (type) => {
+    const exportCSV = async (type: string) => {
         setActionLoading(`export-${type}`);
         try {
             const tkn = localStorage.getItem('feelinga_token');
@@ -352,11 +362,11 @@ export default function Admin() {
             a.download = `${type}-${Date.now()}.csv`;
             a.click();
             URL.revokeObjectURL(url);
-        } catch (err) { showToast(err.message || 'Export failed', 'error'); }
+        } catch (err: any) { showToast(err.message || 'Export failed', 'error'); }
         finally { setActionLoading(null); }
     };
 
-    const downloadInvoice = async (orderId) => {
+    const downloadInvoice = async (orderId: string) => {
         setActionLoading(`invoice-${orderId}`);
         try {
             const tkn = localStorage.getItem('feelinga_token');
@@ -371,20 +381,20 @@ export default function Admin() {
             a.download = `invoice-${orderId}.pdf`;
             a.click();
             URL.revokeObjectURL(url);
-        } catch (err) { showToast(err.message || 'Failed to generate invoice', 'error'); }
+        } catch (err: any) { showToast(err.message || 'Failed to generate invoice', 'error'); }
         finally { setActionLoading(null); }
     };
 
-    const updateOrderStatus = async (id, status) => {
+    const updateOrderStatus = async (id: string, status: string) => {
         setActionLoading(`status-${id}`);
         try {
             await adminApi(`/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) });
             loadOrders(orderPagination.page);
-        } catch (err) { showToast(err.message || 'Failed to update status', 'error'); }
+        } catch (err: any) { showToast(err.message || 'Failed to update status', 'error'); }
         finally { setActionLoading(null); }
     };
 
-    const updateTracking = async (orderId, trackingNumber, trackingUrl) => {
+    const updateTracking = async (orderId: string, trackingNumber: string, trackingUrl: string) => {
         setActionLoading(`tracking-${orderId}`);
         try {
             await adminApi(`/admin/orders/${orderId}/tracking`, {
@@ -392,17 +402,17 @@ export default function Admin() {
                 body: JSON.stringify({ trackingNumber, trackingUrl }),
             });
             loadOrders(orderPagination.page);
-        } catch (err) { showToast(err.message || 'Failed to update tracking', 'error'); }
+        } catch (err: any) { showToast(err.message || 'Failed to update tracking', 'error'); }
         finally { setActionLoading(null); }
     };
 
-    const deleteProduct = async (id, name) => {
+    const deleteProduct = async (id: string, name: string) => {
         if (!confirm(`Delete "${name}"?`)) return;
         setActionLoading(`del-${id}`);
         try {
             await adminApi(`/products/${id}`, { method: 'DELETE' });
             loadProducts(productPagination.page);
-        } catch (err) { showToast(err.message || 'Failed to delete product', 'error'); }
+        } catch (err: any) { showToast(err.message || 'Failed to delete product', 'error'); }
         finally { setActionLoading(null); }
     };
 
@@ -412,7 +422,7 @@ export default function Admin() {
         setShowProductForm(true);
     };
 
-    const openEditProduct = (p) => {
+    const openEditProduct = (p: AdminRecord) => {
         setEditingProduct(p);
         setProductForm({
             name: p.name || '',
@@ -440,18 +450,18 @@ export default function Admin() {
         setShowProductForm(true);
     };
 
-    const handleProductFormChange = (field, value) => {
+    const handleProductFormChange = (field: string, value: any) => {
         setProductForm(prev => ({ ...prev, [field]: value }));
     };
 
-    const toggleMood = (mood) => {
+    const toggleMood = (mood: string) => {
         setProductForm(prev => ({
             ...prev,
-            moods: prev.moods.includes(mood) ? prev.moods.filter(m => m !== mood) : [...prev.moods, mood],
+            moods: prev.moods.includes(mood) ? prev.moods.filter((m: string) => m !== mood) : [...prev.moods, mood],
         }));
     };
 
-    const uploadImages = async (files) => {
+    const uploadImages = async (files: FileList | File[] | null) => {
         if (!files || files.length === 0) return;
         setUploading(true);
         try {
@@ -466,25 +476,25 @@ export default function Admin() {
             const data = await res.json().catch(() => ({}));
             if (!res.ok) throw new Error(data.message || 'Upload failed');
             setProductForm(prev => ({ ...prev, images: [...prev.images, ...data.data.urls] }));
-        } catch (err) {
+        } catch (err: any) {
             showToast(err.message || 'Upload failed', 'error');
         } finally {
             setUploading(false);
         }
     };
 
-    const removeImage = (index) => {
-        setProductForm(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
+    const removeImage = (index: number) => {
+        setProductForm(prev => ({ ...prev, images: prev.images.filter((_img: string, i: number) => i !== index) }));
     };
 
-    const handleDrop = (e) => {
+    const handleDrop = (e: any) => {
         e.preventDefault();
         setDragOver(false);
         const files = e.dataTransfer?.files;
         if (files?.length) uploadImages(files);
     };
 
-    const handleProductSubmit = async (e) => {
+    const handleProductSubmit = async (e: any) => {
         e.preventDefault();
         const body = {
             name: productForm.name.trim(),
@@ -500,8 +510,8 @@ export default function Admin() {
             },
             stock: Number(productForm.stock),
             caffeine: productForm.caffeine,
-            tastingNotes: productForm.tastingNotes ? productForm.tastingNotes.split(',').map(s => s.trim()).filter(Boolean) : [],
-            tags: productForm.tags ? productForm.tags.split(',').map(s => s.trim()).filter(Boolean) : [],
+            tastingNotes: productForm.tastingNotes ? productForm.tastingNotes.split(',').map((s: string) => s.trim()).filter(Boolean) : [],
+            tags: productForm.tags ? productForm.tags.split(',').map((s: string) => s.trim()).filter(Boolean) : [],
             brewingInstructions: {
                 temperature: productForm.brewTemp.trim() || undefined,
                 steepTime: productForm.brewSteep.trim() || undefined,
@@ -521,13 +531,13 @@ export default function Admin() {
             }
             setShowProductForm(false);
             loadProducts(productPagination.page);
-        } catch (err) {
+        } catch (err: any) {
             showToast(err.message || 'Failed to save product', 'error');
         }
     };
 
-    const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
-    const statusColors = { pending: 'var(--color-warning)', confirmed: 'var(--color-info)', processing: '#8b5cf6', shipped: 'var(--color-success)', delivered: 'var(--color-success)', cancelled: 'var(--color-error)' };
+    const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+    const statusColors: Record<string, string> = { pending: 'var(--color-warning)', confirmed: 'var(--color-info)', processing: '#8b5cf6', shipped: 'var(--color-success)', delivered: 'var(--color-success)', cancelled: 'var(--color-error)' };
 
     // Loading while verifying session
     if (!authReady) {
@@ -539,8 +549,8 @@ export default function Admin() {
                     <p className="admin-gate__brand-tagline">Happiness is here — manage your tea universe</p>
                 </div>
                 <div className="admin-gate__panel--form">
-                    <div className="admin-gate__form-inner" style={{ textAlign: 'center' }}>
-                        <p style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-sans)' }}>Verifying session…</p>
+                    <div className="admin-gate__form-inner admin-gate__form-inner--center">
+                        <p className="admin-gate__loading">Verifying session…</p>
                     </div>
                 </div>
             </div>
@@ -575,7 +585,7 @@ export default function Admin() {
                                 <label htmlFor="adminPassword" className="admin-gate__label">Password</label>
                                 <input id="adminPassword" type="password" className="admin-gate__input" placeholder="••••••••••" required value={loginPassword} onChange={e => setLoginPassword(e.target.value)} autoComplete="current-password" />
                             </div>
-                            <button type="submit" className="btn btn--primary" style={{ width: '100%', marginTop: 'var(--space-sm)' }}>Sign In</button>
+                            <button type="submit" className="btn btn--primary admin-gate__submit">Sign In</button>
                         </form>
                         <Link href="/" className="admin-gate__back">← Back to store</Link>
                     </div>
@@ -596,14 +606,16 @@ export default function Admin() {
         { key: 'activity', icon: '📋', label: 'Activity' },
     ];
 
+    const currentSectionLabel = navItems.find(item => item.key === activeSection)?.label || capitalize(activeSection);
+
     return (
         <div className="admin" id="adminDashboard">
             {/* Sidebar */}
-            <aside className="admin__sidebar" id="adminSidebar">
+            <aside className={`admin__sidebar ${sidebarOpen ? 'open' : ''}`} id="adminSidebar" aria-label="Admin navigation">
                 <div className="admin__sidebar-header">
                     <div className="admin__logo">
                         <Image src="/images/logo.png" alt="" width={32} height={32} className="admin__logo-img" />
-                        <span>Feelinga<span style={{ color: 'var(--color-accent)' }}>.</span> admin</span>
+                        <span>Feelinga<span className="admin__logo-dot">.</span> admin</span>
                     </div>
                 </div>
                 <div className="admin__user-info">
@@ -615,25 +627,39 @@ export default function Admin() {
                 </div>
                 <nav className="admin__nav">
                     {navItems.map(item => (
-                        <button key={item.key} className={`admin__nav-item ${activeSection === item.key ? 'active' : ''}`} data-section={item.key} onClick={() => setActiveSection(item.key)}>
+                        <button key={item.key} className={`admin__nav-item ${activeSection === item.key ? 'active' : ''}`} data-section={item.key} onClick={() => { setActiveSection(item.key); setSidebarOpen(false); }}>
                             <span>{item.icon}</span> {item.label}
                         </button>
                     ))}
                 </nav>
                 <div className="admin__sidebar-footer">
-                    <Link href="/" className="admin__nav-item" style={{ display: 'flex', gap: '0.5em', textDecoration: 'none' }}>
+                    <Link href="/" className="admin__nav-item admin__footer-link">
                         <span>🏪</span> Back to Store
                     </Link>
-                    <button className="admin__nav-item" style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-error)' }} onClick={logout}>
+                    <button className="admin__nav-item admin__footer-logout" onClick={logout}>
                         <span>🚪</span> Logout
                     </button>
                 </div>
             </aside>
 
+            <button
+                className={`admin__overlay ${sidebarOpen ? 'open' : ''}`}
+                aria-label="Close admin navigation"
+                onClick={() => setSidebarOpen(false)}
+            />
+
             {/* Main Content */}
             <div className="admin__main">
                 <header className="admin__header">
-                    <h1 id="pageTitle">{capitalize(activeSection)}</h1>
+                    <div className="admin__header-left">
+                        <button className="admin__mobile-toggle" aria-label="Toggle admin navigation" onClick={() => setSidebarOpen(v => !v)}>
+                            ☰
+                        </button>
+                        <div>
+                            <h1 id="pageTitle">{currentSectionLabel}</h1>
+                            <p className="admin__header-subtitle">Manage store operations from one place</p>
+                        </div>
+                    </div>
                 </header>
 
                 <div className="admin__content">
@@ -685,9 +711,9 @@ export default function Admin() {
                                         <div className="admin__card-body">
                                             <div className="overview-chart">
                                                 {(() => {
-                                                    const maxR = Math.max(...overview.monthlyRevenue.map(m => m.revenue), 1);
+                                                    const maxR = Math.max(...overview.monthlyRevenue.map((m: AdminRecord) => m.revenue), 1);
                                                     const months = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                                                    return overview.monthlyRevenue.map((m, i) => (
+                                                    return overview.monthlyRevenue.map((m: AdminRecord, i: number) => (
                                                         <div key={i} className="overview-chart__col">
                                                             <span className="overview-chart__value">₹{(m.revenue / 1000).toFixed(1)}k</span>
                                                             <div
@@ -713,7 +739,7 @@ export default function Admin() {
                                         <table className="admin__table">
                                             <thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead>
                                             <tbody>
-                                                {overview.recentOrders.map(order => (
+                                                {overview.recentOrders.map((order: AdminRecord) => (
                                                     <tr key={order._id}>
                                                         <td>{order.orderNumber}</td>
                                                         <td>{order.user?.name || 'N/A'}</td>
@@ -811,7 +837,7 @@ export default function Admin() {
                                                 {/* Thumbnail previews */}
                                                 {productForm.images.length > 0 && (
                                                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 'var(--space-sm)' }}>
-                                                        {productForm.images.map((url, i) => (
+                                                        {productForm.images.map((url: string, i: number) => (
                                                             <div key={i} style={{ position: 'relative', width: 72, height: 72, borderRadius: 'var(--radius-sm)', overflow: 'hidden', border: '1px solid var(--color-border)' }}>
                                                                 <Image src={url} alt={`Product ${i + 1}`} width={72} height={72} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                                 <button type="button" onClick={() => removeImage(i)} style={{ position: 'absolute', top: 2, right: 2, width: 20, height: 20, borderRadius: '50%', background: 'rgba(0,0,0,0.6)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>✕</button>
