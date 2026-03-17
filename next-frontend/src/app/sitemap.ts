@@ -3,6 +3,7 @@ import { MetadataRoute } from 'next';
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL
     || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://www.feelinga.com');
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000').replace(/\/$/, '');
+const SITEMAP_FETCH_TIMEOUT_MS = 5000;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Static pages
@@ -18,11 +19,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         { url: `${BASE_URL}/terms`, changeFrequency: 'yearly', priority: 0.3 },
     ];
 
-    // Fetch all product slugs from API
+    // Fetch product slugs, but fail fast so sitemap generation never blocks deployment.
     let productPages: MetadataRoute.Sitemap = [];
     try {
         const res = await fetch(`${API_BASE_URL}/api/v1/products?limit=500`, {
-            next: { revalidate: 3600 }, // revalidate every hour
+            next: { revalidate: 3600 },
+            signal: AbortSignal.timeout(SITEMAP_FETCH_TIMEOUT_MS),
         });
         if (res.ok) {
             const data = await res.json();
@@ -35,7 +37,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             }));
         }
     } catch {
-        // If API is unreachable, return static pages only
+        // If the API is unavailable or slow, return static pages and keep the build moving.
     }
 
     return [...staticPages, ...productPages];
