@@ -199,7 +199,17 @@ export const googleLogin = async (req: Request, res: Response, next: NextFunctio
 
         res.json({ status: 'success', data: { user, accessToken, refreshToken } });
     } catch (err: any) {
-        if (err.message?.includes('Token used too late') || err.message?.includes('Invalid token')) return next(new AppError('Invalid Google token', 401));
+        const msg = String(err?.message || '').toLowerCase();
+        if (
+            msg.includes('token used too late')
+            || msg.includes('invalid token')
+            || msg.includes('can\'t parse token')
+            || msg.includes('malformed')
+            || msg.includes('jwt')
+            || msg.includes('audience')
+        ) {
+            return next(new AppError('Invalid Google token', 401));
+        }
         next(err);
     }
 };
