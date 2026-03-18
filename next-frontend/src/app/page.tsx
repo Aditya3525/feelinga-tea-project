@@ -8,6 +8,7 @@ import ProductGridSkeleton from '../components/ProductGridSkeleton';
 import SectionHeader from '../components/SectionHeader';
 import { useCart } from '../context/CartContext';
 import { renderStars } from '../utils/renderStars';
+import { apiRequest } from '../utils/api';
 
 type HomeProduct = {
     id: string;
@@ -99,17 +100,15 @@ export default function Home() {
     useEffect(() => {
         async function fetchProducts() {
             try {
-                const [newRes, bestRes] = await Promise.all([
-                    fetch('/api/v1/products?limit=4&isNewArrival=true&sort=-createdAt'),
-                    fetch('/api/v1/products?limit=4&isBestSeller=true&sort=-reviewCount'),
+                const [newData, initialBestData] = await Promise.all([
+                    apiRequest('/products?limit=4&isNewArrival=true&sort=-createdAt'),
+                    apiRequest('/products?limit=4&isBestSeller=true&sort=-reviewCount'),
                 ]);
-                const newData = await newRes.json().catch(() => ({}));
-                let bestData = await bestRes.json().catch(() => ({}));
+                let bestData = initialBestData;
 
                 // Fallback: if no products are flagged as best sellers, use top-rated
                 if (!bestData.data || bestData.data.length === 0) {
-                    const fallbackRes = await fetch('/api/v1/products?limit=4&sort=-rating');
-                    bestData = await fallbackRes.json().catch(() => ({}));
+                    bestData = await apiRequest('/products?limit=4&sort=-rating');
                 }
 
                 const mapProduct = (p: any): HomeProduct => ({
@@ -140,8 +139,7 @@ export default function Home() {
     useEffect(() => {
         async function fetchTestimonials() {
             try {
-                const res = await fetch('/api/v1/testimonials');
-                const data = await res.json().catch(() => ({}));
+                const data = await apiRequest('/testimonials');
                 if (data.data && data.data.length > 0) {
                     setTestimonials(data.data);
                 } else {
@@ -400,9 +398,10 @@ export default function Home() {
                             e.preventDefault();
                             const email = (e.target as any).elements[0].value.trim();
                             try {
-                                const res = await fetch('/api/v1/newsletter', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
-                                const data = await res.json().catch(() => ({}) as any);
-                                if (!res.ok) throw new Error(data.message || `Request failed (${res.status})`);
+                                const data = await apiRequest('/newsletter', {
+                                    method: 'POST',
+                                    body: JSON.stringify({ email }),
+                                }) as { message?: string };
                                 setNlStatus({ text: data.message || 'Subscribed!', type: 'success' });
                                 (e.target as any).reset();
                             } catch (err: any) {

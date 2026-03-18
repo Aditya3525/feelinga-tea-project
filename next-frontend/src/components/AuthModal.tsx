@@ -7,6 +7,16 @@ import type { FormEvent } from 'react';
 
 type AuthTab = 'login' | 'signup';
 
+type PasswordRule = {
+    label: string;
+    passed: boolean;
+};
+
+type PasswordStrength = {
+    label: 'weak' | 'fair' | 'good' | 'strong';
+    score: number;
+};
+
 type GoogleCredentialResponse = {
     credential: string;
 };
@@ -28,6 +38,24 @@ function getErrorMessage(err: unknown, fallback: string): string {
     return err instanceof Error ? err.message : fallback;
 }
 
+function getPasswordRules(password: string): PasswordRule[] {
+    return [
+        { label: 'At least 8 characters', passed: password.length >= 8 },
+        { label: 'One uppercase letter', passed: /[A-Z]/.test(password) },
+        { label: 'One lowercase letter', passed: /[a-z]/.test(password) },
+        { label: 'One number', passed: /\d/.test(password) },
+        { label: 'One special character', passed: /[^A-Za-z0-9]/.test(password) },
+    ];
+}
+
+function getPasswordStrength(password: string): PasswordStrength {
+    const score = getPasswordRules(password).filter(rule => rule.passed).length;
+    if (score <= 2) return { label: 'weak', score };
+    if (score === 3) return { label: 'fair', score };
+    if (score === 4) return { label: 'good', score };
+    return { label: 'strong', score };
+}
+
 export default function AuthModal() {
     const { showAuthModal, closeAuthModal, login, register, googleLogin } = useAuth();
     const { showToast } = useToast();
@@ -37,7 +65,14 @@ export default function AuthModal() {
     const [showForgot, setShowForgot] = useState(false);
     const [forgotEmail, setForgotEmail] = useState('');
     const [forgotSent, setForgotSent] = useState(false);
+    const [showLoginPassword, setShowLoginPassword] = useState(false);
+    const [showSignupPassword, setShowSignupPassword] = useState(false);
+    const [showSignupConfirm, setShowSignupConfirm] = useState(false);
+    const [signupPassword, setSignupPassword] = useState('');
     const dialogRef = useRef<HTMLDivElement>(null);
+
+    const passwordRules = getPasswordRules(signupPassword);
+    const passwordStrength = getPasswordStrength(signupPassword);
 
     const handleGoogleLogin = useCallback(async (response: GoogleCredentialResponse) => {
         setError('');
@@ -171,7 +206,16 @@ export default function AuthModal() {
         } finally { setLoading(false); }
     };
 
-    const switchTab = (tab: AuthTab) => { setActiveTab(tab); setError(''); setShowForgot(false); setForgotSent(false); };
+    const switchTab = (tab: AuthTab) => {
+        setActiveTab(tab);
+        setError('');
+        setShowForgot(false);
+        setForgotSent(false);
+        setShowLoginPassword(false);
+        setShowSignupPassword(false);
+        setShowSignupConfirm(false);
+        setSignupPassword('');
+    };
 
     return (
         <div className="auth-modal active">
@@ -205,6 +249,7 @@ export default function AuthModal() {
                                     <input
                                         type="email" id="forgotEmail" required
                                         placeholder="your@email.com"
+                                        autoComplete="email"
                                         value={forgotEmail}
                                         onChange={e => setForgotEmail(e.target.value)}
                                     />
@@ -238,11 +283,28 @@ export default function AuthModal() {
                             <form className="auth-modal__form" onSubmit={handleLogin}>
                                 <div className="auth-modal__field">
                                     <label htmlFor="loginEmail">Email</label>
-                                    <input type="email" id="loginEmail" name="email" required placeholder="your@email.com" />
+                                    <input type="email" id="loginEmail" name="email" required placeholder="your@email.com" autoComplete="email" />
                                 </div>
                                 <div className="auth-modal__field">
                                     <label htmlFor="loginPassword">Password</label>
-                                    <input type="password" id="loginPassword" name="password" required placeholder="Min 8 characters" />
+                                    <div className="auth-modal__password-wrap">
+                                        <input
+                                            type={showLoginPassword ? 'text' : 'password'}
+                                            id="loginPassword"
+                                            name="password"
+                                            required
+                                            placeholder="Min 8 characters"
+                                            autoComplete="current-password"
+                                        />
+                                        <button
+                                            type="button"
+                                            className="auth-modal__password-toggle"
+                                            aria-label={showLoginPassword ? 'Hide password' : 'Show password'}
+                                            onClick={() => setShowLoginPassword(prev => !prev)}
+                                        >
+                                            {showLoginPassword ? 'Hide' : 'Show'}
+                                        </button>
+                                    </div>
                                 </div>
                                 <div style={{ textAlign: 'right', marginTop: '-8px', marginBottom: '8px' }}>
                                     <button type="button" className="auth-modal__toggle" style={{ fontSize: '0.85rem' }} onClick={() => setShowForgot(true)}>
@@ -257,19 +319,75 @@ export default function AuthModal() {
                             <form className="auth-modal__form" onSubmit={handleRegister}>
                                 <div className="auth-modal__field">
                                     <label htmlFor="signupName">Full Name</label>
-                                    <input type="text" id="signupName" name="name" required placeholder="Your full name" />
+                                    <input type="text" id="signupName" name="name" required placeholder="Your full name" autoComplete="name" />
                                 </div>
                                 <div className="auth-modal__field">
                                     <label htmlFor="signupEmail">Email</label>
-                                    <input type="email" id="signupEmail" name="email" required placeholder="your@email.com" />
+                                    <input type="email" id="signupEmail" name="email" required placeholder="your@email.com" autoComplete="email" />
                                 </div>
                                 <div className="auth-modal__field">
                                     <label htmlFor="signupPassword">Password</label>
-                                    <input type="password" id="signupPassword" name="password" required minLength={8} placeholder="Min 8 characters" />
+                                    <div className="auth-modal__password-wrap">
+                                        <input
+                                            type={showSignupPassword ? 'text' : 'password'}
+                                            id="signupPassword"
+                                            name="password"
+                                            required
+                                            minLength={8}
+                                            placeholder="Min 8 characters"
+                                            autoComplete="new-password"
+                                            value={signupPassword}
+                                            onChange={e => setSignupPassword(e.target.value)}
+                                        />
+                                        <button
+                                            type="button"
+                                            className="auth-modal__password-toggle"
+                                            aria-label={showSignupPassword ? 'Hide password' : 'Show password'}
+                                            onClick={() => setShowSignupPassword(prev => !prev)}
+                                        >
+                                            {showSignupPassword ? 'Hide' : 'Show'}
+                                        </button>
+                                    </div>
                                 </div>
+
+                                <div className="auth-modal__password-guide" aria-live="polite">
+                                    <div className="auth-modal__password-guide-head">
+                                        <strong>Strong password guide</strong>
+                                        <span className={`auth-modal__password-strength auth-modal__password-strength--${passwordStrength.label}`}>
+                                            {passwordStrength.label.toUpperCase()}
+                                        </span>
+                                    </div>
+                                    <ul className="auth-modal__password-rules">
+                                        {passwordRules.map(rule => (
+                                            <li key={rule.label} className={rule.passed ? 'passed' : ''}>
+                                                <span aria-hidden="true">{rule.passed ? '✓' : '•'}</span>
+                                                <span>{rule.label}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+
                                 <div className="auth-modal__field">
                                     <label htmlFor="signupConfirm">Confirm Password</label>
-                                    <input type="password" id="signupConfirm" name="confirm" required minLength={8} placeholder="Confirm password" />
+                                    <div className="auth-modal__password-wrap">
+                                        <input
+                                            type={showSignupConfirm ? 'text' : 'password'}
+                                            id="signupConfirm"
+                                            name="confirm"
+                                            required
+                                            minLength={8}
+                                            placeholder="Confirm password"
+                                            autoComplete="new-password"
+                                        />
+                                        <button
+                                            type="button"
+                                            className="auth-modal__password-toggle"
+                                            aria-label={showSignupConfirm ? 'Hide confirm password' : 'Show confirm password'}
+                                            onClick={() => setShowSignupConfirm(prev => !prev)}
+                                        >
+                                            {showSignupConfirm ? 'Hide' : 'Show'}
+                                        </button>
+                                    </div>
                                 </div>
                                 <button type="submit" className="btn btn--primary auth-modal__submit" disabled={loading}>
                                     {loading ? 'Creating...' : 'CREATE ACCOUNT'}
