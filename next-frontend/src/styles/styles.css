@@ -4834,6 +4834,21 @@ textarea:focus-visible {
   flex-shrink: 0;
 }
 
+.auth-modal__assist {
+  margin: 2px 0 6px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-accent-light) 78%, transparent);
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+.auth-modal__assist .auth-modal__toggle {
+  font-weight: 700;
+}
+
 [data-theme="dark"] .auth-modal__google {
   background: var(--color-bg);
   border-color: var(--color-border);
@@ -5229,6 +5244,10 @@ textarea:focus-visible {
 
 [data-theme="dark"] .auth-modal__google:hover {
   border-color: var(--color-accent);
+}
+
+[data-theme="dark"] .auth-modal__assist {
+  background: color-mix(in srgb, var(--color-accent-light) 32%, transparent);
 }
 
 .auth-modal__password-wrap {

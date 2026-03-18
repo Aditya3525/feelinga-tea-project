@@ -69,10 +69,14 @@ export default function AuthModal() {
     const [showSignupPassword, setShowSignupPassword] = useState(false);
     const [showSignupConfirm, setShowSignupConfirm] = useState(false);
     const [signupPassword, setSignupPassword] = useState('');
+    const [loginEmail, setLoginEmail] = useState('');
+    const [signupEmail, setSignupEmail] = useState('');
+    const [showLoginSignupHint, setShowLoginSignupHint] = useState(false);
     const dialogRef = useRef<HTMLDivElement>(null);
 
     const passwordRules = getPasswordRules(signupPassword);
     const passwordStrength = getPasswordStrength(signupPassword);
+    const hasGoogleClientId = Boolean(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.trim());
 
     const handleGoogleLogin = useCallback(async (response: GoogleCredentialResponse) => {
         setError('');
@@ -90,7 +94,7 @@ export default function AuthModal() {
 
     useEffect(() => {
         if (!showAuthModal) return;
-        const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+        const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.trim();
         if (!GOOGLE_CLIENT_ID) return;
 
         // Load the GSI script once
@@ -167,28 +171,51 @@ export default function AuthModal() {
     const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError('');
+        setShowLoginSignupHint(false);
         setLoading(true);
         const formData = new FormData(e.currentTarget);
+        const email = String(formData.get('email') || '').trim();
+        const password = String(formData.get('password') || '');
         try {
-            await login(String(formData.get('email') || ''), String(formData.get('password') || ''));
+            await login(email, password);
             showToast('Welcome back! 🍵', 'success');
             closeAuthModal();
-        } catch (err) { setError(getErrorMessage(err, 'Login failed')); } finally { setLoading(false); }
+        } catch (err) {
+            const message = getErrorMessage(err, 'Login failed');
+            const normalized = message.toLowerCase();
+            setError(message);
+            if (normalized.includes('invalid email or password') || normalized.includes('user not found')) {
+                setSignupEmail(email);
+                setShowLoginSignupHint(true);
+            }
+        } finally { setLoading(false); }
     };
 
     const handleRegister = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError('');
         const formData = new FormData(e.currentTarget);
+        const name = String(formData.get('name') || '').trim();
+        const email = String(formData.get('email') || '').trim();
         const password = String(formData.get('password') || '');
         const confirmPassword = String(formData.get('confirm') || '');
         if (password !== confirmPassword) { setError('Passwords do not match'); return; }
         setLoading(true);
         try {
-            await register(String(formData.get('name') || ''), String(formData.get('email') || ''), password);
+            await register(name, email, password);
             showToast('Account created! Welcome to Feelinga 🍵', 'success');
             closeAuthModal();
-        } catch (err) { setError(getErrorMessage(err, 'Registration failed')); } finally { setLoading(false); }
+        } catch (err) {
+            const message = getErrorMessage(err, 'Registration failed');
+            const normalized = message.toLowerCase();
+            if (normalized.includes('already registered') || normalized.includes('already in use')) {
+                switchTab('login');
+                setLoginEmail(email);
+                setError('This email already has an account. Please sign in.');
+            } else {
+                setError(message);
+            }
+        } finally { setLoading(false); }
     };
 
     const handleForgotPassword = async (e: FormEvent<HTMLFormElement>) => {
@@ -209,6 +236,7 @@ export default function AuthModal() {
     const switchTab = (tab: AuthTab) => {
         setActiveTab(tab);
         setError('');
+        setShowLoginSignupHint(false);
         setShowForgot(false);
         setForgotSent(false);
         setShowLoginPassword(false);
@@ -283,7 +311,19 @@ export default function AuthModal() {
                             <form className="auth-modal__form" onSubmit={handleLogin}>
                                 <div className="auth-modal__field">
                                     <label htmlFor="loginEmail">Email</label>
-                                    <input type="email" id="loginEmail" name="email" required placeholder="your@email.com" autoComplete="email" />
+                                    <input
+                                        type="email"
+                                        id="loginEmail"
+                                        name="email"
+                                        required
+                                        placeholder="your@email.com"
+                                        autoComplete="email"
+                                        value={loginEmail}
+                                        onChange={e => {
+                                            setLoginEmail(e.target.value);
+                                            setShowLoginSignupHint(false);
+                                        }}
+                                    />
                                 </div>
                                 <div className="auth-modal__field">
                                     <label htmlFor="loginPassword">Password</label>
@@ -311,6 +351,21 @@ export default function AuthModal() {
                                         Forgot password?
                                     </button>
                                 </div>
+                                {showLoginSignupHint && (
+                                    <div className="auth-modal__assist">
+                                        New to Feelinga?{' '}
+                                        <button
+                                            type="button"
+                                            className="auth-modal__toggle"
+                                            onClick={() => {
+                                                switchTab('signup');
+                                                setSignupEmail(loginEmail);
+                                            }}
+                                        >
+                                            Create your account
+                                        </button>
+                                    </div>
+                                )}
                                 <button type="submit" className="btn btn--primary auth-modal__submit" disabled={loading}>
                                     {loading ? 'Signing in...' : 'SIGN IN'}
                                 </button>
@@ -323,7 +378,16 @@ export default function AuthModal() {
                                 </div>
                                 <div className="auth-modal__field">
                                     <label htmlFor="signupEmail">Email</label>
-                                    <input type="email" id="signupEmail" name="email" required placeholder="your@email.com" autoComplete="email" />
+                                    <input
+                                        type="email"
+                                        id="signupEmail"
+                                        name="email"
+                                        required
+                                        placeholder="your@email.com"
+                                        autoComplete="email"
+                                        value={signupEmail}
+                                        onChange={e => setSignupEmail(e.target.value)}
+                                    />
                                 </div>
                                 <div className="auth-modal__field">
                                     <label htmlFor="signupPassword">Password</label>
@@ -396,7 +460,7 @@ export default function AuthModal() {
                         )}
 
                         <div className="auth-modal__divider"><span>OR</span></div>
-                        {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ? (
+                        {hasGoogleClientId ? (
                             <div id="google-signin-btn" style={{ display: 'flex', justifyContent: 'center', marginBottom: '4px' }} />
                         ) : (
                             <button className="auth-modal__google" disabled style={{ opacity: 0.5, cursor: 'not-allowed' }} aria-label="Google Sign-In — coming soon">
