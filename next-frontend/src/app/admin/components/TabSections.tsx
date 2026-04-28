@@ -332,38 +332,98 @@ export function ProductsTab({
                             <h2>{editingProduct ? 'Edit Product' : 'Add Product'}</h2>
                             <button className="admin-modal__close" onClick={() => setShowProductForm(false)}><AppIcon name="xCircle" size={16} aria-hidden /></button>
                         </div>
-                        <form onSubmit={handleProductSubmit} className="admin-form-grid">
-                            <div><label>Name *</label><input className="admin-form-control" type="text" required value={productForm.name} onChange={e => handleProductFormChange('name', e.target.value)} /></div>
-                            <div><label>Slug</label><input className="admin-form-control" type="text" value={productForm.slug} onChange={e => handleProductFormChange('slug', e.target.value)} placeholder="auto-generated" /></div>
-                            <div>
-                                <label>Type *</label>
-                                <select className="admin-form-control" value={productForm.type} onChange={e => handleProductFormChange('type', e.target.value)}>
-                                    {['Black Tea', 'Green Tea', 'White Tea', 'Oolong', 'Herbal', 'Herbal Infusion', 'Masala Chai', 'Matcha'].map(t => <option key={t} value={t}>{t}</option>)}
-                                </select>
-                            </div>
-                            <div><label>Origin *</label><input className="admin-form-control" type="text" required value={productForm.origin} onChange={e => handleProductFormChange('origin', e.target.value)} /></div>
-                            <div className="admin-form-grid__span-all"><label>Description *</label><textarea className="admin-form-control admin-form-control--textarea" required value={productForm.description} onChange={e => handleProductFormChange('description', e.target.value)} /></div>
-                            <div className="admin-form-grid__span-all"><label>Short Description</label><input className="admin-form-control" type="text" maxLength={200} value={productForm.shortDescription} onChange={e => handleProductFormChange('shortDescription', e.target.value)} /></div>
+                        <form onSubmit={handleProductSubmit} className="admin-product-form">
+                            <section className="admin-form-section">
+                                <h4 className="admin-form-section__title">Basic Details</h4>
+                                <p className="admin-form-section__hint">Core product identity shown across catalog and search.</p>
+                                <div className="admin-form-subgrid">
+                                    <div><label className="admin-form-label">Name *</label><input className="admin-form-control" type="text" required value={productForm.name} onChange={e => handleProductFormChange('name', e.target.value)} /></div>
+                                    <div>
+                                        <label className="admin-form-label">Slug</label>
+                                        <input className="admin-form-control" type="text" value={productForm.slug} onChange={e => handleProductFormChange('slug', e.target.value)} placeholder="auto-generated from name" />
+                                        <div className="admin-form-helper">Used in URL: <code>{(productForm.slug || productForm.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'your-product-slug'}</code></div>
+                                    </div>
+                                    <div>
+                                        <label className="admin-form-label">Type *</label>
+                                        <select className="admin-form-control" value={productForm.type} onChange={e => handleProductFormChange('type', e.target.value)}>
+                                            {['Black Tea', 'Green Tea', 'White Tea', 'Oolong', 'Herbal', 'Herbal Infusion', 'Masala Chai', 'Matcha'].map(t => <option key={t} value={t}>{t}</option>)}
+                                        </select>
+                                    </div>
+                                    <div><label className="admin-form-label">Origin *</label><input className="admin-form-control" type="text" required value={productForm.origin} onChange={e => handleProductFormChange('origin', e.target.value)} placeholder="e.g. Darjeeling, India" /></div>
+                                    <div className="admin-form-grid__span-all"><label className="admin-form-label">Description *</label><textarea className="admin-form-control admin-form-control--textarea" required value={productForm.description} onChange={e => handleProductFormChange('description', e.target.value)} /></div>
+                                    <div className="admin-form-grid__span-all">
+                                        <label className="admin-form-label">Short Description</label>
+                                        <input className="admin-form-control" type="text" maxLength={200} value={productForm.shortDescription} onChange={e => handleProductFormChange('shortDescription', e.target.value)} />
+                                        <div className="admin-form-helper">Max 200 characters. Used on product cards.</div>
+                                    </div>
+                                </div>
+                            </section>
 
-                            <h4 className="admin-form-grid__section-title">Pricing</h4>
-                            <div><label>50g (₹)</label><input className="admin-form-control" type="number" min={0} value={productForm['price50g']} onChange={e => handleProductFormChange('price50g', e.target.value)} /></div>
-                            <div><label>100g (₹) *</label><input className="admin-form-control" type="number" min={0} required value={productForm['price100g']} onChange={e => handleProductFormChange('price100g', e.target.value)} /></div>
-                            <div><label>200g (₹)</label><input className="admin-form-control" type="number" min={0} value={productForm['price200g']} onChange={e => handleProductFormChange('price200g', e.target.value)} /></div>
-                            <div><label>Stock</label><input className="admin-form-control" type="number" min={0} value={productForm.stock} onChange={e => handleProductFormChange('stock', e.target.value)} /></div>
+                            <section className="admin-form-section">
+                                <h4 className="admin-form-section__title">Pricing & Inventory</h4>
+                                <p className="admin-form-section__hint">Set pack-wise pricing and available stock.</p>
+                                <div className="admin-form-subgrid">
+                                    <div><label className="admin-form-label">50g (₹)</label><input className="admin-form-control" type="number" min={0} step="0.01" value={productForm['price50g']} onChange={e => handleProductFormChange('price50g', e.target.value)} /></div>
+                                    <div><label className="admin-form-label">100g (₹) *</label><input className="admin-form-control" type="number" min={0} step="0.01" required value={productForm['price100g']} onChange={e => handleProductFormChange('price100g', e.target.value)} /></div>
+                                    <div><label className="admin-form-label">200g (₹)</label><input className="admin-form-control" type="number" min={0} step="0.01" value={productForm['price200g']} onChange={e => handleProductFormChange('price200g', e.target.value)} /></div>
+                                    <div>
+                                        <label className="admin-form-label">Stock</label>
+                                        <input className="admin-form-control" type="number" min={0} value={productForm.stock} onChange={e => handleProductFormChange('stock', e.target.value)} />
+                                        <div className={`admin-stock-indicator ${Number(productForm.stock || 0) > 0 ? 'is-in' : 'is-out'}`}>
+                                            {Number(productForm.stock || 0) > 0 ? 'In stock' : 'Out of stock'} (auto sync)
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
 
-                            <div>
-                                <label>Caffeine</label>
-                                <select className="admin-form-control" value={productForm.caffeine} onChange={e => handleProductFormChange('caffeine', e.target.value)}>
-                                    {['none', 'low', 'medium', 'high'].map(c => <option key={c} value={c}>{capitalize(c)}</option>)}
-                                </select>
-                            </div>
-                            <div><label>Tasting Notes</label><input className="admin-form-control" type="text" placeholder="floral, citrus, malty" value={productForm.tastingNotes} onChange={e => handleProductFormChange('tastingNotes', e.target.value)} /></div>
-                            <div><label>Brewing Temperature</label><input className="admin-form-control" type="text" placeholder="e.g. 85°C" value={productForm.brewTemp} onChange={e => handleProductFormChange('brewTemp', e.target.value)} /></div>
-                            <div><label>Steep Time</label><input className="admin-form-control" type="text" placeholder="e.g. 2-3 minutes" value={productForm.brewSteep} onChange={e => handleProductFormChange('brewSteep', e.target.value)} /></div>
-                            <div><label>Tea Amount</label><input className="admin-form-control" type="text" placeholder="e.g. 1 tsp per 200ml" value={productForm.brewAmount} onChange={e => handleProductFormChange('brewAmount', e.target.value)} /></div>
-                            <div><label>Tags</label><input className="admin-form-control" type="text" placeholder="premium, bestseller" value={productForm.tags} onChange={e => handleProductFormChange('tags', e.target.value)} /></div>
-                            <div className="admin-form-grid__span-all">
-                                <label className="admin-form-label">Product Images</label>
+                            <section className="admin-form-section">
+                                <h4 className="admin-form-section__title">Attributes & Discoverability</h4>
+                                <p className="admin-form-section__hint">These values appear in shop cards, filters, and product pages.</p>
+                                <div className="admin-form-subgrid">
+                                    <div>
+                                        <label className="admin-form-label">Caffeine</label>
+                                        <select className="admin-form-control" value={productForm.caffeine} onChange={e => handleProductFormChange('caffeine', e.target.value)}>
+                                            {['none', 'low', 'medium', 'high'].map(c => <option key={c} value={c}>{capitalize(c)}</option>)}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="admin-form-label">Tasting Notes</label>
+                                        <input className="admin-form-control" type="text" placeholder="floral, citrus, malty" value={productForm.tastingNotes} onChange={e => handleProductFormChange('tastingNotes', e.target.value)} />
+                                        <div className="admin-form-helper">Comma separated.</div>
+                                    </div>
+                                    <div className="admin-form-grid__span-all">
+                                        <label className="admin-form-label">Tags</label>
+                                        <input className="admin-form-control" type="text" placeholder="premium, bestseller" value={productForm.tags} onChange={e => handleProductFormChange('tags', e.target.value)} />
+                                        <div className="admin-form-helper">Comma separated keywords for search.</div>
+                                    </div>
+                                    <div className="admin-form-grid__span-all">
+                                        <label className="admin-form-label">Moods</label>
+                                        <div className="admin-moods">
+                                            {['energize', 'relax', 'focus', 'detox', 'glow', 'immunity'].map(mood => (
+                                                <button type="button" key={mood} onClick={() => toggleMood(mood)} className={`admin-mood-chip ${productForm.moods.includes(mood) ? 'is-active' : ''}`}>{capitalize(mood)}</button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="admin-flags">
+                                        <label className="admin-flag"><input type="checkbox" checked={productForm.isBestSeller} onChange={e => handleProductFormChange('isBestSeller', e.target.checked)} /> Best Seller</label>
+                                        <label className="admin-flag"><input type="checkbox" checked={productForm.isNewArrival} onChange={e => handleProductFormChange('isNewArrival', e.target.checked)} /> New Arrival</label>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section className="admin-form-section">
+                                <h4 className="admin-form-section__title">Brewing Guide</h4>
+                                <p className="admin-form-section__hint">Optional but helpful for better conversion and customer trust.</p>
+                                <div className="admin-form-subgrid">
+                                    <div><label className="admin-form-label">Brewing Temperature</label><input className="admin-form-control" type="text" placeholder="e.g. 85°C" value={productForm.brewTemp} onChange={e => handleProductFormChange('brewTemp', e.target.value)} /></div>
+                                    <div><label className="admin-form-label">Steep Time</label><input className="admin-form-control" type="text" placeholder="e.g. 2-3 minutes" value={productForm.brewSteep} onChange={e => handleProductFormChange('brewSteep', e.target.value)} /></div>
+                                    <div className="admin-form-grid__span-all"><label className="admin-form-label">Tea Amount</label><input className="admin-form-control" type="text" placeholder="e.g. 1 tsp per 200ml" value={productForm.brewAmount} onChange={e => handleProductFormChange('brewAmount', e.target.value)} /></div>
+                                </div>
+                            </section>
+
+                            <section className="admin-form-section">
+                                <h4 className="admin-form-section__title">Product Images</h4>
+                                <p className="admin-form-section__hint">Add at least one image to avoid placeholder visuals in storefront.</p>
                                 {productForm.images.length > 0 && (
                                     <div className="admin-product-images">
                                         {productForm.images.map((url: string, i: number) => (
@@ -399,26 +459,13 @@ export function ProductsTab({
                                         </>
                                     )}
                                 </div>
-                            </div>
-
-                            <div className="admin-form-grid__span-all">
-                                <label className="admin-form-label">Moods</label>
-                                <div className="admin-moods">
-                                    {['energize', 'relax', 'focus', 'detox', 'glow', 'immunity'].map(mood => (
-                                        <button type="button" key={mood} onClick={() => toggleMood(mood)} className={`admin-mood-chip ${productForm.moods.includes(mood) ? 'is-active' : ''}`}>{capitalize(mood)}</button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="admin-flags">
-                                <label className="admin-flag"><input type="checkbox" checked={productForm.inStock} onChange={e => handleProductFormChange('inStock', e.target.checked)} /> In Stock</label>
-                                <label className="admin-flag"><input type="checkbox" checked={productForm.isBestSeller} onChange={e => handleProductFormChange('isBestSeller', e.target.checked)} /> Best Seller</label>
-                                <label className="admin-flag"><input type="checkbox" checked={productForm.isNewArrival} onChange={e => handleProductFormChange('isNewArrival', e.target.checked)} /> New Arrival</label>
-                            </div>
+                            </section>
 
                             <div className="admin-form-actions">
-                                <button type="submit" className="btn btn--primary">{editingProduct ? 'Update Product' : 'Create Product'}</button>
-                                <button type="button" className="btn btn--ghost" onClick={() => setShowProductForm(false)}>Cancel</button>
+                                <button type="submit" className="btn btn--primary" disabled={actionLoading === 'save-product'}>
+                                    {actionLoading === 'save-product' ? 'Saving...' : (editingProduct ? 'Update Product' : 'Create Product')}
+                                </button>
+                                <button type="button" className="btn btn--ghost" onClick={() => setShowProductForm(false)} disabled={actionLoading === 'save-product'}>Cancel</button>
                             </div>
                         </form>
                     </div>

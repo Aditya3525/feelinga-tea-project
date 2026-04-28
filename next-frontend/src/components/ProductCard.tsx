@@ -16,6 +16,18 @@ type ProductCardProps = {
     footer?: React.ReactNode;
 };
 
+type CardBadge = {
+    label: string;
+    className?: string;
+};
+
+function formatCaffeine(caffeine?: string) {
+    if (!caffeine) return null;
+    const normalized = caffeine.toLowerCase();
+    if (normalized === 'none') return 'Caffeine Free';
+    return `${normalized.charAt(0).toUpperCase()}${normalized.slice(1)} Caffeine`;
+}
+
 export default function ProductCard({
     product,
     badge,
@@ -27,9 +39,31 @@ export default function ProductCard({
     footer,
 }: ProductCardProps) {
     const href = linkHref ?? `/product/${product.slug}`;
+    const cardBadges: CardBadge[] = Array.isArray(product.badges) && product.badges.length > 0
+        ? product.badges
+        : (badge ? [{ label: badge, className: badgeClass }] : []);
+    const primaryPrice = Number(product.price ?? 0);
+    const sizePrices: Array<{ size: string; value: number }> = Array.isArray(product.sizePrices)
+        ? product.sizePrices
+        : [];
+    const secondarySizes = sizePrices.filter((entry) => entry.size !== '100g').slice(0, 2);
+    const originLabel = product.originLabel || product.origin;
+    const tastingNotes = Array.isArray(product.tastingNotes) ? product.tastingNotes.slice(0, 2) : [];
+    const stock = Number(product.stock || 0);
+    const showStockCount = product.inStock && stock > 0;
+    const caffeineLabel = formatCaffeine(product.caffeine);
+
     return (
         <div className="product-card">
-            {badge && <span className={`product-card__badge ${badgeClass || ''}`}>{badge}</span>}
+            {cardBadges.length > 0 && (
+                <div className="product-card__badges">
+                    {cardBadges.map((entry) => (
+                        <span key={`${product.id}-${entry.label}`} className={`product-card__badge ${entry.className || ''}`}>
+                            {entry.label}
+                        </span>
+                    ))}
+                </div>
+            )}
             <Link href={href}>
                 <div className="product-card__img">
                     <Image
@@ -45,11 +79,34 @@ export default function ProductCard({
                 <div className="product-card__type">{product.typeName || product.type}</div>
                 <Link href={href} className="product-card__name">{product.name}</Link>
                 <div className="product-card__note">{product.note}</div>
+                <div className="product-card__meta">
+                    {originLabel && <span>{originLabel}</span>}
+                    {caffeineLabel && <span>{caffeineLabel}</span>}
+                </div>
+                {tastingNotes.length > 0 && (
+                    <div className="product-card__notes">
+                        {tastingNotes.map((note: string) => (
+                            <span key={`${product.id}-${note}`} className="product-card__chip">
+                                {note}
+                            </span>
+                        ))}
+                    </div>
+                )}
                 <div className="product-card__bottom">
-                    <div className="product-card__price">₹{(product.price ?? 0).toLocaleString()}</div>
+                    <div>
+                        <div className="product-card__price">₹{primaryPrice.toLocaleString()}</div>
+                        {secondarySizes.length > 0 && (
+                            <div className="product-card__size-prices">
+                                {secondarySizes.map((entry) => `${entry.size}: ₹${entry.value.toLocaleString()}`).join(' · ')}
+                            </div>
+                        )}
+                    </div>
                     {product.stars != null && (
                         <div className="product-card__rating">{renderStars(product.stars)} <span>({product.reviews})</span></div>
                     )}
+                </div>
+                <div className="product-card__stock">
+                    {product.inStock ? (showStockCount ? `${stock} in stock` : 'In stock') : 'Out of stock'}
                 </div>
                 {footer ?? (showAddButton && (
                     <button

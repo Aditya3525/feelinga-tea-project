@@ -2559,10 +2559,6 @@ p {
 }
 
 .product-card__badge {
-  position: absolute;
-  top: var(--space-md);
-  left: var(--space-md);
-  z-index: 2;
   background: var(--color-accent);
   color: #fff;
   font-size: 0.7rem;
@@ -2571,6 +2567,16 @@ p {
   text-transform: uppercase;
   padding: 4px 12px;
   border-radius: var(--radius-sm);
+}
+
+.product-card__badges {
+  position: absolute;
+  top: var(--space-md);
+  left: var(--space-md);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .product-card__img {
@@ -2639,15 +2645,49 @@ p {
   font-style: italic;
 }
 
+.product-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  font-size: 0.73rem;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-sm);
+}
+
+.product-card__notes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: var(--space-sm);
+}
+
+.product-card__chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-alt);
+  font-size: 0.7rem;
+  color: var(--color-text-light);
+}
+
 .product-card__bottom {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
 }
 
 .product-card__price {
   font-weight: 600;
   font-size: 1.05rem;
+}
+
+.product-card__size-prices {
+  margin-top: 3px;
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
 }
 
 .product-card__price del {
@@ -2666,6 +2706,12 @@ p {
 }
 
 .product-card__rating span {
+  color: var(--color-text-muted);
+}
+
+.product-card__stock {
+  margin-top: var(--space-xs);
+  font-size: 0.72rem;
   color: var(--color-text-muted);
 }
 
@@ -4670,10 +4716,14 @@ a.btn,
   }
 
   .product-card__badge {
-    top: 10px;
-    left: 10px;
     font-size: 0.62rem;
     padding: 3px 8px;
+  }
+
+  .product-card__badges {
+    top: 10px;
+    left: 10px;
+    gap: 4px;
   }
 
   .product-card__name {
@@ -4694,6 +4744,19 @@ a.btn,
     flex-direction: column;
     align-items: flex-start;
     gap: 4px;
+  }
+
+  .product-card__meta {
+    gap: 4px 8px;
+  }
+
+  .product-card__chip {
+    font-size: 0.66rem;
+  }
+
+  .product-card__size-prices,
+  .product-card__stock {
+    font-size: 0.66rem;
   }
 
   .product-card__rating {

@@ -23,11 +23,19 @@ type ShopProduct = {
     typeName?: string;
     moods: string[];
     origin: string;
+    originLabel: string;
     price: number;
+    sizePrices: Array<{ size: string; value: number }>;
     img: string;
     note: string;
     reviews: number;
     stars: number;
+    stock: number;
+    caffeine?: string;
+    tastingNotes: string[];
+    isBestSeller: boolean;
+    isNewArrival: boolean;
+    badges: Array<{ label: string; className?: string }>;
     badge?: string | null;
     badgeColor?: string;
     inStock: boolean;
@@ -122,6 +130,17 @@ function ShopInner() {
                 const data = await res.json().catch(() => ({}));
                 if (data.data) {
                     setProducts(data.data.map((p: any): ShopProduct => ({
+                        // Prepare badges by priority for the product card
+                        // to reflect key admin attributes in the shop view.
+                        // Order: sold out > best seller > new arrival.
+                        ...(() => {
+                            const inStock = Boolean(p.inStock);
+                            const badges: Array<{ label: string; className?: string }> = [];
+                            if (!inStock) badges.push({ label: 'Sold Out', className: 'product-card__badge--danger' });
+                            if (p.isBestSeller) badges.push({ label: 'Best Seller', className: 'product-card__badge--gold' });
+                            if (p.isNewArrival) badges.push({ label: 'New Arrival', className: 'product-card__badge--success' });
+                            return { inStock, badges };
+                        })(),
                         id: p._id,
                         slug: p.slug,
                         name: p.name,
@@ -129,14 +148,27 @@ function ShopInner() {
                         typeName: p.type,
                         moods: p.moods || [],
                         origin: p.origin?.split(',')[0]?.trim().toLowerCase() || '',
+                        originLabel: p.origin?.split(',')[0]?.trim() || '',
                         price: p.prices?.['100g'] || 0,
+                        sizePrices: [
+                            ['50g', p.prices?.['50g']],
+                            ['100g', p.prices?.['100g']],
+                            ['200g', p.prices?.['200g']],
+                        ]
+                            .filter(([, value]) => Number.isFinite(Number(value)) && Number(value) > 0)
+                            .map(([size, value]) => ({ size, value: Number(value) })),
                         img: p.images?.[0] || '/images/products/darjeeling-ff.jpg',
                         note: p.shortDescription || (p.description ? p.description.substring(0, 70) + '...' : ''),
                         reviews: p.reviewCount || 0,
-                        stars: Math.round(p.rating || 0) || 5,
+                        stars: Math.round(p.rating || 0),
+                        stock: Number(p.stock || 0),
+                        caffeine: p.caffeine || '',
+                        tastingNotes: Array.isArray(p.tastingNotes) ? p.tastingNotes : [],
+                        isBestSeller: Boolean(p.isBestSeller),
+                        isNewArrival: Boolean(p.isNewArrival),
                         badge: !p.inStock ? 'Sold Out' : null,
                         badgeColor: !p.inStock ? 'var(--color-error)' : undefined,
-                        inStock: p.inStock,
+                        inStock: Boolean(p.inStock),
                     })));
                     setTotalPages(data.pagination?.totalPages || 1);
                     setTotal(data.pagination?.total || data.results || 0);

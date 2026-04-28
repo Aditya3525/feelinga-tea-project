@@ -703,22 +703,77 @@ export default function Admin() {
 
     const handleProductSubmit = async (e: any) => {
         e.preventDefault();
+        const normalizedName = productForm.name.trim();
+        const normalizedDescription = productForm.description.trim();
+        const normalizedOrigin = productForm.origin.trim();
+        const normalizedSlug = (productForm.slug.trim() || normalizedName.toLowerCase().replace(/[^a-z0-9]+/g, '-')).replace(/(^-|-$)/g, '');
+        const normalizedStock = Number(productForm.stock);
+        const price100g = Number(productForm['price100g']);
+        const price50gRaw = String(productForm['price50g'] || '').trim();
+        const price200gRaw = String(productForm['price200g'] || '').trim();
+        const price50g = price50gRaw ? Number(price50gRaw) : null;
+        const price200g = price200gRaw ? Number(price200gRaw) : null;
+
+        if (!normalizedName || normalizedName.length < 2) {
+            showToast('Product name must be at least 2 characters.', 'error');
+            return;
+        }
+        if (!normalizedSlug) {
+            showToast('Please provide a valid product slug.', 'error');
+            return;
+        }
+        if (!normalizedOrigin) {
+            showToast('Product origin is required.', 'error');
+            return;
+        }
+        if (!normalizedDescription || normalizedDescription.length < 10) {
+            showToast('Description should be at least 10 characters.', 'error');
+            return;
+        }
+        if (!Number.isFinite(price100g) || price100g <= 0) {
+            showToast('100g price must be a valid positive number.', 'error');
+            return;
+        }
+        if (price50g !== null && (!Number.isFinite(price50g) || price50g <= 0)) {
+            showToast('50g price must be a valid positive number.', 'error');
+            return;
+        }
+        if (price200g !== null && (!Number.isFinite(price200g) || price200g <= 0)) {
+            showToast('200g price must be a valid positive number.', 'error');
+            return;
+        }
+        if (!Number.isFinite(normalizedStock) || normalizedStock < 0) {
+            showToast('Stock must be 0 or higher.', 'error');
+            return;
+        }
+        if (!Array.isArray(productForm.images) || productForm.images.length === 0) {
+            showToast('Please upload at least one product image.', 'error');
+            return;
+        }
+
+        const tastingNotes = productForm.tastingNotes
+            ? Array.from(new Set(productForm.tastingNotes.split(',').map((s: string) => s.trim()).filter(Boolean)))
+            : [];
+        const tags = productForm.tags
+            ? Array.from(new Set(productForm.tags.split(',').map((s: string) => s.trim()).filter(Boolean)))
+            : [];
+
         const body = {
-            name: productForm.name.trim(),
-            slug: productForm.slug.trim() || productForm.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+            name: normalizedName,
+            slug: normalizedSlug,
             type: productForm.type,
-            description: productForm.description.trim(),
+            description: normalizedDescription,
             shortDescription: productForm.shortDescription.trim() || undefined,
-            origin: productForm.origin.trim(),
+            origin: normalizedOrigin,
             prices: {
-                ...(productForm['price50g'] ? { '50g': Number(productForm['price50g']) } : {}),
-                '100g': Number(productForm['price100g']),
-                ...(productForm['price200g'] ? { '200g': Number(productForm['price200g']) } : {}),
+                ...(price50g !== null ? { '50g': price50g } : {}),
+                '100g': price100g,
+                ...(price200g !== null ? { '200g': price200g } : {}),
             },
-            stock: Number(productForm.stock),
+            stock: normalizedStock,
             caffeine: productForm.caffeine,
-            tastingNotes: productForm.tastingNotes ? productForm.tastingNotes.split(',').map((s: string) => s.trim()).filter(Boolean) : [],
-            tags: productForm.tags ? productForm.tags.split(',').map((s: string) => s.trim()).filter(Boolean) : [],
+            tastingNotes,
+            tags,
             brewingInstructions: {
                 temperature: productForm.brewTemp.trim() || undefined,
                 steepTime: productForm.brewSteep.trim() || undefined,
@@ -728,15 +783,18 @@ export default function Admin() {
             moods: productForm.moods,
             isBestSeller: productForm.isBestSeller,
             isNewArrival: productForm.isNewArrival,
-            inStock: productForm.inStock,
+            inStock: normalizedStock > 0,
         };
         try {
+            setActionLoading('save-product');
             if (editingProduct) {
                 await adminApi(`/products/${editingProduct._id}`, { method: 'PATCH', body: JSON.stringify(body) });
             } else {
                 await adminApi('/products', { method: 'POST', body: JSON.stringify(body) });
             }
             setShowProductForm(false);
+            setEditingProduct(null);
+            setProductForm(emptyProduct);
             loadProducts(productPagination.page);
         } catch (err: any) {
             const message = String(err?.message || '');
@@ -745,6 +803,8 @@ export default function Admin() {
             } else {
                 showToast(message || 'Failed to save product', 'error');
             }
+        } finally {
+            setActionLoading(null);
         }
     };
 
