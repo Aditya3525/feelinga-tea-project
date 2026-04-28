@@ -651,7 +651,14 @@ export default function Admin() {
     };
 
     const handleProductFormChange = (field: string, value: any) => {
-        setProductForm(prev => ({ ...prev, [field]: value }));
+        setProductForm(prev => {
+            if (field === 'stock') {
+                const stockValue = Number(value);
+                const normalizedStock = Number.isFinite(stockValue) ? stockValue : 0;
+                return { ...prev, stock: value, inStock: normalizedStock > 0 };
+            }
+            return { ...prev, [field]: value };
+        });
     };
 
     const toggleMood = (mood: string) => {

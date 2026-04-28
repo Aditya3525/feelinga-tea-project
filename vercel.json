@@ -3,5 +3,15 @@
   "framework": "nextjs",
   "buildCommand": "npm run build --prefix next-frontend",
   "installCommand": "npm install --prefix next-frontend",
-  "devCommand": "npm run dev --prefix next-frontend"
+  "devCommand": "npm run dev --prefix next-frontend",
+  "experimentalServices": {
+    "frontend": {
+      "routePrefix": "/",
+      "framework": "nextjs"
+    },
+    "backend": {
+      "entrypoint": "backend",
+      "routePrefix": "/_/backend"
+    }
+  }
 }

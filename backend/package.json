@@ -1,7 +1,7 @@
-{
-  "name": "serene-tea-api",
+﻿{
+  "name": "feelinga-tea-api",
   "version": "1.0.0",
-  "description": "Backend API for Serené Tea e-commerce",
+  "description": "Backend API for Feelinga Tea e-commerce",
   "main": "dist/app.js",
   "type": "module",
   "scripts": {
@@ -54,3 +54,4 @@
     "vitest": "^2.0.0"
   }
 }
+

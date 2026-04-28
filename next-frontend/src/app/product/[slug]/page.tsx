@@ -104,6 +104,7 @@ export default function ProductDetail() {
     // Reviews state
     const [reviews, setReviews] = useState<ReviewItem[]>([]);
     const [reviewsLoading, setReviewsLoading] = useState(false);
+    const [showAllReviews, setShowAllReviews] = useState(false);
     const [reviewForm, setReviewForm] = useState<ReviewFormState>({ rating: 5, title: '', body: '' });
     const [reviewSubmitting, setReviewSubmitting] = useState(false);
     const [activeTab, setActiveTab] = useState<PdpTab>('description');
@@ -168,6 +169,7 @@ export default function ProductDetail() {
         if (!product) return;
         const productId = product._id;
         const productType = product.type;
+        setShowAllReviews(false);
 
         // Fetch reviews
         async function fetchReviews() {
@@ -352,6 +354,11 @@ export default function ProductDetail() {
         .filter((entry): entry is { size: string; perGram: number } => Boolean(entry));
     const selectedPerGram = perGramBySize.find(entry => entry.size === selectedSize)?.perGram;
     const avgRating = reviews.length > 0 ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) : null;
+    const sortedReviews = [...reviews].sort((a, b) => {
+        if (b.rating !== a.rating) return b.rating - a.rating;
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+    const visibleReviews = showAllReviews ? sortedReviews : sortedReviews.slice(0, 2);
     const productImages = product.images || [];
     const tastingNotes = product.tastingNotes || [];
     const stockCount = product.stock || 0;
@@ -723,7 +730,7 @@ export default function ProductDetail() {
                                 </div>
                             ) : (
                                 <div className="pdp-reviews-list">
-                                    {reviews.map(review => (
+                                    {visibleReviews.map(review => (
                                         <div key={review._id} className="pdp-review-card">
                                             <div className="pdp-review-card__head">
                                                 <div>
@@ -737,6 +744,17 @@ export default function ProductDetail() {
                                             {review.body && <p className="pdp-review-card__body">{review.body}</p>}
                                         </div>
                                     ))}
+                                    {sortedReviews.length > 2 && (
+                                        <div className="text-center mt-md">
+                                            <button
+                                                type="button"
+                                                className="btn btn--ghost btn--sm"
+                                                onClick={() => setShowAllReviews((prev) => !prev)}
+                                            >
+                                                {showAllReviews ? 'Show Less Reviews' : `Show More Reviews (${sortedReviews.length - 2})`}
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>

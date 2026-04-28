@@ -1,6 +1,6 @@
-services:
+﻿services:
   - type: web
-    name: serene-tea-api
+    name: feelinga-tea-api
     runtime: node
     rootDir: backend
     plan: free
@@ -33,11 +33,11 @@ services:
 
       # Cookie / session security
       - key: COOKIE_SAMESITE
-        value: none          # Required for cross-origin cookies (Vercel → Render)
+        value: none          # Required for cross-origin cookies (Vercel â†’ Render)
       - key: ENFORCE_HTTPS
         value: true
 
-      # CORS — set to your Vercel frontend URL
+      # CORS â€” set to your Vercel frontend URL
       - key: CLIENT_URL
         sync: false           # e.g. https://feelinga-tea.vercel.app
 
@@ -87,7 +87,7 @@ services:
       - key: HIBP_FAIL_CLOSED
         value: false
 
-      # Email verification (Hunter.io — set provider to 'hunter' to enable)
+      # Email verification (Hunter.io â€” set provider to 'hunter' to enable)
       - key: EMAIL_VERIFIER_PROVIDER
         value: none
       - key: HUNTER_API_KEY
@@ -100,3 +100,4 @@ services:
         value: true
       - key: HUNTER_FAIL_OPEN
         value: true
+

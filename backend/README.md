@@ -1,6 +1,6 @@
-# Serené Tea — Backend API
+﻿# Feelinga Tea â€” Backend API
 
-RESTful API for the Serené Tea e-commerce platform, built with Express, TypeScript, and MongoDB.
+RESTful API for the Feelinga Tea e-commerce platform, built with Express, TypeScript, and MongoDB.
 
 ## Features
 
@@ -76,3 +76,4 @@ Run the integration test suite:
 ```bash
 npm test
 ```
+

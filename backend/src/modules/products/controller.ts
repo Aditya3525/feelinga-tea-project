@@ -141,6 +141,11 @@ export const getBySlug = async (req: Request, res: Response, next: NextFunction)
 export const create = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const requestedSlug = String(req.body.slug || '').trim().toLowerCase();
+        const normalizedBody: Record<string, any> = { ...req.body, slug: requestedSlug };
+        if (normalizedBody.stock !== undefined) {
+            normalizedBody.stock = Number(normalizedBody.stock);
+            normalizedBody.inStock = normalizedBody.stock > 0;
+        }
         const existingProduct = await Product.findOne({ slug: requestedSlug, includeSoftDeleted: true } as any);
 
         if (existingProduct && !existingProduct.deletedAt) {
@@ -150,7 +155,7 @@ export const create = async (req: Request, res: Response, next: NextFunction) =>
         if (existingProduct && existingProduct.deletedAt) {
             const restored = await Product.findByIdAndUpdate(
                 existingProduct._id,
-                { ...req.body, slug: requestedSlug, deletedAt: null },
+                { ...normalizedBody, deletedAt: null },
                 { new: true, runValidators: true },
             );
             if (!restored) throw new AppError('Failed to restore product', 500);
@@ -166,7 +171,7 @@ export const create = async (req: Request, res: Response, next: NextFunction) =>
             return res.status(201).json({ status: 'success', data: restored });
         }
 
-        const product = await Product.create({ ...req.body, slug: requestedSlug });
+        const product = await Product.create(normalizedBody);
         cache.invalidate('products:');
         await logAdminAction({
             actor: req.user!,
@@ -229,8 +234,9 @@ export const bulkDelete = async (req: Request, res: Response, next: NextFunction
 // PATCH /products/:id (admin)
 export const update = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        if (req.body.stock !== undefined && req.body.stock > 0 && req.body.inStock === undefined) {
-            req.body.inStock = true;
+        if (req.body.stock !== undefined) {
+            req.body.stock = Number(req.body.stock);
+            req.body.inStock = req.body.stock > 0;
         }
         const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
         if (!product) throw new AppError('Product not found', 404);
