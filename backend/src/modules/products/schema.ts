@@ -25,6 +25,11 @@ export const createProductSchema = z.object({
     origin: z.string().min(2),
     caffeine: z.enum(caffeineTypes).optional(),
     tastingNotes: z.array(z.string()).optional(),
+    tags: z.array(z.string()).optional(),
+    stock: z.number().int().min(0).optional(),
+    inStock: z.boolean().optional(),
+    isBestSeller: z.boolean().optional(),
+    isNewArrival: z.boolean().optional(),
     images: z.array(z.string()).optional(),
     brewingInstructions: brewingInstructionsSchema.optional(),
 });

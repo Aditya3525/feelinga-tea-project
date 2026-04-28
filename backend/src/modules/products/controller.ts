@@ -140,7 +140,33 @@ export const getBySlug = async (req: Request, res: Response, next: NextFunction)
 // POST /products (admin)
 export const create = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const product = await Product.create(req.body);
+        const requestedSlug = String(req.body.slug || '').trim().toLowerCase();
+        const existingProduct = await Product.findOne({ slug: requestedSlug, includeSoftDeleted: true } as any);
+
+        if (existingProduct && !existingProduct.deletedAt) {
+            throw new AppError('A product with this slug already exists. Please use a different name or slug.', 409);
+        }
+
+        if (existingProduct && existingProduct.deletedAt) {
+            const restored = await Product.findByIdAndUpdate(
+                existingProduct._id,
+                { ...req.body, slug: requestedSlug, deletedAt: null },
+                { new: true, runValidators: true },
+            );
+            if (!restored) throw new AppError('Failed to restore product', 500);
+            cache.invalidate('products:');
+            await logAdminAction({
+                actor: req.user!,
+                action: 'product.restore',
+                entityType: 'product',
+                entityId: restored._id,
+                summary: `Restored product "${restored.name}" from archived state`,
+                meta: { slug: restored.slug },
+            });
+            return res.status(201).json({ status: 'success', data: restored });
+        }
+
+        const product = await Product.create({ ...req.body, slug: requestedSlug });
         cache.invalidate('products:');
         await logAdminAction({
             actor: req.user!,

@@ -732,7 +732,12 @@ export default function Admin() {
             setShowProductForm(false);
             loadProducts(productPagination.page);
         } catch (err: any) {
-            showToast(err.message || 'Failed to save product', 'error');
+            const message = String(err?.message || '');
+            if (message.toLowerCase().includes('resource already exists')) {
+                showToast('A product with this slug already exists. Change name/slug and try again.', 'error');
+            } else {
+                showToast(message || 'Failed to save product', 'error');
+            }
         }
     };
 
