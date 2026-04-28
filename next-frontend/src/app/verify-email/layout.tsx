@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Verify Email — Feelinga',
-    description: 'Verify your Feelinga account email address.',
+    title: 'Email Verification Disabled — Feelinga',
+    description: 'Email verification is not required for Feelinga accounts.',
     robots: { index: false, follow: false },
 };
 

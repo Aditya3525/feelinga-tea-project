@@ -1,5 +1,12 @@
 const fallbackApiOrigin = 'http://127.0.0.1:5000';
-const apiOrigin = (process.env.NEXT_PUBLIC_API_URL || fallbackApiOrigin).replace(/\/$/, '');
+
+function sanitizeApiOrigin(raw) {
+  const trimmed = String(raw || '').trim().replace(/^"(.+)"$/, '$1');
+  const noTrailingSlash = trimmed.replace(/\/$/, '');
+  return noTrailingSlash.replace(/\/api(?:\/v1)?$/i, '');
+}
+
+const apiOrigin = sanitizeApiOrigin(process.env.NEXT_PUBLIC_API_URL || fallbackApiOrigin);
 
 const remotePatterns = [
   { protocol: 'http', hostname: 'localhost', port: '5000' },

@@ -96,7 +96,16 @@ export const changeUserRole = async (req: Request, res: Response, next: NextFunc
         const targetUser = await User.findById(req.params.id);
         if (!targetUser) return res.status(404).json({ status: 'error', message: 'User not found' });
         if (role === 'customer' && ADMIN_EMAIL && targetUser.email.toLowerCase() === ADMIN_EMAIL) return res.status(400).json({ status: 'error', message: 'Cannot demote the primary admin account' });
+        const previousRole = targetUser.role;
         const user = await User.findByIdAndUpdate(req.params.id, { role }, { new: true }).select('name email role');
+        await logAdminAction({
+            actor: req.user!,
+            action: 'user.role_change',
+            entityType: 'user',
+            entityId: targetUser._id,
+            summary: `Changed ${targetUser.email} role from ${previousRole} to ${role}`,
+            meta: { previousRole, newRole: role, email: targetUser.email },
+        });
         res.json({ status: 'success', data: user });
     } catch (err) { next(err); }
 };
@@ -162,7 +171,7 @@ export const exportUsers = async (req: Request, res: Response, next: NextFunctio
 // ===== COUPONS =====
 
 export const listCoupons = async (_req: Request, res: Response, next: NextFunction) => {
-    try { res.json({ status: 'success', data: await Coupon.find().sort({ createdAt: -1 }).lean() }); } catch (err) { next(err); }
+    try { res.json({ status: 'success', data: await Coupon.find().sort({ priority: -1, createdAt: -1 }).lean() }); } catch (err) { next(err); }
 };
 
 export const createCoupon = async (req: Request, res: Response, next: NextFunction) => {

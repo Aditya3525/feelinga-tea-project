@@ -1,7 +1,11 @@
 'use client';
 import { useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import Layout from '../../components/Layout';
+import AppIcon from '../../components/AppIcon';
+import { apiRequest } from '../../utils/api';
+import { getStrongPasswordError } from '../../utils/password';
 
 function ResetPasswordForm() {
     const searchParams = useSearchParams();
@@ -13,25 +17,30 @@ function ResetPasswordForm() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
+    const canSubmit = Boolean(token) && !getStrongPasswordError(password) && confirm.length > 0 && password === confirm && !loading;
+
+    const getErrorMessage = (unknownError: unknown) => {
+        if (unknownError instanceof Error && unknownError.message) return unknownError.message;
+        return 'Could not reset your password. Please try again.';
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-        if (password.length < 8) { setError('Password must be at least 8 characters'); return; }
+        if (!token) { setError('Reset link is missing or expired.'); return; }
+        const strongPasswordError = getStrongPasswordError(password);
+        if (strongPasswordError) { setError(strongPasswordError); return; }
         if (password !== confirm) { setError('Passwords do not match'); return; }
         setLoading(true);
         try {
-            const res = await fetch('/api/v1/auth/reset-password', {
+            await apiRequest('/auth/reset-password', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ token, password }),
             });
-            const data = await res.json().catch(() => ({}) as any);
-            if (!res.ok) throw new Error(data.message || 'Reset failed');
             setSuccess(true);
             setTimeout(() => router.push('/'), 3000);
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err: unknown) {
+            setError(getErrorMessage(err));
         } finally {
             setLoading(false);
         }
@@ -40,12 +49,15 @@ function ResetPasswordForm() {
     if (!token) {
         return (
             <Layout>
-                <div className="container section" style={{ textAlign: 'center', padding: 'var(--space-4xl) 0' }}>
-                    <div style={{ fontSize: '3rem', marginBottom: 'var(--space-lg)' }}>🔗</div>
+                <div className="container section auth-reset__invalid">
+                    <div className="auth-reset__status-icon"><AppIcon name="fileText" size={40} aria-hidden /></div>
                     <h2>Invalid Reset Link</h2>
-                    <p style={{ color: 'var(--color-text-muted)', marginTop: 'var(--space-md)' }}>
+                    <p className="auth-reset__status-copy">
                         This password reset link is invalid or has expired. Please request a new one.
                     </p>
+                    <div className="auth-reset__actions">
+                        <Link href="/" className="btn btn--ghost">Back Home</Link>
+                    </div>
                 </div>
             </Layout>
         );
@@ -53,26 +65,30 @@ function ResetPasswordForm() {
 
     return (
         <Layout>
-            <div className="container section" style={{ maxWidth: 440, margin: '0 auto', padding: 'var(--space-4xl) var(--space-lg)' }}>
+            <div className="container section auth-reset">
                 {success ? (
-                    <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '3rem', marginBottom: 'var(--space-lg)' }}>✅</div>
+                    <div className="auth-reset__success">
+                        <div className="auth-reset__status-icon"><AppIcon name="checkCircle" size={40} aria-hidden /></div>
                         <h2>Password Reset!</h2>
-                        <p style={{ color: 'var(--color-text-muted)', marginTop: 'var(--space-md)' }}>
+                        <p className="auth-reset__status-copy">
                             Your password has been updated. Redirecting to homepage...
                         </p>
+                        <div className="auth-reset__actions">
+                            <Link href="/" className="btn btn--primary">Go to Home</Link>
+                        </div>
                     </div>
                 ) : (
                     <>
-                        <h2 style={{ marginBottom: 'var(--space-lg)', textAlign: 'center' }}>Set New Password</h2>
+                        <h2 className="auth-reset__title">Set New Password</h2>
+                        <p className="auth-reset__hint">Use 8+ chars with uppercase, lowercase, number, and special character.</p>
                         {error && (
-                            <div style={{ background: 'var(--color-error-light, #fef2f2)', color: 'var(--color-error, #dc2626)', padding: 'var(--space-sm) var(--space-md)', borderRadius: 'var(--radius-sm)', marginBottom: 'var(--space-md)', fontSize: '0.9rem' }}>
+                            <div className="auth-reset__error" role="alert">
                                 {error}
                             </div>
                         )}
-                        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
-                            <div>
-                                <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, fontSize: '0.9rem' }}>New Password</label>
+                        <form onSubmit={handleSubmit} className="auth-reset__form">
+                            <div className="auth-reset__field">
+                                <label>New Password</label>
                                 <input
                                     type="password"
                                     required
@@ -80,23 +96,24 @@ function ResetPasswordForm() {
                                     placeholder="At least 8 characters"
                                     value={password}
                                     onChange={e => setPassword(e.target.value)}
-                                    style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', fontSize: '1rem' }}
                                 />
                             </div>
-                            <div>
-                                <label style={{ display: 'block', marginBottom: 4, fontWeight: 600, fontSize: '0.9rem' }}>Confirm Password</label>
+                            <div className="auth-reset__field">
+                                <label>Confirm Password</label>
                                 <input
                                     type="password"
                                     required
                                     placeholder="Repeat your password"
                                     value={confirm}
                                     onChange={e => setConfirm(e.target.value)}
-                                    style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', fontSize: '1rem' }}
                                 />
                             </div>
-                            <button type="submit" className="btn btn--primary" disabled={loading} style={{ marginTop: 'var(--space-sm)' }}>
+                            <button type="submit" className="btn btn--primary auth-reset__submit" disabled={loading}>
                                 {loading ? 'Resetting...' : 'Reset Password'}
                             </button>
+                            {!loading && confirm.length > 0 && password !== confirm && (
+                                <p className="auth-reset__error" role="status" aria-live="polite">Passwords must match before submitting.</p>
+                            )}
                         </form>
                     </>
                 )}
@@ -107,7 +124,7 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
     return (
-        <Suspense fallback={<div style={{ textAlign: 'center', padding: '4rem' }}>Loading...</div>}>
+        <Suspense fallback={<div className="auth-reset__loading">Loading...</div>}>
             <ResetPasswordForm />
         </Suspense>
     );

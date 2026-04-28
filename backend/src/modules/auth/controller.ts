@@ -7,13 +7,33 @@ import Order from '../../models/Order.js';
 import Cart from '../../models/Cart.js';
 import Review from '../../models/Review.js';
 import { AppError } from '../../middleware/errorHandler.js';
-import { sendPasswordResetEmail, sendEmail } from '../../utils/email.js';
+import { sendPasswordResetEmail } from '../../utils/email.js';
+import { checkEmailAddress } from '../../utils/emailCheck.js';
+import { setAuthCookies, clearAuthCookies, getCookieValue, REFRESH_COOKIE_NAME } from '../../utils/cookies.js';
+import { assertPasswordNotBreached } from '../../utils/passwordBreach.js';
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // ===== HELPERS =====
 
 const hashToken = (token: string) => crypto.createHash('sha256').update(token).digest('hex');
+const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,100}$/;
+const lockDurationMs = Number.parseInt(String(process.env.LOGIN_LOCK_MS || ''), 10) || 15 * 60 * 1000;
+
+async function assertEmailIsValid(email: string) {
+    const result = await checkEmailAddress(email);
+    if (!result.valid) throw new AppError(result.reason || 'Please enter a valid email address.', 400);
+    return result;
+}
+
+async function issueSession(res: Response, user: any) {
+    const accessToken = signAccessToken(user);
+    const refreshToken = signRefreshToken(user);
+    user.refreshToken = hashToken(refreshToken);
+    await user.save({ validateBeforeSave: false });
+    setAuthCookies(res, accessToken, refreshToken);
+    return { accessToken, refreshToken };
+}
 
 const signAccessToken = (user: any) =>
     jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET as string, {
@@ -30,25 +50,13 @@ const signRefreshToken = (user: any) =>
 export const register = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { name, email, password } = req.body;
+        await assertEmailIsValid(email);
+        await assertPasswordNotBreached(password);
         const existingUser = await User.findOne({ email });
-        if (existingUser) throw new AppError('Email already registered', 409);
+        if (existingUser) throw new AppError('Unable to create account with provided details.', 409);
 
-        const user = await User.create({ name, email, password });
-        const accessToken = signAccessToken(user);
-        const refreshToken = signRefreshToken(user);
-
-        user.refreshToken = hashToken(refreshToken);
-        const verifyToken = crypto.randomBytes(32).toString('hex');
-        user.emailVerifyToken = hashToken(verifyToken);
-        user.emailVerifyExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
-        await user.save({ validateBeforeSave: false });
-
-        const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
-        const verifyUrl = `${clientUrl}/verify-email?token=${verifyToken}`;
-        sendEmail({
-            to: email, subject: 'Verify your email — Feelinga',
-            html: `<p>Hi ${name},</p><p>Welcome to Feelinga! Please verify your email by clicking the link below:</p><p><a href="${verifyUrl}" style="padding:10px 20px;background:#8b6f47;color:#fff;text-decoration:none;border-radius:6px;">Verify Email</a></p><p>This link expires in 24 hours.</p>`,
-        }).catch(err => console.error('Verify email error:', err.message));
+        const user = await User.create({ name, email, password, emailVerified: true });
+        const { accessToken, refreshToken } = await issueSession(res, user);
 
         res.status(201).json({ status: 'success', data: { user, accessToken, refreshToken } });
     } catch (err) { next(err); }
@@ -68,7 +76,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
             if (user) {
                 const attempts = (user.loginAttempts || 0) + 1;
                 const update: any = { loginAttempts: attempts };
-                if (attempts >= 5) { update.lockUntil = new Date(Date.now() + 15 * 60 * 1000); update.loginAttempts = 0; }
+                if (attempts >= 5) { update.lockUntil = new Date(Date.now() + lockDurationMs); update.loginAttempts = 0; }
                 await User.findByIdAndUpdate(user._id, update);
             }
             throw new AppError('Invalid email or password', 401);
@@ -78,28 +86,23 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
             await User.findByIdAndUpdate(user._id, { loginAttempts: 0, $unset: { lockUntil: 1 } });
         }
 
-        const accessToken = signAccessToken(user);
-        const refreshToken = signRefreshToken(user);
-        user.refreshToken = hashToken(refreshToken);
-        await user.save({ validateBeforeSave: false });
+        user.emailVerified = true;
 
+        const { accessToken, refreshToken } = await issueSession(res, user);
         res.json({ status: 'success', data: { user, accessToken, refreshToken } });
     } catch (err) { next(err); }
 };
 
 export const refresh = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { refreshToken } = req.body;
+        const refreshToken = req.body?.refreshToken || getCookieValue(req, REFRESH_COOKIE_NAME);
         if (!refreshToken) throw new AppError('Refresh token required', 400);
 
         const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET as string) as any;
         const user = await User.findById(decoded.id).select('+refreshToken');
         if (!user || user.refreshToken !== hashToken(refreshToken)) throw new AppError('Invalid refresh token', 401);
 
-        const newAccessToken = signAccessToken(user);
-        const newRefreshToken = signRefreshToken(user);
-        user.refreshToken = hashToken(newRefreshToken);
-        await user.save({ validateBeforeSave: false });
+        const { accessToken: newAccessToken, refreshToken: newRefreshToken } = await issueSession(res, user);
 
         res.json({ status: 'success', data: { accessToken: newAccessToken, refreshToken: newRefreshToken } });
     } catch (err) { next(err); }
@@ -109,6 +112,7 @@ export const logout = async (req: Request, res: Response, next: NextFunction) =>
     try {
         req.user!.refreshToken = undefined as any;
         await (req.user! as any).save({ validateBeforeSave: false });
+        clearAuthCookies(res);
         res.json({ status: 'success', message: 'Logged out' });
     } catch (err) { next(err); }
 };
@@ -123,6 +127,7 @@ export const updateProfile = async (req: Request, res: Response, next: NextFunct
         const user = req.user!;
 
         if (email && email !== user.email) {
+            await assertEmailIsValid(email);
             if (!currentPassword) throw new AppError('Current password is required to change email', 400);
             const userWithPw = await User.findById(user._id).select('+password');
             if (!userWithPw || !(await (userWithPw as any).comparePassword(currentPassword))) throw new AppError('Current password is incorrect', 401);
@@ -144,6 +149,7 @@ export const changePassword = async (req: Request, res: Response, next: NextFunc
         const user = await User.findById(req.user!._id).select('+password');
         if (!user) throw new AppError('User not found', 404);
         if (!(await (user as any).comparePassword(currentPassword))) throw new AppError('Current password is incorrect', 401);
+        await assertPasswordNotBreached(newPassword);
 
         user.password = newPassword;
         await user.save();
@@ -162,6 +168,40 @@ export const addAddress = async (req: Request, res: Response, next: NextFunction
         user.addresses.push(address);
         await (user as any).save({ validateBeforeSave: false });
         res.status(201).json({ status: 'success', data: { addresses: user.addresses } });
+    } catch (err) { next(err); }
+};
+
+export const updateAddress = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const user = req.user!;
+        const idx = user.addresses.findIndex((a: any) => a._id.toString() === req.params.id);
+        if (idx === -1) throw new AppError('Address not found', 404);
+
+        const incoming = req.body;
+        const address = user.addresses[idx] as any;
+
+        if (incoming.isDefault) {
+            user.addresses.forEach((a: any) => { a.isDefault = false; });
+            address.isDefault = true;
+        } else if (typeof incoming.isDefault === 'boolean') {
+            address.isDefault = incoming.isDefault;
+        }
+
+        address.label = incoming.label;
+        address.fullName = incoming.fullName;
+        address.phone = incoming.phone;
+        address.addressLine1 = incoming.addressLine1;
+        address.addressLine2 = incoming.addressLine2;
+        address.city = incoming.city;
+        address.state = incoming.state;
+        address.pincode = incoming.pincode;
+
+        if (!user.addresses.some((a: any) => a.isDefault)) {
+            address.isDefault = true;
+        }
+
+        await (user as any).save({ validateBeforeSave: false });
+        res.json({ status: 'success', data: { addresses: user.addresses } });
     } catch (err) { next(err); }
 };
 
@@ -190,13 +230,14 @@ export const googleLogin = async (req: Request, res: Response, next: NextFunctio
         const { email, name, sub: googleId } = payload;
 
         let user = await User.findOne({ email });
-        if (!user) user = await User.create({ name, email, password: crypto.randomBytes(32).toString('hex'), googleId });
+        if (!user) user = await User.create({ name, email, password: crypto.randomBytes(32).toString('hex'), googleId, emailVerified: true });
+        if (user && !user.googleId) {
+            user.googleId = googleId;
+        }
 
-        const accessToken = signAccessToken(user);
-        const refreshToken = signRefreshToken(user);
-        user.refreshToken = hashToken(refreshToken);
-        await user.save({ validateBeforeSave: false });
+        user.emailVerified = true;
 
+        const { accessToken, refreshToken } = await issueSession(res, user);
         res.json({ status: 'success', data: { user, accessToken, refreshToken } });
     } catch (err: any) {
         const msg = String(err?.message || '').toLowerCase();
@@ -235,7 +276,10 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
     try {
         const { token, password } = req.body;
         if (!token || !password) throw new AppError('Token and new password are required', 400);
-        if (password.length < 8) throw new AppError('Password must be at least 8 characters', 400);
+        if (!strongPasswordRegex.test(password)) {
+            throw new AppError('Password must be 8-100 characters and include uppercase, lowercase, number, and special character', 400);
+        }
+        await assertPasswordNotBreached(password);
 
         const user = await User.findOne({ passwordResetToken: hashToken(token), passwordResetExpires: { $gt: new Date() } });
         if (!user) throw new AppError('Token is invalid or has expired', 400);
@@ -261,6 +305,14 @@ export const verifyEmail = async (req: Request, res: Response, next: NextFunctio
         user.emailVerifyExpires = undefined as any;
         await user.save({ validateBeforeSave: false });
         res.json({ status: 'success', message: 'Email verified successfully!' });
+    } catch (err) { next(err); }
+};
+
+export const checkEmail = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { email } = req.body;
+        const result = await checkEmailAddress(email);
+        res.json({ status: 'success', data: result });
     } catch (err) { next(err); }
 };
 

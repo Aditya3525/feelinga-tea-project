@@ -10,3 +10,7 @@ export const contactSchema = z.object({
 export const newsletterSubscribeSchema = z.object({
     email: z.string().email(),
 });
+
+export const updateMessageStatusSchema = z.object({
+    status: z.enum(['read', 'replied']),
+});

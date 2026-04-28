@@ -68,6 +68,10 @@
     transition: var(--transition);
 }
 
+.profile__icon {
+    display: inline-flex;
+}
+
 .profile__nav-item:hover {
     color: var(--color-text);
     background: var(--color-surface);
@@ -84,6 +88,9 @@
 .profile__logout {
     margin-top: var(--space-lg);
     width: 100%;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     padding: 10px 12px;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
@@ -180,6 +187,12 @@
     outline: none;
 }
 
+.profile__phone-group {
+    display: grid;
+    grid-template-columns: minmax(130px, 180px) 1fr;
+    gap: var(--space-sm);
+}
+
 .profile__hint {
     font-weight: 500;
     color: var(--color-text-muted);
@@ -211,6 +224,12 @@
     flex-wrap: wrap;
     padding-top: var(--space-xs);
 }
+    .profile__form-actions .btn:disabled,
+    .address-card__btn:disabled,
+    .profile__section-header .btn:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+    }
 
 .profile__checkbox {
     display: inline-flex;
@@ -236,6 +255,18 @@
 .profile__address-form h4 {
     font-family: var(--font-serif);
     margin-bottom: var(--space-lg);
+}
+
+.profile__address-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+}
+
+.profile__address-head h4 {
+    margin: 0;
 }
 
 .profile__addresses {
@@ -330,6 +361,9 @@
     border-color: var(--color-error);
     color: var(--color-error);
 }
+    .profile__msg[role="alert"] {
+        margin-bottom: var(--space-md);
+    }
 
 .order-card {
     background: var(--color-surface);
@@ -450,5 +484,9 @@
 
     .profile__nav-item {
         min-width: 0;
+    }
+
+    .profile__phone-group {
+        grid-template-columns: 1fr;
     }
 }

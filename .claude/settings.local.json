@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip3 --version)",
+      "Bash(pip install *)",
+      "Bash(python *)",
+      "Bash(/c/Users/adity/AppData/Local/Microsoft/WindowsApps/python *)",
+      "Bash(cmd.exe *)",
+      "Bash(pip --version)",
+      "Bash(where pip *)",
+      "Bash(where pip3 *)",
+      "Bash(python3 -m pip --version)",
+      "Bash(py --version)",
+      "Bash(/c/Users/adity/.local/bin/python3.14.exe *)",
+      "Bash(.venv/Scripts/graphify.exe *)",
+      "Bash(npm run *)"
+    ]
+  }
+}

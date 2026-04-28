@@ -1,4 +1,4 @@
-import 'dotenv/config';
+﻿import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -28,6 +28,7 @@ import couponRoutes from './modules/coupons/routes.js';
 const app = express();
 const PORT = process.env.PORT || 5000;
 const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase();
+const enforceHttps = process.env.ENFORCE_HTTPS === 'true';
 
 // ===== ENV VALIDATION =====
 const requiredEnvVars = ['MONGODB_URI', 'JWT_SECRET', 'JWT_REFRESH_SECRET'];
@@ -43,6 +44,8 @@ if (unset.length > 0) {
 }
 
 // ===== GLOBAL MIDDLEWARE =====
+
+app.set('trust proxy', 1);
 
 // Security headers (relaxed for Google Identity Services)
 app.use(helmet({
@@ -61,11 +64,34 @@ app.use(helmet({
     crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
 }));
 
-// CORS — allow all origins in dev (file:// protocol)
+// Allow Vercel main + preview deployments; permit all origins in dev
+const allowedOrigins: (string | RegExp)[] = [];
+if (process.env.CLIENT_URL) {
+    allowedOrigins.push(process.env.CLIENT_URL);
+}
+allowedOrigins.push(/^https:\/\/feelinga-tea[\w-]*\.vercel\.app$/);
+
 app.use(cors({
-    origin: process.env.NODE_ENV === 'production' ? process.env.CLIENT_URL : true,
+    origin: process.env.NODE_ENV === 'production'
+        ? (origin, cb) => {
+            if (!origin || allowedOrigins.some(o => typeof o === 'string' ? o === origin : o.test(origin))) {
+                cb(null, true);
+            } else {
+                cb(new Error(`CORS: Origin '${origin}' not allowed`));
+            }
+        }
+        : true,
     credentials: true,
 }));
+
+if (enforceHttps && process.env.NODE_ENV === 'production') {
+    app.use((req, res, next) => {
+        const forwardedProto = String(req.headers['x-forwarded-proto'] || '').split(',')[0].trim();
+        if (req.secure || forwardedProto === 'https') return next();
+        const host = req.headers.host || '';
+        return res.redirect(301, `https://${host}${req.originalUrl}`);
+    });
+}
 
 // Request logging
 if (process.env.NODE_ENV !== 'test') {
@@ -109,6 +135,16 @@ const authLimiter = rateLimit({
     max: isDev ? 200 : 50,
     message: { status: 'error', message: 'Too many auth attempts, please try again later' },
 });
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: isDev ? 30 : 10,
+    skipSuccessfulRequests: true,
+    keyGenerator: (req) => {
+        const email = String(req.body?.email || '').trim().toLowerCase();
+        return `${req.ip}:${email}`;
+    },
+    message: { status: 'error', message: 'Too many login attempts. Please try again later.' },
+});
 
 // ===== API ROUTES =====
 
@@ -124,6 +160,7 @@ app.get('/api/v1/health', (req, res) => {
     });
 });
 
+app.use('/api/v1/auth/login', loginLimiter);
 app.use('/api/v1/auth', authLimiter, authRoutes);
 app.use('/api/v1/products', productRoutes);
 app.use('/api/v1/orders', orderRoutes);

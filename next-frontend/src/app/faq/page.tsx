@@ -1,99 +1,160 @@
-'use client';
-import Layout from '../../components/Layout';
-import { useState } from 'react';
-import Link from 'next/link';
+"use client";
 
-const faqData = [
-    {
-        category: 'Ordering', items: [
-            { q: 'How do I place an order?', a: 'Browse our shop, add items to your cart, and proceed to checkout. You can pay via Cash on Delivery (COD) or Pay on WhatsApp.' },
-            { q: 'Can I modify my order after placing it?', a: 'Orders can be modified within 2 hours of placement. Please contact us at hello@feelinga.com.' },
-            { q: 'What payment methods do you accept?', a: 'We currently accept Cash on Delivery (COD) and Pay on WhatsApp.' },
-        ]
-    },
-    {
-        category: 'Shipping', items: [
-            { q: 'How long does delivery take?', a: 'Standard delivery takes 3–5 business days. Metro cities may receive orders in 2–3 days.' },
-            { q: 'Do you offer free shipping?', a: 'Yes! Orders above ₹999 qualify for free shipping across India.' },
-            { q: 'Do you ship internationally?', a: 'We currently ship to UAE and Singapore. More countries will be added soon.' },
-        ]
-    },
-    {
-        category: 'Products', items: [
-            { q: 'Are your teas organic?', a: 'Many of our teas are certified organic. Look for the organic badge on product pages.' },
-            { q: 'How should I store my tea?', a: 'Store in a cool, dry place away from direct sunlight. Keep the pouch sealed or use an airtight container.' },
-            { q: 'What is the shelf life of your teas?', a: 'Our loose leaf teas stay fresh for 12–18 months when stored properly.' },
-        ]
-    },
-    {
-        category: 'Returns', items: [
-            { q: 'What is your return policy?', a: 'If you are not satisfied, contact us within 7 days of delivery for a full refund or exchange.' },
-            { q: 'How do I return a product?', a: 'Email us at hello@feelinga.com with your order number. We will arrange a pickup.' },
-        ]
-    },
+import { useMemo, useState } from 'react';
+import Link from 'next/link';
+import Layout from '../../components/Layout';
+import SectionHeader from '../../components/SectionHeader';
+
+type FaqCategory = 'Ordering' | 'Shipping' | 'Products' | 'Returns';
+
+type FaqItem = {
+  id: string;
+  category: FaqCategory;
+  q: string;
+  a: string;
+};
+
+const FAQ_CATEGORIES: FaqCategory[] = ['Ordering', 'Shipping', 'Products', 'Returns'];
+
+const FAQ_DATA: FaqItem[] = [
+  {
+    id: 'ordering',
+    category: 'Ordering',
+    q: 'How do I place an order?',
+    a: 'Select a tea, choose quantity, and click "Add to Cart". Then proceed to checkout.',
+  },
+  {
+    id: 'shipping',
+    category: 'Shipping',
+    q: 'What shipping options are available?',
+    a: 'Standard (3-5 days) and Express (1-2 days) are available for all domestic orders.',
+  },
+  {
+    id: 'products',
+    category: 'Products',
+    q: 'Are the teas organic?',
+    a: 'All our teas are sourced from certified sustainable farms; many are organic.',
+  },
+  {
+    id: 'returns',
+    category: 'Returns',
+    q: 'What is your return policy?',
+    a: 'We accept returns within 30 days of delivery for unopened products.',
+  },
 ];
 
-export default function FAQ() {
-    const [openItems, setOpenItems] = useState<Record<string, boolean>>({});
+function FaqPage() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [openId, setOpenId] = useState<string | null>(null);
 
-    const toggle = (key: string) => {
-        setOpenItems(prev => ({ ...prev, [key]: !prev[key] }));
-    };
-
-    return (
-        <Layout>
-            <div className="page-hero">
-                <div className="container">
-                    <nav className="breadcrumb" aria-label="Breadcrumb"><Link href="/">Home</Link> <span>/</span> <span>FAQ</span></nav>
-                    <p className="overline">Help Center</p>
-                    <h1>Frequently Asked Questions</h1>
-                    <p>Find answers to common questions about ordering, shipping, and more.</p>
-                </div>
-            </div>
-
-            <section className="section">
-                <div className="container" style={{ maxWidth: '800px' }}>
-                    {faqData.map((section, si) => (
-                        <div key={si} id={section.category.toLowerCase().replace(/\s+/g, '-')} style={{ marginBottom: 'var(--space-2xl)' }}>
-                            <h2 style={{ marginBottom: 'var(--space-md)' }}>{section.category}</h2>
-                            {section.items.map((item, qi) => {
-                                const key = `${si}-${qi}`;
-                                return (
-                                    <div key={key} className="faq-item" style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: 'var(--space-md)', marginBottom: 'var(--space-md)' }}>
-                                        <button
-                                        className="faq-question"
-                                        aria-expanded={!!openItems[key]}
-                                        aria-controls={`faq-answer-${key}`}
-                                        onClick={() => toggle(key)}
-                                        style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none', padding: 'var(--space-sm) 0', fontSize: '1rem', fontWeight: 600, cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--color-text)' }}>
-                                            {item.q}
-                                            <span style={{ transition: 'transform 0.3s', transform: openItems[key] ? 'rotate(45deg)' : 'rotate(0)' }}>+</span>
-                                        </button>
-                                        {openItems[key] && (
-                                            <div
-                                            id={`faq-answer-${key}`}
-                                            role="region"
-                                            className="faq-answer"
-                                            style={{ padding: 'var(--space-sm) 0', color: 'var(--color-text-muted)', lineHeight: 1.7 }}>
-                                                {item.a}
-                                            </div>
-                                        )}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    ))}
-
-                    <div className="text-center" style={{ marginTop: 'var(--space-3xl)' }}>
-                        <h3>Still have questions?</h3>
-                        <p style={{ margin: 'var(--space-sm) 0 var(--space-lg)' }}>Our team is happy to help.</p>
-                        <Link href="/contact" className="btn btn--primary">Contact Us</Link>
-                    </div>
-                </div>
-            </section>
-        </Layout>
+  const filteredFaqs = useMemo(() => {
+    if (!searchTerm) return FAQ_DATA;
+    const term = searchTerm.toLowerCase();
+    return FAQ_DATA.filter((faq) =>
+      faq.q.toLowerCase().includes(term) || faq.a.toLowerCase().includes(term)
     );
+  }, [searchTerm]);
+
+  const hasResults = filteredFaqs.length > 0;
+
+  const toggle = (id: string) => {
+    setOpenId((prev) => (prev === id ? null : id));
+  };
+
+  return (
+    <Layout>
+      <section className="faq-hero" aria-label="FAQ Hero">
+        <div className="container">
+          <SectionHeader
+            overline="Help Center"
+            title="Frequently Asked Questions"
+            description="Find answers to common questions about ordering, shipping, and more."
+          />
+          <div className="faq-search">
+            <input
+              type="text"
+              placeholder="Search FAQs..."
+              aria-label="Search FAQs"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            {searchTerm && (
+              <button
+                type="button"
+                className="faq-search__clear"
+                onClick={() => setSearchTerm('')}
+                aria-label="Clear FAQ search"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <main id="main" className="faq-content" role="main">
+        {!hasResults && (
+          <section className="faq-empty" aria-live="polite">
+            <p>No FAQs matched "{searchTerm}".</p>
+            <button
+              type="button"
+              className="btn btn--ghost btn--sm"
+              onClick={() => setSearchTerm('')}
+            >
+              Clear search
+            </button>
+          </section>
+        )}
+
+        {FAQ_CATEGORIES.map((category) => {
+          const categoryFaqs = filteredFaqs.filter((f) => f.category === category);
+          if (categoryFaqs.length === 0) return null;
+
+          return (
+            <section key={category} aria-labelledby={`cat-${category}`} className="faq-category">
+              <h2 id={`cat-${category}`} className="faq-category-title">
+                {category}
+              </h2>
+              <ul className="faq-list" role="list">
+                {categoryFaqs.map((faq) => (
+                  <li key={faq.id} className={`faq-item ${openId === faq.id ? 'active' : ''}`}>
+                    <button
+                      id={`question-${faq.id}`}
+                      type="button"
+                      className="faq-question"
+                      aria-controls={`answer-${faq.id}`}
+                      aria-expanded={openId === faq.id}
+                      onClick={() => toggle(faq.id)}
+                    >
+                      {faq.q}
+                    </button>
+                    <div
+                      id={`answer-${faq.id}`}
+                      className="faq-answer"
+                      hidden={openId !== faq.id}
+                      role="region"
+                      aria-labelledby={`question-${faq.id}`}
+                    >
+                      <p>{faq.a}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          );
+        })}
+
+        <section className="faq-contact">
+          <p>
+            Still have questions?{' '}
+            <Link href="/contact" className="btn btn--primary btn--sm">
+              Contact Us
+            </Link>
+          </p>
+        </section>
+      </main>
+    </Layout>
+  );
 }
 
-
-
+export default FaqPage;

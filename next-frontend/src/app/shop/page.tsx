@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Layout from '../../components/Layout';
 import ProductCard from '../../components/ProductCard';
 import EmptyState from '../../components/EmptyState';
+import AppIcon from '../../components/AppIcon';
 import { useCart } from '../../context/CartContext';
 import { renderStars } from '../../utils/renderStars';
 import type { ChangeEvent } from 'react';
@@ -47,29 +48,50 @@ function ShopInner() {
     const [totalPages, setTotalPages] = useState(1);
     const [total, setTotal] = useState(0);
     const [searchQuery, setSearchQuery] = useState('');
+    const [error, setError] = useState<string | null>(null);
     const LIMIT = 12;
 
     // Sync mood and search query from URL params
     useEffect(() => {
         const moodParam = searchParams.get('mood');
         if (moodParam) setFilters(prev => ({ ...prev, mood: [moodParam] }));
+        else setFilters(prev => ({ ...prev, mood: [] }));
         const qParam = searchParams.get('q');
-        if (qParam) setSearchQuery(qParam);
+        setSearchQuery(qParam || '');
         // Support direct type param from footer links (e.g. ?type=Green+Tea)
         const typeParam = searchParams.get('type');
         if (typeParam) {
             const reverseTypeMap: Record<string, string> = { 'Green Tea': 'green', 'Black Tea': 'black', 'White Tea': 'white', 'Oolong': 'oolong', 'Herbal': 'herbal', 'Herbal Infusion': 'herbal', 'Masala Chai': 'chai' };
             const key = reverseTypeMap[typeParam];
             if (key) setFilters(prev => ({ ...prev, type: [key] }));
+            else setFilters(prev => ({ ...prev, type: [] }));
+        } else {
+            setFilters(prev => ({ ...prev, type: [] }));
         }
     }, [searchParams]);
+
+    useEffect(() => {
+        if (!mobileFilterOpen) return;
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        const handleEscape = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') setMobileFilterOpen(false);
+        };
+        document.addEventListener('keydown', handleEscape);
+        return () => {
+            document.body.style.overflow = previousOverflow;
+            document.removeEventListener('keydown', handleEscape);
+        };
+    }, [mobileFilterOpen]);
 
     // Fetch products from API
     // Fetch products from API with current filters + page
     useEffect(() => {
+        const controller = new AbortController();
         async function fetchProducts() {
             try {
                 setLoading(true);
+                setError(null);
                 const params = new URLSearchParams();
                 params.set('limit', String(LIMIT));
                 params.set('page', String(page));
@@ -95,7 +117,8 @@ function ShopInner() {
                     params.set('origin', filters.origin[0]);
                 }
 
-                const res = await fetch(`/api/v1/products?${params}`);
+                const res = await fetch(`/api/v1/products?${params}`, { signal: controller.signal });
+                if (!res.ok) throw new Error('Could not load teas right now.');
                 const data = await res.json().catch(() => ({}));
                 if (data.data) {
                     setProducts(data.data.map((p: any): ShopProduct => ({
@@ -107,7 +130,7 @@ function ShopInner() {
                         moods: p.moods || [],
                         origin: p.origin?.split(',')[0]?.trim().toLowerCase() || '',
                         price: p.prices?.['100g'] || 0,
-                        img: p.images?.[0] || '/images/darjeeling-tea.png',
+                        img: p.images?.[0] || '/images/products/darjeeling-ff.jpg',
                         note: p.shortDescription || (p.description ? p.description.substring(0, 70) + '...' : ''),
                         reviews: p.reviewCount || 0,
                         stars: Math.round(p.rating || 0) || 5,
@@ -118,13 +141,16 @@ function ShopInner() {
                     setTotalPages(data.pagination?.totalPages || 1);
                     setTotal(data.pagination?.total || data.results || 0);
                 }
-            } catch (err) {
+            } catch (err: unknown) {
+                if (err instanceof DOMException && err.name === 'AbortError') return;
                 console.error('Failed to load products:', err);
+                setError(err instanceof Error ? err.message : 'Failed to load products.');
             } finally {
                 setLoading(false);
             }
         }
         fetchProducts();
+        return () => controller.abort();
     }, [filters, sort, page, searchQuery]);
 
     const toggleFilter = (group: FilterGroupKey, value: string) => {
@@ -138,6 +164,11 @@ function ShopInner() {
     };
 
     const handleSortChange = (val: ShopSort) => { setSort(val); setPage(1); };
+    const activeFilterCount = Object.values(filters).reduce((count, values) => count + values.length, 0);
+    const pageWindow = 2;
+    const startPage = Math.max(1, page - pageWindow);
+    const endPage = Math.min(totalPages, page + pageWindow);
+    const visiblePages = Array.from({ length: endPage - startPage + 1 }, (_, idx) => startPage + idx);
 
 
     const filterGroups: FilterGroup[] = [
@@ -170,7 +201,8 @@ function ShopInner() {
             </div>
             <div className="container">
                 <div className="plp-layout section">
-                    <aside className={`plp-sidebar ${mobileFilterOpen ? 'active' : ''}`}>
+                    {mobileFilterOpen && <div className="plp-mobile-overlay active" aria-hidden="true" onClick={() => setMobileFilterOpen(false)} />}
+                    <aside id="shop-filters" className={`plp-sidebar ${mobileFilterOpen ? 'active' : ''}`}>
                         <div className="plp-sidebar__header">
                             <span className="plp-sidebar__title">Filters</span>
                             <button
@@ -197,10 +229,10 @@ function ShopInner() {
                     </aside>
                     <div>
                         <div className="plp-topbar">
-                            <button className="btn btn--sm btn--secondary mobile-filter-toggle" onClick={() => setMobileFilterOpen(!mobileFilterOpen)}>☰ Filters</button>
-                            <span className="plp-topbar__count">Showing {products.length} of {total} teas</span>
+                            <button type="button" className="btn btn--sm btn--secondary mobile-filter-toggle" aria-expanded={mobileFilterOpen} aria-controls="shop-filters" onClick={() => setMobileFilterOpen(!mobileFilterOpen)}><AppIcon name="menu" size={14} aria-hidden /> Filters {activeFilterCount > 0 ? `(${activeFilterCount})` : ''}</button>
+                            <span className="plp-topbar__count" aria-live="polite">Showing {products.length} of {total} teas</span>
                             <div className="plp-topbar__sort">
-                                <select value={sort} onChange={(e: ChangeEvent<HTMLSelectElement>) => handleSortChange(e.target.value as ShopSort)}>
+                                <select aria-label="Sort products" value={sort} onChange={(e: ChangeEvent<HTMLSelectElement>) => handleSortChange(e.target.value as ShopSort)}>
                                     <option value="popular">Sort: Popular</option>
                                     <option value="newest">Newest</option>
                                     <option value="price-asc">Price: Low to High</option>
@@ -218,33 +250,40 @@ function ShopInner() {
                                         return opt ? (
                                             <span key={`${group.key}-${val}`} className="plp-active-filter">
                                                 {opt.label}
-                                                <span
-                                                    className="plp-active-filter__remove"
-                                                    role="button"
+                                                <button
+                                                    type="button"
+                                                    className="plp-active-filter__remove plp-active-filter__remove-btn"
                                                     aria-label={`Remove ${opt.label} filter`}
                                                     onClick={() => toggleFilter(group.key, val)}
-                                                >✕</span>
+                                                ><AppIcon name="xCircle" size={12} aria-hidden /></button>
                                             </span>
                                         ) : null;
                                     })
                                 )}
-                                <span
-                                    className="plp-active-filter"
-                                    style={{ opacity: 0.7, cursor: 'pointer' }}
-                                    role="button"
+                                <button
+                                    type="button"
+                                    className="plp-active-filter plp-active-filter--clear"
                                     aria-label="Clear all filters"
                                     onClick={() => { setFilters({ type: [], mood: [], origin: [], price: [] }); setPage(1); }}
                                 >
-                                    Clear all ✕
-                                </span>
+                                    Clear all <AppIcon name="xCircle" size={12} aria-hidden />
+                                </button>
                             </div>
                         )}
 
                         {loading ? (
                             <div className="state-center py-3xl">
-                                <div className="state-emoji">🍵</div>
+                                <div className="state-emoji"><AppIcon name="leaf" size={32} aria-hidden /></div>
                                 <p className="mt-md state-text">Loading teas...</p>
                             </div>
+                        ) : error ? (
+                            <EmptyState
+                                title="Unable to load teas"
+                                message={error}
+                                actionLabel="Try Again"
+                                actionHref="/shop"
+                                className="py-3xl"
+                            />
                         ) : (
                             <div className="plp-products">
                                 {products.length === 0 ? (
@@ -275,13 +314,16 @@ function ShopInner() {
                                     onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                                     disabled={page === 1}
                                 >← Prev</button>
-                                {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
+                                {startPage > 1 && <span className="pagination-gap" aria-hidden="true">...</span>}
+                                {visiblePages.map(n => (
                                     <button
                                         key={n}
                                         className={`btn btn--sm ${n === page ? 'btn--primary' : 'btn--ghost'} min-w-38`}
+                                        aria-current={n === page ? 'page' : undefined}
                                         onClick={() => { setPage(n); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                                     >{n}</button>
                                 ))}
+                                {endPage < totalPages && <span className="pagination-gap" aria-hidden="true">...</span>}
                                 <button
                                     className="btn btn--ghost btn--sm"
                                     onClick={() => { setPage(p => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}

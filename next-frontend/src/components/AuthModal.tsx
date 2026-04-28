@@ -2,8 +2,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from './Toast';
+import AppIcon from './AppIcon';
 import { apiRequest } from '../utils/api';
 import type { FormEvent } from 'react';
+import { getEmailError } from '../utils/email';
+import { checkEmailAddress } from '../utils/emailCheck';
 
 type AuthTab = 'login' | 'signup';
 
@@ -71,6 +74,7 @@ export default function AuthModal() {
     const [signupPassword, setSignupPassword] = useState('');
     const [loginEmail, setLoginEmail] = useState('');
     const [signupEmail, setSignupEmail] = useState('');
+    const [signupEmailChecking, setSignupEmailChecking] = useState(false);
     const [showLoginSignupHint, setShowLoginSignupHint] = useState(false);
     const dialogRef = useRef<HTMLDivElement>(null);
 
@@ -83,7 +87,7 @@ export default function AuthModal() {
         setLoading(true);
         try {
             await googleLogin(response.credential);
-            showToast('Welcome! 🍵', 'success');
+            showToast('Welcome!', 'success');
             closeAuthModal();
         } catch (err) {
             setError(getErrorMessage(err, 'Google login failed'));
@@ -133,6 +137,14 @@ export default function AuthModal() {
         }
     }, [showAuthModal, handleGoogleLogin]);
 
+    useEffect(() => {
+        if (!showAuthModal) {
+            setError('');
+            setShowForgot(false);
+            setForgotSent(false);
+        }
+    }, [showAuthModal]);
+
     // Focus trap + Escape key handler (runs when modal is shown)
     useEffect(() => {
         if (!showAuthModal || !dialogRef.current) return;
@@ -178,7 +190,7 @@ export default function AuthModal() {
         const password = String(formData.get('password') || '');
         try {
             await login(email, password);
-            showToast('Welcome back! 🍵', 'success');
+            showToast('Welcome back!', 'success');
             closeAuthModal();
         } catch (err) {
             const message = getErrorMessage(err, 'Login failed');
@@ -199,11 +211,23 @@ export default function AuthModal() {
         const email = String(formData.get('email') || '').trim();
         const password = String(formData.get('password') || '');
         const confirmPassword = String(formData.get('confirm') || '');
+        const strongPassword = getPasswordRules(password).every(rule => rule.passed);
+        const emailError = getEmailError(email);
+        if (emailError) { setError(emailError); return; }
         if (password !== confirmPassword) { setError('Passwords do not match'); return; }
+        if (!strongPassword) {
+            setError('Password must include uppercase, lowercase, number, and special character.');
+            return;
+        }
         setLoading(true);
         try {
+            const emailCheck = await checkEmailAddress(email);
+            if (!emailCheck.valid) {
+                setError(emailCheck.reason || 'Please enter a valid email address.');
+                return;
+            }
             await register(name, email, password);
-            showToast('Account created! Welcome to Feelinga 🍵', 'success');
+            showToast('Account created! Welcome to Feelinga.', 'success');
             closeAuthModal();
         } catch (err) {
             const message = getErrorMessage(err, 'Registration failed');
@@ -243,6 +267,27 @@ export default function AuthModal() {
         setShowSignupPassword(false);
         setShowSignupConfirm(false);
         setSignupPassword('');
+        setSignupEmailChecking(false);
+    };
+
+    const handleSignupEmailBlur = async (email: string) => {
+        const emailError = getEmailError(email);
+        if (emailError) {
+            setError(emailError);
+            return;
+        }
+
+        setSignupEmailChecking(true);
+        try {
+            const result = await checkEmailAddress(email);
+            if (!result.valid) {
+                setError(result.reason || 'Please enter a valid email address.');
+            }
+        } catch {
+            setError('Unable to verify this email address right now. Please try again.');
+        } finally {
+            setSignupEmailChecking(false);
+        }
     };
 
     return (
@@ -260,13 +305,13 @@ export default function AuthModal() {
                             <p className="auth-modal__subtitle">Enter your email to receive a reset link</p>
                         </div>
                         {forgotSent ? (
-                            <div style={{ textAlign: 'center', padding: 'var(--space-xl) 0' }}>
-                                <div style={{ fontSize: '3rem', marginBottom: 'var(--space-md)' }}>📬</div>
-                                <p style={{ fontWeight: 600 }}>Check your inbox!</p>
-                                <p style={{ color: 'var(--color-text-muted)', marginTop: 'var(--space-xs)', fontSize: '0.9rem' }}>
+                            <div className="auth-modal__forgot-success">
+                                <div className="auth-modal__forgot-icon"><AppIcon name="send" size={40} aria-hidden /></div>
+                                <p className="auth-modal__forgot-title">Check your inbox!</p>
+                                <p className="auth-modal__forgot-copy">
                                     If an account exists for <strong>{forgotEmail}</strong>, we&apos;ve sent a password reset link.
                                 </p>
-                                <button className="btn btn--ghost btn--sm" style={{ marginTop: 'var(--space-lg)' }} onClick={() => { setShowForgot(false); setForgotSent(false); }}>
+                                <button className="btn btn--ghost btn--sm auth-modal__forgot-back" onClick={() => { setShowForgot(false); setForgotSent(false); }}>
                                     ← Back to Login
                                 </button>
                             </div>
@@ -285,7 +330,7 @@ export default function AuthModal() {
                                 <button type="submit" className="btn btn--primary auth-modal__submit" disabled={loading}>
                                     {loading ? 'Sending...' : 'Send Reset Link'}
                                 </button>
-                                <div style={{ textAlign: 'center', marginTop: 'var(--space-md)' }}>
+                                <div className="auth-modal__back-wrap">
                                     <button type="button" className="auth-modal__toggle" onClick={() => setShowForgot(false)}>← Back to Login</button>
                                 </div>
                             </form>
@@ -305,7 +350,7 @@ export default function AuthModal() {
                             <button className={`auth-modal__tab ${activeTab === 'login' ? 'active' : ''}`} onClick={() => switchTab('login')}>Login</button>
                             <button className={`auth-modal__tab ${activeTab === 'signup' ? 'active' : ''}`} onClick={() => switchTab('signup')}>Sign Up</button>
                         </div>
-                        {error && <div className="auth-modal__error" style={{ display: 'block' }}>{error}</div>}
+                        {error && <div className="auth-modal__error auth-modal__error--visible">{error}</div>}
 
                         {activeTab === 'login' ? (
                             <form className="auth-modal__form" onSubmit={handleLogin}>
@@ -346,8 +391,8 @@ export default function AuthModal() {
                                         </button>
                                     </div>
                                 </div>
-                                <div style={{ textAlign: 'right', marginTop: '-8px', marginBottom: '8px' }}>
-                                    <button type="button" className="auth-modal__toggle" style={{ fontSize: '0.85rem' }} onClick={() => setShowForgot(true)}>
+                                <div className="auth-modal__forgot-link-wrap">
+                                    <button type="button" className="auth-modal__toggle auth-modal__toggle--sm" onClick={() => setShowForgot(true)}>
                                         Forgot password?
                                     </button>
                                 </div>
@@ -387,8 +432,10 @@ export default function AuthModal() {
                                         autoComplete="email"
                                         value={signupEmail}
                                         onChange={e => setSignupEmail(e.target.value)}
+                                        onBlur={(e) => { void handleSignupEmailBlur(e.currentTarget.value); }}
                                     />
                                 </div>
+                                {signupEmailChecking && <div className="auth-modal__assist">Verifying email address...</div>}
                                 <div className="auth-modal__field">
                                     <label htmlFor="signupPassword">Password</label>
                                     <div className="auth-modal__password-wrap">
@@ -424,7 +471,7 @@ export default function AuthModal() {
                                     <ul className="auth-modal__password-rules">
                                         {passwordRules.map(rule => (
                                             <li key={rule.label} className={rule.passed ? 'passed' : ''}>
-                                                <span aria-hidden="true">{rule.passed ? '✓' : '•'}</span>
+                                                <span aria-hidden="true">{rule.passed ? <AppIcon name="check" size={12} aria-hidden /> : <AppIcon name="circle" size={8} aria-hidden />}</span>
                                                 <span>{rule.label}</span>
                                             </li>
                                         ))}
@@ -459,14 +506,11 @@ export default function AuthModal() {
                             </form>
                         )}
 
-                        <div className="auth-modal__divider"><span>OR</span></div>
-                        {hasGoogleClientId ? (
-                            <div id="google-signin-btn" style={{ display: 'flex', justifyContent: 'center', marginBottom: '4px' }} />
-                        ) : (
-                            <button className="auth-modal__google" disabled style={{ opacity: 0.5, cursor: 'not-allowed' }} aria-label="Google Sign-In — coming soon">
-                                <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#4285F4" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" /><path fill="#34A853" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" /><path fill="#FBBC05" d="M10.53 28.59A14.5 14.5 0 019.5 24c0-1.59.28-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 000 24c0 3.77.9 7.35 2.47 10.54l8.06-5.95z" /><path fill="#EA4335" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" /></svg>
-                                Continue with Google <span style={{ fontSize: '0.75em', marginLeft: 4 }}>(coming soon)</span>
-                            </button>
+                        {hasGoogleClientId && (
+                            <>
+                                <div className="auth-modal__divider"><span>OR</span></div>
+                                <div id="google-signin-btn" className="auth-modal__google-wrap" />
+                            </>
                         )}
 
                         <div className="auth-modal__footer">

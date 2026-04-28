@@ -13,10 +13,40 @@ export const submitContact = async (req: Request, res: Response, next: NextFunct
 };
 
 // GET /contact (admin)
-export const listMessages = async (_req: Request, res: Response, next: NextFunction) => {
+export const listMessages = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const messages = await ContactMessage.find().sort({ createdAt: -1 }).limit(50);
-        res.json({ status: 'success', data: messages });
+        const pageNum = Math.max(1, Number.parseInt(String(req.query.page), 10) || 1);
+        const limitNum = Math.min(100, Math.max(1, Number.parseInt(String(req.query.limit), 10) || 50));
+        const status = typeof req.query.status === 'string' ? req.query.status : undefined;
+
+        const filter: Record<string, any> = {};
+        if (status) filter.status = status;
+
+        const [messages, total] = await Promise.all([
+            ContactMessage.find(filter).sort({ createdAt: -1 }).skip((pageNum - 1) * limitNum).limit(limitNum),
+            ContactMessage.countDocuments(filter),
+        ]);
+
+        res.json({
+            status: 'success',
+            pagination: {
+                page: pageNum,
+                limit: limitNum,
+                totalPages: Math.ceil(total / limitNum),
+                total,
+            },
+            data: messages,
+        });
+    } catch (err) { next(err); }
+};
+
+// PATCH /contact/:id (admin)
+export const updateMessageStatus = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { status } = req.body;
+        const message = await ContactMessage.findByIdAndUpdate(req.params.id, { status }, { new: true, runValidators: true });
+        if (!message) return res.status(404).json({ status: 'error', message: 'Message not found' });
+        res.json({ status: 'success', data: message });
     } catch (err) { next(err); }
 };
 

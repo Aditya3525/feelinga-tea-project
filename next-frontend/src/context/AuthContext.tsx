@@ -59,7 +59,9 @@ export function AuthProvider({ children }: AppProviderProps) {
 
     const login = async (email: string, password: string) => {
         const data = await apiRequest('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
-        persist(data.data.user, data.data.accessToken, data.data.refreshToken);
+        if (data?.status === 'success' && data?.data?.accessToken && data?.data?.refreshToken && data?.data?.user) {
+            persist(data.data.user, data.data.accessToken, data.data.refreshToken);
+        }
         return data;
     };
 
@@ -71,15 +73,26 @@ export function AuthProvider({ children }: AppProviderProps) {
 
     const googleLogin = async (credential: string) => {
         const data = await apiRequest('/auth/google', { method: 'POST', body: JSON.stringify({ credential }) });
-        persist(data.data.user, data.data.accessToken, data.data.refreshToken);
+        if (data?.status === 'success' && data?.data?.accessToken && data?.data?.refreshToken && data?.data?.user) {
+            persist(data.data.user, data.data.accessToken, data.data.refreshToken);
+        }
         return data;
     };
 
-    const logout = () => {
-        clearAuthStorage();
-        setUser(null);
-        setIsAuthenticated(false);
-        setIsAdmin(false);
+    const logout = async () => {
+        try {
+            const token = localStorage.getItem('feelinga_token');
+            if (token) {
+                await apiRequest('/auth/logout', { method: 'POST' });
+            }
+        } catch {
+            // Even if server logout fails, always clear local auth state.
+        } finally {
+            clearAuthStorage();
+            setUser(null);
+            setIsAuthenticated(false);
+            setIsAdmin(false);
+        }
     };
 
     const updateProfile = async (updates: Record<string, unknown>) => {

@@ -2,22 +2,29 @@
 import Layout from '../../components/Layout';
 import Link from 'next/link';
 import Image from 'next/image';
+import AppIcon from '../../components/AppIcon';
 import SectionHeader from '../../components/SectionHeader';
 
 export default function About() {
     return (
         <Layout>
             {/* Hero */}
-            <section className="about-hero">
+            <section className="about-hero" aria-label="About hero">
                 <div className="container">
                     <p className="overline">Our Story</p>
                     <h1>Born from a Love of Ritual</h1>
-                    <p className="subtitle" style={{ margin: '0 auto' }}>We believe that a cup of tea is more than a beverage — it's a moment of mindfulness, a pause, a quiet celebration of the senses.</p>
+                    <p className="subtitle about-hero__subtitle">We believe that a cup of tea is more than a beverage — it's a moment of mindfulness, a pause, a quiet celebration of the senses.</p>
+                    <nav className="about-hero__quick-nav" aria-label="About page sections">
+                        <a href="#founder-story">Founder</a>
+                        <a href="#values">Values</a>
+                        <a href="#journey">Journey</a>
+                        <a href="#careers">Careers</a>
+                    </nav>
                 </div>
             </section>
 
             {/* Founder Story */}
-            <section className="section">
+            <section id="founder-story" className="section" aria-label="Founder story">
                 <div className="container">
                     <div className="about-section fade-in">
                         <div>
@@ -28,15 +35,15 @@ export default function About() {
                             <p>Standing alongside Kailas is his co-director <strong>Jagabai Ishwar Mane</strong>, whose unwavering support and shared belief in the brand has been a cornerstone of Feelinga&apos;s journey from day one.</p>
                             <p>"I wanted people to experience tea the way it's meant to be — not just a drink, but a daily dose of happiness." — <em>Kailas Ishwar Mane, Founder & Managing Director</em></p>
                         </div>
-                        <div className="about-visual" style={{ display: 'flex', justifyContent: 'center' }}>
-                            <Image src="/images/founder.jpg" alt="Kailas Ishwar Mane — Founder of Feelinga" width={320} height={400} style={{ width: '100%', maxWidth: '320px', height: 'auto', borderRadius: 'var(--radius-lg)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }} />
+                        <div className="about-visual about-visual--centered">
+                            <Image src="/images/founder.jpg" alt="Kailas Ishwar Mane — Founder of Feelinga" width={320} height={400} className="about-founder-image" />
                         </div>
                     </div>
                 </div>
             </section>
 
             {/* Sourcing */}
-            <section className="section section--alt">
+            <section className="section section--alt" aria-label="Sourcing story">
                 <div className="container">
                     <div className="about-section about-section--reverse fade-in">
                         <div>
@@ -45,23 +52,23 @@ export default function About() {
                             <p>We partner directly with 15+ small-estate growers across Darjeeling, Assam, the Nilgiris, and Kangra Valley. No middlemen, no blending houses — just a direct relationship between the garden and your cup.</p>
                             <p>Every lot is personally tasted and selected by our team. We visit our partner estates twice a year, working closely with the pluckers and tea makers to ensure quality, fair wages, and sustainable farming practices.</p>
                         </div>
-                        <div className="about-visual" aria-hidden="true">🏔️</div>
+                        <div className="about-visual" aria-hidden="true"><AppIcon name="mountain" size={38} aria-hidden /></div>
                     </div>
                 </div>
             </section>
 
             {/* Values */}
-            <section className="section">
+            <section id="values" className="section" aria-label="Values">
                 <div className="container">
                     <SectionHeader overline="What We Stand For" title="Our Values" className="fade-in" />
                     <div className="values-grid fade-in">
                         {[
-                            { icon: '🌱', title: 'Sustainability', desc: 'Biodegradable packaging, carbon-offset shipping, and support for regenerative farming practices across our partner estates.' },
-                            { icon: '🤝', title: 'Fair Trade', desc: 'We pay 20–30% above market rate to our growers, funding education, healthcare, and community development programs.' },
-                            { icon: '💚', title: 'Wellness First', desc: 'No artificial flavors, no plastic tea bags, no fillers. Just pure, whole-leaf teas and natural botanicals that nourish your body.' },
+                            { icon: 'leaf', title: 'Sustainability', desc: 'Biodegradable packaging, carbon-offset shipping, and support for regenerative farming practices across our partner estates.' },
+                            { icon: 'handshake', title: 'Fair Trade', desc: 'We pay 20–30% above market rate to our growers, funding education, healthcare, and community development programs.' },
+                            { icon: 'heart', title: 'Wellness First', desc: 'No artificial flavors, no plastic tea bags, no fillers. Just pure, whole-leaf teas and natural botanicals that nourish your body.' },
                         ].map((v, i) => (
                             <div className="value-card" key={i}>
-                                <div className="value-card__icon">{v.icon}</div>
+                                <div className="value-card__icon"><AppIcon name={v.icon} size={28} aria-hidden /></div>
                                 <h4>{v.title}</h4>
                                 <p>{v.desc}</p>
                             </div>
@@ -71,10 +78,10 @@ export default function About() {
             </section>
 
             {/* Timeline */}
-            <section className="section section--alt">
+            <section id="journey" className="section section--alt" aria-label="Company timeline">
                 <div className="container">
                     <SectionHeader overline="Milestones" title="Our Journey" className="fade-in" />
-                    <div className="timeline fade-in">
+                    <ol className="timeline fade-in" role="list">
                         {[
                             { year: '2025', text: 'Vithubadayaji Industries Pvt. Ltd. incorporated in January 2025. Feelinga brand launched from Pandharpur, Maharashtra with a curated collection of premium Indian teas.' },
                             { year: '2025', text: 'Obtained Shop Establishment Certificate and Udyam (MSME) registration. First 12 single-origin teas listed online.' },
@@ -83,12 +90,12 @@ export default function About() {
                             { year: '2026', text: 'Switched to fully biodegradable packaging. Began exporting to UAE & Singapore.' },
                             { year: '2026', text: '50+ varieties, 10,000+ happy sippers, and growing with gratitude every day.' },
                         ].map((t, i) => (
-                            <div className="timeline-item" key={i}>
+                            <li className="timeline-item" key={i}>
                                 <div className="timeline-item__year">{t.year}</div>
                                 <p>{t.text}</p>
-                            </div>
+                            </li>
                         ))}
-                    </div>
+                    </ol>
                 </div>
             </section>
 
@@ -96,7 +103,7 @@ export default function About() {
             <section id="careers" className="section">
                 <div className="container text-center fade-in">
                     <h2>Join Our Team</h2>
-                    <p style={{ margin: 'var(--space-md) auto var(--space-xl)', maxWidth: '600px' }}>We&apos;re always looking for passionate tea lovers to join the Feelinga family. Reach out to learn about current opportunities.</p>
+                    <p className="about-cta-copy about-cta-copy--narrow">We&apos;re always looking for passionate tea lovers to join the Feelinga family. Reach out to learn about current opportunities.</p>
                     <Link href="/contact" className="btn btn--secondary">Get in Touch</Link>
                 </div>
             </section>
@@ -105,7 +112,7 @@ export default function About() {
             <section className="section">
                 <div className="container text-center fade-in">
                     <h2>Ready to Begin Your Tea Journey?</h2>
-                    <p style={{ margin: 'var(--space-md) auto var(--space-xl)' }}>Explore our collection and discover your perfect cup.</p>
+                    <p className="about-cta-copy">Explore our collection and discover your perfect cup.</p>
                     <Link href="/shop" className="btn btn--primary">Shop All Teas</Link>
                 </div>
             </section>

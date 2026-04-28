@@ -16,7 +16,7 @@ export const createOrderSchema = z.object({
         pincode: z.string().min(5),
         phone: z.string().min(10),
     }),
-    paymentMethod: z.enum(['cod', 'upi', 'card']).default('cod'),
+    paymentMethod: z.enum(['cod', 'upi', 'card', 'whatsapp']).default('cod'),
     couponCode: z.string().optional(),
     notes: z.string().max(500).optional(),
 });
@@ -24,4 +24,8 @@ export const createOrderSchema = z.object({
 export const bulkStatusSchema = z.object({
     orderIds: z.array(z.string()).min(1),
     status: z.enum(['confirmed', 'processing', 'shipped', 'delivered', 'cancelled']),
+});
+
+export const updateOrderStatusSchema = z.object({
+    status: z.enum(['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled']),
 });

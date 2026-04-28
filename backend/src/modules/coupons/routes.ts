@@ -4,6 +4,58 @@ import { authenticate } from '../../middleware/auth.js';
 
 const router = Router();
 
+// GET /coupons/campaign/active — Fetch currently active, admin-enabled campaign
+router.get('/campaign/active', async (_req, res) => {
+    try {
+        const now = new Date();
+        const coupon = await Coupon.findOne({
+            active: true,
+            featuredOnStore: true,
+            validFrom: { $lte: now },
+            validTo: { $gte: now },
+        })
+            .sort({ priority: -1, updatedAt: -1 })
+            .lean();
+
+        if (!coupon) {
+            return res.json({ status: 'success', data: null });
+        }
+
+        const discountDisplay = coupon.discountType === 'percentage'
+            ? `${coupon.discountValue}% OFF`
+            : `Flat ₹${coupon.discountValue} OFF`;
+
+        const minOrderText = coupon.minOrderAmount
+            ? `Min order ₹${coupon.minOrderAmount}`
+            : null;
+
+        const maxDiscountText = coupon.maxDiscount && coupon.discountType === 'percentage'
+            ? `Max discount ₹${coupon.maxDiscount}`
+            : null;
+
+        const details = [minOrderText, maxDiscountText].filter(Boolean).join(' • ');
+
+        return res.json({
+            status: 'success',
+            data: {
+                id: coupon._id,
+                name: coupon.name || coupon.code,
+                code: coupon.code,
+                campaignType: coupon.campaignType || 'regular',
+                campaignLabel: coupon.campaignLabel || null,
+                bannerText: coupon.bannerText || `${discountDisplay} with code ${coupon.code}`,
+                discountType: coupon.discountType,
+                discountValue: coupon.discountValue,
+                discountDisplay,
+                details: details || null,
+                validTo: coupon.validTo,
+            },
+        });
+    } catch (err) {
+        return res.status(500).json({ status: 'error', message: 'Server error' });
+    }
+});
+
 // POST /coupons/validate — Validate and calculate coupon discount
 router.post('/validate', authenticate, async (req, res) => {
     try {

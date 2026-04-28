@@ -1,14 +1,17 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import AppIcon from '../components/AppIcon';
 import Layout from '../components/Layout';
 import ProductCard from '../components/ProductCard';
 import ProductGridSkeleton from '../components/ProductGridSkeleton';
 import SectionHeader from '../components/SectionHeader';
 import { useCart } from '../context/CartContext';
+import useCounter from '../hooks/useCounter';
 import { renderStars } from '../utils/renderStars';
 import { apiRequest } from '../utils/api';
+import type { FormEvent, KeyboardEvent as ReactKeyboardEvent } from 'react';
 
 type HomeProduct = {
     id: string;
@@ -39,14 +42,30 @@ type NewsletterStatus = {
     type: '' | 'success' | 'error';
 };
 
+type HomeTab = 'new' | 'best';
+
 export default function Home() {
-    const [activeTab, setActiveTab] = useState('new');
+    const [activeTab, setActiveTab] = useState<HomeTab>('new');
     const { addToCart } = useCart();
     const [nlStatus, setNlStatus] = useState<NewsletterStatus>({ text: '', type: '' });
+    const [newsletterEmail, setNewsletterEmail] = useState('');
+    const [newsletterSubmitting, setNewsletterSubmitting] = useState(false);
+    const testimonialsTrackRef = useRef<HTMLDivElement | null>(null);
 
     const [newArrivals, setNewArrivals] = useState<HomeProduct[]>([]);
     const [bestSellers, setBestSellers] = useState<HomeProduct[]>([]);
     const [loadingProducts, setLoadingProducts] = useState(true);
+
+    const clampRating = (value: unknown): number => {
+        const parsed = Number(value);
+        if (!Number.isFinite(parsed)) return 0;
+        return Math.max(0, Math.min(5, Math.round(parsed)));
+    };
+
+    const renderRatingText = (value: unknown): string => {
+        const safe = clampRating(value);
+        return `${'★'.repeat(safe)}${'☆'.repeat(5 - safe)}`;
+    };
 
     // Testimonials from API
     const [testimonials, setTestimonials] = useState<HomeTestimonial[]>([]);
@@ -56,26 +75,6 @@ export default function Home() {
         { _id: '3', text: 'Their Heritage Spiced Chai has replaced my morning coffee entirely. The blend of spices is perfectly balanced — warm but never overwhelming. An everyday essential.', author: 'Kavya Nair', role: 'Wellness Coach, Bangalore', rating: 5 },
         { _id: '4', text: 'As a café owner, I switched to Feelinga for our premium tea menu. Our customers immediately noticed the quality difference. Exceptional sourcing and consistency.', author: 'Rohan Desai', role: 'Café Owner, Pune', rating: 5 },
     ];
-
-    // Animated counter hook
-    const useCounter = (target: number, suffix = ''): { count: string; start: () => void } => {
-        const [count, setCount] = useState(0);
-        const [started, setStarted] = useState(false);
-        useEffect(() => {
-            if (!started) return;
-            let start = 0;
-            const duration = 2000;
-            const step = (timestamp: number) => {
-                if (!start) start = timestamp;
-                const progress = Math.min((timestamp - start) / duration, 1);
-                const eased = 1 - Math.pow(1 - progress, 3);
-                setCount(Math.floor(eased * target));
-                if (progress < 1) requestAnimationFrame(step);
-            };
-            requestAnimationFrame(step);
-        }, [started, target]);
-        return { count: count + suffix, start: () => setStarted(true) };
-    };
 
     const estates = useCounter(15, '+');
     const varieties = useCounter(50, '+');
@@ -120,7 +119,7 @@ export default function Home() {
                     img: p.images?.[0] || '/images/darjeeling-tea.png',
                     note: p.shortDescription || (p.description ? p.description.substring(0, 60) + '...' : ''),
                     reviews: p.reviewCount || 0,
-                    stars: Math.round(p.rating || 0) || 5,
+                    stars: clampRating(p.rating),
                     inStock: p.inStock,
                 });
 
@@ -154,6 +153,51 @@ export default function Home() {
 
     const handleAddToCart = (p: HomeProduct) => {
         addToCart({ id: p.id, slug: p.slug, name: p.name, price: p.price, size: '100g', img: p.img });
+    };
+
+    const homeTabs: Array<{ key: HomeTab; label: string }> = [
+        { key: 'new', label: 'New Arrivals' },
+        { key: 'best', label: 'Best Sellers' },
+    ];
+
+    const handleTabKeyDown = (currentIndex: number, event: ReactKeyboardEvent<HTMLButtonElement>) => {
+        let nextIndex = currentIndex;
+        if (event.key === 'ArrowRight') {
+            nextIndex = (currentIndex + 1) % homeTabs.length;
+        } else if (event.key === 'ArrowLeft') {
+            nextIndex = (currentIndex - 1 + homeTabs.length) % homeTabs.length;
+        } else {
+            return;
+        }
+        event.preventDefault();
+        const nextTab = homeTabs[nextIndex];
+        setActiveTab(nextTab.key);
+        const nextEl = document.getElementById(`htab-${nextTab.key}`);
+        if (nextEl) nextEl.focus();
+    };
+
+    const scrollTestimonials = (delta: number) => {
+        if (!testimonialsTrackRef.current) return;
+        testimonialsTrackRef.current.scrollBy({ left: delta, behavior: 'smooth' });
+    };
+
+    const handleNewsletterSubmit = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (!newsletterEmail.trim() || newsletterSubmitting) return;
+        setNewsletterSubmitting(true);
+        setNlStatus({ text: '', type: '' });
+        try {
+            const data = await apiRequest('/newsletter', {
+                method: 'POST',
+                body: JSON.stringify({ email: newsletterEmail.trim() }),
+            }) as { message?: string };
+            setNlStatus({ text: data.message || 'Subscribed!', type: 'success' });
+            setNewsletterEmail('');
+        } catch (err: unknown) {
+            setNlStatus({ text: err instanceof Error ? err.message : 'Failed to subscribe', type: 'error' });
+        } finally {
+            setNewsletterSubmitting(false);
+        }
     };
     const seasonalGifts: HomeProduct[] = [
         { id: 'gift-spring-festival-box', slug: 'gift-spring-festival-box', name: 'Spring Festival Tea Box', type: 'Gift Collection', price: 1499, img: '/images/gift-box.png', note: '5 curated teas in a premium gift box', reviews: 45, stars: 5, inStock: true },
@@ -194,16 +238,16 @@ export default function Home() {
                         title="Shop by Mood"
                         description="Let your mood guide you to the perfect cup."
                     />
-                    <div className="mood-grid fade-in" style={{ '--stagger': '0.1s' } as any}>
+                    <div className="mood-grid mood-grid--stagger-1 fade-in">
                         {[
-                            { mood: 'energize', icon: '⚡', title: 'Energize', desc: "Start your day with vibrant, uplifting blends." },
-                            { mood: 'relax', icon: '🌿', title: 'Relax', desc: "Soothing teas that melt away the day's stress." },
-                            { mood: 'focus', icon: '🧠', title: 'Focus', desc: 'Sharpen your clarity and stay centered.' },
-                            { mood: 'detox', icon: '💧', title: 'Detox', desc: 'Light, detoxifying infusions for renewal.' },
-                            { mood: 'glow', icon: '✨', title: 'Glow', desc: 'Nourish your skin and radiate from within.' },
+                            { mood: 'energize', icon: 'flame', title: 'Energize', desc: "Start your day with vibrant, uplifting blends." },
+                            { mood: 'relax', icon: 'leaf', title: 'Relax', desc: "Soothing teas that melt away the day's stress." },
+                            { mood: 'focus', icon: 'brain', title: 'Focus', desc: 'Sharpen your clarity and stay centered.' },
+                            { mood: 'detox', icon: 'drop', title: 'Detox', desc: 'Light, detoxifying infusions for renewal.' },
+                            { mood: 'glow', icon: 'sparkles', title: 'Glow', desc: 'Nourish your skin and radiate from within.' },
                         ].map(m => (
                             <Link href={`/shop?mood=${m.mood}`} className="mood-card" key={m.mood}>
-                                <div className="mood-card__icon">{m.icon}</div>
+                                <div className="mood-card__icon"><AppIcon name={m.icon} size={26} aria-hidden /></div>
                                 <h4>{m.title}</h4>
                                 <p>{m.desc}</p>
                                 <span className="btn btn--ghost btn--sm">Explore</span>
@@ -222,8 +266,21 @@ export default function Home() {
                         title="Discover Our Teas"
                     />
                     <div className="commerce-tabs fade-in" role="tablist">
-                        {[{ key: 'new', label: 'New Arrivals' }, { key: 'best', label: 'Best Sellers' }, { key: 'seasonal', label: 'Seasonal Gifts' }].map(t => (
-                            <button key={t.key} className={`commerce-tab ${activeTab === t.key ? 'active' : ''}`} role="tab" id={`htab-${t.key}`} aria-selected={activeTab === t.key} aria-controls={`hpanel-${t.key}`} onClick={() => setActiveTab(t.key)}>{t.label}</button>
+                        {homeTabs.map((t, index) => (
+                            <button
+                                key={t.key}
+                                type="button"
+                                className={`commerce-tab ${activeTab === t.key ? 'active' : ''}`}
+                                role="tab"
+                                id={`htab-${t.key}`}
+                                aria-selected={activeTab === t.key}
+                                aria-controls={`hpanel-${t.key}`}
+                                tabIndex={activeTab === t.key ? 0 : -1}
+                                onClick={() => setActiveTab(t.key)}
+                                onKeyDown={(event) => handleTabKeyDown(index, event)}
+                            >
+                                {t.label}
+                            </button>
                         ))}
                     </div>
 
@@ -232,7 +289,7 @@ export default function Home() {
                     ) : (
                         <>
                             {/* New Arrivals */}
-                            <div role="tabpanel" id="hpanel-new" aria-labelledby="htab-new" className={`product-grid tab-panel ${activeTab === 'new' ? 'tab-panel--active' : 'product-grid--hidden'}`}>
+                            <div role="tabpanel" id="hpanel-new" aria-labelledby="htab-new" hidden={activeTab !== 'new'} className={`product-grid tab-panel ${activeTab === 'new' ? 'tab-panel--active' : 'product-grid--hidden'}`}>
                                 {newArrivals.length === 0 ? (
                                     <p className="tab-panel__empty">No new arrivals at the moment. <Link href="/shop">Browse all teas</Link></p>
                                 ) : newArrivals.map(p => (
@@ -247,7 +304,7 @@ export default function Home() {
                             </div>
 
                             {/* Best Sellers */}
-                            <div role="tabpanel" id="hpanel-best" aria-labelledby="htab-best" className={`product-grid tab-panel ${activeTab === 'best' ? 'tab-panel--active' : 'product-grid--hidden'}`}>
+                            <div role="tabpanel" id="hpanel-best" aria-labelledby="htab-best" hidden={activeTab !== 'best'} className={`product-grid tab-panel ${activeTab === 'best' ? 'tab-panel--active' : 'product-grid--hidden'}`}>
                                 {bestSellers.length === 0 ? (
                                     <p className="tab-panel__empty">Check back soon for our top picks. <Link href="/shop">Browse all teas</Link></p>
                                 ) : bestSellers.map(p => (
@@ -264,25 +321,35 @@ export default function Home() {
                         </>
                     )}
 
-                    {/* Seasonal Gifts — static */}
-                    <div role="tabpanel" id="hpanel-seasonal" aria-labelledby="htab-seasonal" className={`product-grid tab-panel ${activeTab === 'seasonal' ? 'tab-panel--active' : 'product-grid--hidden'}`}>
-                        {seasonalGifts.map((p, i) => (
+                    <div className="text-center mt-2xl">
+                        <Link href="/shop" className="btn btn--secondary">View All Teas</Link>
+                    </div>
+                </div>
+            </section>
+
+            {/* 3b. GIFT COLLECTION SECTION */}
+            <section className="section">
+                <div className="container">
+                    <SectionHeader
+                        className="fade-in"
+                        overline="Gifting"
+                        title="Gift Collection"
+                        description="Curated gift sets for every tea lover."
+                    />
+                    <div className="product-grid product-grid--gifts fade-in">
+                        {seasonalGifts.slice(0, 4).map((p) => (
                             <ProductCard
-                                key={i}
+                                key={p.id}
                                 product={p}
                                 badge="Gift Set"
                                 badgeClass="product-card__badge--success"
                                 renderStars={renderStars}
                                 linkHref="/gifting"
-                                footer={
-                                    <Link href="/gifting" className="btn btn--ghost btn--sm btn-block mt-12">View Gift Sets</Link>
-                                }
                             />
                         ))}
                     </div>
-
-                    <div className="text-center mt-2xl">
-                        <Link href="/shop" className="btn btn--secondary">View All Teas</Link>
+                    <div className="text-center mt-xl">
+                        <Link href="/gifting" className="btn btn--primary">View All Gifts</Link>
                     </div>
                 </div>
             </section>
@@ -298,9 +365,9 @@ export default function Home() {
                     />
                     <div className="curated-grid scale-in">
                         {[
-                            { name: 'First Flush Darjeeling', img: '/images/darjeeling-tea.png', desc: '"The champagne of teas — this spring harvest delivers an exquisite muscatel aroma with a light, floral body."', meta: '₹1,299 · Limited Edition', slug: 'darjeeling-first-flush' },
-                            { name: 'Silver Needle White', img: '/images/white-tea.png', desc: '"Rare, hand-plucked buds with the most delicate sweetness. Best enjoyed in quiet afternoon solitude."', meta: '₹1,899 · Single Estate', slug: 'silver-needle-white' },
-                            { name: 'Aged Pu-erh Reserve', img: '/images/oolong-tea.png', desc: '"Deep, earthy complexity with a smooth, velvety finish. A meditative tea for the true connoisseur."', meta: '₹2,499 · Rare Find', slug: null },
+                            { name: 'First Flush Darjeeling', img: '/images/products/darjeeling-ff.jpg', desc: '"The champagne of teas — this spring harvest delivers an exquisite muscatel aroma with a light, floral body."', meta: '₹1,299 · Limited Edition', slug: 'darjeeling-first-flush' },
+                            { name: 'Silver Needle White', img: '/images/products/silver-needle.jpg', desc: '"Rare, hand-plucked buds with the most delicate sweetness. Best enjoyed in quiet afternoon solitude."', meta: '₹1,899 · Single Estate', slug: 'silver-needle-white' },
+                            { name: 'Aged Pu-erh Reserve', img: '/images/products/oolong-beauty.jpg', desc: '"Deep, earthy complexity with a smooth, velvety finish. A meditative tea for the true connoisseur."', meta: '₹2,499 · Rare Find', slug: null },
                         ].map((c, i) => (
                             <div className="curated-card" key={i}>
                                 <div className="curated-card__img"><Image src={c.img} alt={c.name} width={400} height={300} className="img-cover-rounded-md" /></div>
@@ -349,14 +416,14 @@ export default function Home() {
                         title="Learn the Art of Tea"
                         description="Explore guides, stories, and brewing wisdom from our experts."
                     />
-                    <div className="guide-grid fade-in" style={{ '--stagger': '0.15s' } as any}>
+                    <div className="guide-grid guide-grid--stagger-2 fade-in">
                         {[
-                            { icon: '🫖', title: 'The Perfect Brew', desc: 'Temperature, timing, and technique — master the art of brewing every tea type.' },
-                            { icon: '🌱', title: 'Tea & Wellness', desc: 'How different teas support your immunity, digestion, and mental clarity.' },
-                            { icon: '🗺️', title: 'Origin Stories', desc: "Journey through India's finest tea regions and meet the growers behind your cup." },
+                            { icon: 'leaf', title: 'The Perfect Brew', desc: 'Temperature, timing, and technique - master the art of brewing every tea type.' },
+                            { icon: 'leaf', title: 'Tea & Wellness', desc: 'How different teas support your immunity, digestion, and mental clarity.' },
+                            { icon: 'mapPin', title: 'Origin Stories', desc: "Journey through India's finest tea regions and meet the growers behind your cup." },
                         ].map((g, i) => (
                             <Link href="/learn" className="guide-card" key={i}>
-                                <div className="guide-card__icon">{g.icon}</div>
+                                <div className="guide-card__icon"><AppIcon name={g.icon} size={26} aria-hidden /></div>
                                 <h4>{g.title}</h4>
                                 <p>{g.desc}</p>
                                 <span className="btn btn--ghost btn--sm">Read Guide</span>
@@ -371,20 +438,20 @@ export default function Home() {
                 <div className="container">
                     <SectionHeader overline="Reviews" title="What Our Sippers Say" className="fade-in" />
                     <div className="testimonials-wrapper">
-                        <button className="testimonials-arrow testimonials-arrow--left" aria-label="Scroll left" onClick={() => { const track = document.querySelector('.testimonials-track'); if (track) track.scrollBy({ left: -400, behavior: 'smooth' }); }}>&#8249;</button>
-                        <div className="testimonials-track blur-in">
+                        <button type="button" className="testimonials-arrow testimonials-arrow--left" aria-label="Scroll left" onClick={() => scrollTestimonials(-400)}>&#8249;</button>
+                        <div ref={testimonialsTrackRef} className="testimonials-track blur-in">
                             {(testimonials.length > 0 ? testimonials : fallbackTestimonials).map((t, i) => (
                                 <div className="testimonial-card" key={t._id || i}>
-                                    <div className="testimonial-card__stars">{'★'.repeat(t.rating || 5)}{'☆'.repeat(5 - (t.rating || 5))}</div>
+                                    <div className="testimonial-card__stars">{renderRatingText(t.rating)}</div>
                                     <div className="testimonial-card__text">"{t.text}"</div>
                                     <div className="testimonial-card__author">{t.author}</div>
                                     <div className="testimonial-card__role">{t.role}</div>
                                 </div>
                             ))}
                         </div>
-                        <button className="testimonials-arrow testimonials-arrow--right" aria-label="Scroll right" onClick={() => { const track = document.querySelector('.testimonials-track'); if (track) track.scrollBy({ left: 400, behavior: 'smooth' }); }}>&#8250;</button>
+                        <button type="button" className="testimonials-arrow testimonials-arrow--right" aria-label="Scroll right" onClick={() => scrollTestimonials(400)}>&#8250;</button>
                     </div>
-                    <div className="testimonials__summary fade-in"><strong>4.8 / 5</strong> from 500+ reviews · Trusted since 2019</div>
+                    <div className="testimonials__summary fade-in"><strong>4.8 / 5</strong> from 500+ reviews · Trusted since 2025</div>
                 </div>
             </section>
 
@@ -394,22 +461,9 @@ export default function Home() {
                     <div className="newsletter scale-in">
                         <h3>Join the Tea Circle</h3>
                         <p>Get early access to new arrivals, brewing tips, and 10% off your first order.</p>
-                        <form className="newsletter__form" onSubmit={async (e) => {
-                            e.preventDefault();
-                            const email = (e.target as any).elements[0].value.trim();
-                            try {
-                                const data = await apiRequest('/newsletter', {
-                                    method: 'POST',
-                                    body: JSON.stringify({ email }),
-                                }) as { message?: string };
-                                setNlStatus({ text: data.message || 'Subscribed!', type: 'success' });
-                                (e.target as any).reset();
-                            } catch (err: any) {
-                                setNlStatus({ text: err.message || 'Failed to subscribe', type: 'error' });
-                            }
-                        }}>
-                            <input type="email" placeholder="Your email address" required aria-label="Email address" />
-                            <button type="submit">Subscribe</button>
+                        <form className="newsletter__form" onSubmit={handleNewsletterSubmit}>
+                            <input type="email" placeholder="Your email address" required aria-label="Email address" value={newsletterEmail} onChange={(e) => setNewsletterEmail(e.target.value)} />
+                            <button type="submit" disabled={newsletterSubmitting} aria-busy={newsletterSubmitting}>{newsletterSubmitting ? 'Subscribing...' : 'Subscribe'}</button>
                         </form>
                         {nlStatus.text && <p className={`mt-sm text-0-9 ${nlStatus.type === 'success' ? 'text-success' : 'text-error'}`}>{nlStatus.text}</p>}
                     </div>

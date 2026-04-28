@@ -1,13 +1,13 @@
 'use client';
 
 function normalizeApiBase(origin: string): string {
-    const normalized = origin.replace(/\/$/, '');
+    const normalized = origin.trim().replace(/^"(.+)"$/, '$1').replace(/\/$/, '');
     if (/\/api\/v1$/i.test(normalized)) return normalized;
     if (/\/api$/i.test(normalized)) return `${normalized}/v1`;
     return `${normalized}/api/v1`;
 }
 
-const configuredApiOrigin = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '');
+const configuredApiOrigin = process.env.NEXT_PUBLIC_API_URL?.trim().replace(/^"(.+)"$/, '$1').replace(/\/$/, '');
 const configuredApiBase = configuredApiOrigin ? normalizeApiBase(configuredApiOrigin) : null;
 const FALLBACK_PROD_API_BASE = 'https://feelinga-tea-api.onrender.com/api/v1';
 const RETRYABLE_STATUS = new Set([502, 503, 504]);
@@ -67,17 +67,19 @@ let refreshPromise: Promise<{ accessToken: string; refreshToken: string } | null
 
 async function doRefresh(apiBase: string): Promise<{ accessToken: string; refreshToken: string } | null> {
     const refreshToken = localStorage.getItem('feelinga_refresh');
-    if (!refreshToken) return null;
     try {
         const res = await fetch(`${apiBase}/auth/refresh`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ refreshToken }),
+            credentials: 'include',
+            body: JSON.stringify(refreshToken ? { refreshToken } : {}),
         });
         if (res.ok) {
             const data = await res.json();
             localStorage.setItem('feelinga_token', data.data.accessToken);
-            localStorage.setItem('feelinga_refresh', data.data.refreshToken);
+            if (data?.data?.refreshToken) {
+                localStorage.setItem('feelinga_refresh', data.data.refreshToken);
+            }
             return data.data;
         }
     } catch (err) {
@@ -107,17 +109,18 @@ export async function apiRequest(path: string, options: any = {}) {
         };
 
         try {
-            let res = await fetchWithRetry(url, { ...options, headers }, method);
+            const requestInit = { ...options, headers, credentials: 'include' as const };
+            let res = await fetchWithRetry(url, requestInit, method);
 
             // Auto-refresh on 401 (mutex prevents duplicate refresh calls)
-            if (res.status === 401 && token) {
+            if (res.status === 401 && !path.startsWith('/auth/refresh')) {
                 if (!refreshPromise) {
                     refreshPromise = doRefresh(base).finally(() => { refreshPromise = null; });
                 }
                 const tokens = await refreshPromise;
                 if (tokens) {
                     headers.Authorization = `Bearer ${tokens.accessToken}`;
-                    res = await fetchWithRetry(url, { ...options, headers }, method);
+                    res = await fetchWithRetry(url, { ...options, headers, credentials: 'include' }, method);
                 }
             }
 

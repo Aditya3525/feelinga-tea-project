@@ -38,11 +38,17 @@ export const metadata = {
     },
 };
 
+export const viewport = {
+    themeColor: '#FAEDE4', // var(--color-bg) for seamless top-notch blending
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5, // allows a11y zoom but respects initial scale
+};
+
 export default function RootLayout({ children }: AppProviderProps) {
     return (
         <html lang="en">
             <body>
-                <a href="#main" className="skip-link">Skip to main content</a>
                 <Providers>
                     {children}
                 </Providers>

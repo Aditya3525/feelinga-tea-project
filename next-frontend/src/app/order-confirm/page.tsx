@@ -1,89 +1,106 @@
 'use client';
-import { Suspense } from 'react';
+import { Suspense, useMemo, useState } from 'react';
 import Layout from '../../components/Layout';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import AppIcon from '../../components/AppIcon';
 
 function OrderConfirmInner() {
     const searchParams = useSearchParams();
     const orderNumber = searchParams.get('order') || null;
     const itemsParam = searchParams.get('items');
     const totalParam = searchParams.get('total');
-    const items = itemsParam ? parseInt(itemsParam, 10) : null;
-    const total = totalParam ? parseInt(totalParam, 10) : null;
+    const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'error'>('idle');
+
+    const items = useMemo(() => {
+        if (!itemsParam) return null;
+        const parsed = Number.parseInt(itemsParam, 10);
+        return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+    }, [itemsParam]);
+
+    const total = useMemo(() => {
+        if (!totalParam) return null;
+        const parsed = Number.parseFloat(totalParam);
+        return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+    }, [totalParam]);
+
+    const handleCopyOrderNumber = async () => {
+        if (!orderNumber) return;
+        try {
+            await navigator.clipboard.writeText(orderNumber);
+            setCopyStatus('copied');
+        } catch {
+            setCopyStatus('error');
+        }
+    };
 
     return (
         <Layout>
-            <div className="container section" style={{ textAlign: 'center', padding: 'var(--space-4xl) 0', maxWidth: 600, margin: '0 auto' }}>
+            <div className="container section order-confirm">
                 {/* Success animation */}
-                <div style={{
-                    width: 100, height: 100, borderRadius: '50%',
-                    background: 'linear-gradient(135deg, var(--color-accent), var(--color-gold, #c9a84c))',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    margin: '0 auto var(--space-xl)',
-                    fontSize: '2.5rem',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
-                    animation: 'scaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                }}>
-                    🎉
+                <div className="order-confirm__icon-wrap">
+                    <AppIcon name="checkCircle" size={44} aria-hidden />
                 </div>
 
-                <h1 style={{ fontSize: '2.2rem', marginBottom: 'var(--space-md)' }}>Order Placed!</h1>
-                <p style={{ color: 'var(--color-text-muted)', fontSize: '1.1rem', lineHeight: 1.7, marginBottom: 'var(--space-xl)' }}>
+                <h1 className="order-confirm__title">Order Placed!</h1>
+                <p className="order-confirm__subtitle">
                     Thank you for choosing Feelinga. Your teas are on their way!
                 </p>
+                {!orderNumber && (
+                    <p className="order-confirm__note" role="status" aria-live="polite">
+                        We could not read an order number from this link. You can find your latest purchase in My Orders.
+                    </p>
+                )}
 
                 {/* Order details card */}
-                <div style={{
-                    background: 'var(--color-bg-alt)', borderRadius: 'var(--radius-lg)',
-                    padding: 'var(--space-xl)', marginBottom: 'var(--space-2xl)',
-                    border: '1px solid var(--color-border)',
-                    textAlign: 'left',
-                }}>
+                <div className="order-confirm__details-card">
                     {orderNumber && (
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--space-md)', paddingBottom: 'var(--space-md)', borderBottom: '1px solid var(--color-border)' }}>
-                            <span style={{ color: 'var(--color-text-muted)' }}>Order Number</span>
-                            <strong style={{ fontFamily: 'monospace', color: 'var(--color-accent)' }}>{orderNumber}</strong>
+                        <div className="order-confirm__row order-confirm__row--divider">
+                            <span className="order-confirm__label">Order Number</span>
+                            <div className="order-confirm__order-id-wrap">
+                                <strong className="order-confirm__mono-accent">{orderNumber}</strong>
+                                <button type="button" className="order-confirm__copy-btn" onClick={handleCopyOrderNumber}>
+                                    {copyStatus === 'copied' ? 'Copied' : 'Copy'}
+                                </button>
+                            </div>
                         </div>
                     )}
                     {items && (
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--space-sm)' }}>
-                            <span style={{ color: 'var(--color-text-muted)' }}>Items</span>
+                        <div className="order-confirm__row order-confirm__row--sm-gap">
+                            <span className="order-confirm__label">Items</span>
                             <span>{items} {items === 1 ? 'item' : 'items'}</span>
                         </div>
                     )}
                     {total && (
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--space-sm)' }}>
-                            <span style={{ color: 'var(--color-text-muted)' }}>Total Paid</span>
+                        <div className="order-confirm__row order-confirm__row--sm-gap">
+                            <span className="order-confirm__label">Total Paid</span>
                             <strong>₹{total.toLocaleString()}</strong>
                         </div>
                     )}
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ color: 'var(--color-text-muted)' }}>Estimated Delivery</span>
+                    <div className="order-confirm__row">
+                        <span className="order-confirm__label">Estimated Delivery</span>
                         <span>3–5 business days</span>
                     </div>
                 </div>
+                {copyStatus === 'error' && (
+                    <p className="order-confirm__copy-error" role="alert">Could not copy order number. Please copy it manually.</p>
+                )}
 
                 {/* What happens next */}
-                <div style={{ textAlign: 'left', marginBottom: 'var(--space-2xl)' }}>
-                    <h3 style={{ marginBottom: 'var(--space-lg)' }}>What happens next?</h3>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+                <div className="order-confirm__next">
+                    <h3 className="order-confirm__next-title">What happens next?</h3>
+                    <div className="order-confirm__steps">
                         {[
-                            { icon: '📧', step: 'Confirmation email', desc: 'You\'ll receive an email with your order details shortly.' },
-                            { icon: '📦', step: 'Order processing', desc: 'We\'ll carefully pack your teas within 1 business day.' },
-                            { icon: '🚚', step: 'Dispatch & tracking', desc: 'You\'ll get a tracking link once your order ships.' },
-                            { icon: '🍵', step: 'Enjoy your teas', desc: 'Fresh, garden-to-cup goodness arrives at your door!' },
+                            { icon: 'mail', step: 'Confirmation email', desc: 'You\'ll receive an email with your order details shortly.' },
+                            { icon: 'package', step: 'Order processing', desc: 'We\'ll carefully pack your teas within 1 business day.' },
+                            { icon: 'truck', step: 'Dispatch & tracking', desc: 'You\'ll get a tracking link once your order ships.' },
+                            { icon: 'leaf', step: 'Enjoy your teas', desc: 'Fresh, garden-to-cup goodness arrives at your door!' },
                         ].map((item, i) => (
-                            <div key={i} style={{ display: 'flex', gap: 'var(--space-md)', alignItems: 'flex-start' }}>
-                                <div style={{
-                                    width: 40, height: 40, minWidth: 40, borderRadius: '50%',
-                                    background: 'var(--color-accent)', color: '#fff',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    fontSize: '1.1rem',
-                                }}>{item.icon}</div>
+                            <div key={i} className="order-confirm__step">
+                                <div className="order-confirm__step-icon"><AppIcon name={item.icon} size={18} aria-hidden /></div>
                                 <div>
-                                    <div style={{ fontWeight: 600 }}>{item.step}</div>
-                                    <div style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>{item.desc}</div>
+                                    <div className="order-confirm__step-title">{item.step}</div>
+                                    <div className="order-confirm__step-desc">{item.desc}</div>
                                 </div>
                             </div>
                         ))}
@@ -91,7 +108,7 @@ function OrderConfirmInner() {
                 </div>
 
                 {/* CTAs */}
-                <div style={{ display: 'flex', gap: 'var(--space-md)', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <div className="order-confirm__actions">
                     <Link href="/profile?tab=orders" className="btn btn--ghost">View My Orders</Link>
                     <Link href="/shop" className="btn btn--primary">Continue Shopping</Link>
                 </div>
@@ -102,7 +119,7 @@ function OrderConfirmInner() {
 
 export default function OrderConfirmPage() {
     return (
-        <Suspense fallback={<Layout><div className="container section" style={{ textAlign: 'center' }}>Loading...</div></Layout>}>
+        <Suspense fallback={<Layout><div className="container section order-confirm__loading">Loading...</div></Layout>}>
             <OrderConfirmInner />
         </Suspense>
     );

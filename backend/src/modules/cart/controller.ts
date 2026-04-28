@@ -104,11 +104,21 @@ export const sync = async (req: Request, res: Response, next: NextFunction) => {
         let cart = await Cart.findOne({ user: req.user!._id });
         if (!cart) cart = new Cart({ user: req.user!._id, items: [] });
 
+        const requestedIds = [...new Set(items.map((item: any) => item.productId).filter(Boolean).map((id: any) => String(id)))];
+        const requestedSlugs = [...new Set(items.map((item: any) => item.slug).filter(Boolean).map((slug: any) => String(slug)))];
+
+        const query: Record<string, any>[] = [];
+        if (requestedIds.length > 0) query.push({ _id: { $in: requestedIds } });
+        if (requestedSlugs.length > 0) query.push({ slug: { $in: requestedSlugs } });
+
+        const products = query.length > 0 ? await Product.find({ $or: query }) : [];
+        const productsById = new Map(products.map(product => [product._id.toString(), product]));
+        const productsBySlug = new Map(products.map(product => [product.slug, product]));
+
         for (const item of items) {
             let product;
-            if (item.productId) product = await Product.findById(item.productId);
-            else if (item.slug) product = await Product.findOne({ slug: item.slug });
-            else if (item.name) product = await Product.findOne({ name: item.name });
+            if (item.productId) product = productsById.get(String(item.productId));
+            if (!product && item.slug) product = productsBySlug.get(String(item.slug));
             if (!product) continue;
 
             const itemSize = item.size || '100g';

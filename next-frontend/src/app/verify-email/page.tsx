@@ -1,68 +1,28 @@
 'use client';
-import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useEffect, Suspense } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Layout from '../../components/Layout';
+import AppIcon from '../../components/AppIcon';
 
 function VerifyEmailInner() {
-    const searchParams = useSearchParams();
-    const token = searchParams.get('token');
-    const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-    const [message, setMessage] = useState('');
+    const router = useRouter();
 
     useEffect(() => {
-        if (!token) {
-            setStatus('error');
-            setMessage('No verification token provided.');
-            return;
-        }
-        async function verify() {
-            try {
-                const res = await fetch('/api/v1/auth/verify-email', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token }),
-                });
-                const data = await res.json().catch(() => ({}) as any);
-                if (!res.ok) throw new Error(data.message || 'Verification failed');
-                setStatus('success');
-                setMessage(data.message || 'Email verified successfully!');
-            } catch (err: any) {
-                setStatus('error');
-                setMessage(err.message || 'Verification failed. The link may have expired.');
-            }
-        }
-        verify();
-    }, [token]);
+        router.replace('/');
+    }, [router]);
 
     return (
         <Layout>
-            <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ textAlign: 'center', maxWidth: 480, padding: 'var(--space-2xl)' }}>
-                    {status === 'loading' && (
-                        <>
-                            <div style={{ fontSize: '3rem', marginBottom: 'var(--space-lg)' }}>⏳</div>
-                            <h2>Verifying your email...</h2>
-                            <p style={{ marginTop: 'var(--space-md)', color: 'var(--color-text-muted)' }}>Please wait while we confirm your email address.</p>
-                        </>
-                    )}
-                    {status === 'success' && (
-                        <>
-                            <div style={{ fontSize: '3rem', marginBottom: 'var(--space-lg)' }}>✅</div>
-                            <h2>Email Verified!</h2>
-                            <p style={{ marginTop: 'var(--space-md)', color: 'var(--color-text-muted)' }}>{message}</p>
-                            <p style={{ marginTop: 'var(--space-sm)', color: 'var(--color-text-muted)' }}>You can now enjoy all features of your account.</p>
-                            <Link href="/shop" className="btn btn--primary" style={{ marginTop: 'var(--space-xl)', display: 'inline-block' }}>Start Shopping</Link>
-                        </>
-                    )}
-                    {status === 'error' && (
-                        <>
-                            <div style={{ fontSize: '3rem', marginBottom: 'var(--space-lg)' }}>❌</div>
-                            <h2>Verification Failed</h2>
-                            <p style={{ marginTop: 'var(--space-md)', color: 'var(--color-text-muted)' }}>{message}</p>
-                            <Link href="/" className="btn btn--ghost" style={{ marginTop: 'var(--space-xl)', display: 'inline-block' }}>Go Home</Link>
-                        </>
-                    )}
+            <div className="status-screen">
+                <div className="status-screen__inner">
+                    <div className="status-screen__icon"><AppIcon name="checkCircle" size={40} aria-hidden /></div>
+                    <h2>Email Verification Disabled</h2>
+                    <p className="status-screen__message">You can create an account and sign in without a separate verification step.</p>
+                    <div className="status-screen__actions">
+                        <Link href="/" className="btn btn--primary status-screen__action">Go Home</Link>
+                        <Link href="/shop" className="btn btn--ghost status-screen__action">Start Shopping</Link>
+                    </div>
                 </div>
             </div>
         </Layout>
@@ -71,7 +31,7 @@ function VerifyEmailInner() {
 
 export default function VerifyEmail() {
     return (
-        <Suspense fallback={<Layout><div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><p>Loading...</p></div></Layout>}>
+        <Suspense fallback={<Layout><div className="status-screen"><p>Loading...</p></div></Layout>}>
             <VerifyEmailInner />
         </Suspense>
     );

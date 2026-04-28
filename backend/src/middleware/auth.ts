@@ -2,16 +2,18 @@ import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import User from '../models/User.js';
 import { AppError } from './errorHandler.js';
+import { ACCESS_COOKIE_NAME, getCookieValue } from '../utils/cookies.js';
 
 // Verify JWT and attach user to request
 export const authenticate = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const authHeader = req.headers.authorization;
-        if (!authHeader?.startsWith('Bearer ')) {
+        const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
+        const cookieToken = getCookieValue(req, ACCESS_COOKIE_NAME);
+        const token = bearerToken || cookieToken;
+        if (!token) {
             throw new AppError('Not authenticated. Please log in.', 401);
         }
-
-        const token = authHeader.split(' ')[1];
         const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as any;
 
         const user = await User.findById(decoded.id);
@@ -40,8 +42,10 @@ export const authorize = (...roles: string[]) => {
 export const optionalAuth = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const authHeader = req.headers.authorization;
-        if (authHeader?.startsWith('Bearer ')) {
-            const token = authHeader.split(' ')[1];
+        const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
+        const cookieToken = getCookieValue(req, ACCESS_COOKIE_NAME);
+        const token = bearerToken || cookieToken;
+        if (token) {
             const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as any;
             req.user = await User.findById(decoded.id) as any;
         }

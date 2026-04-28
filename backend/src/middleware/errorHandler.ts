@@ -27,8 +27,7 @@ const errorHandler = (err: any, req: Request, res: Response, _next: NextFunction
     // Mongoose duplicate key
     if (err.code === 11000) {
         statusCode = 409;
-        const field = Object.keys(err.keyValue)[0];
-        message = `${field} already exists`;
+        message = 'Resource already exists';
     }
 
     // Mongoose bad ObjectId

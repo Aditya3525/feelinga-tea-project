@@ -1,7 +1,13 @@
 import { z } from 'zod';
 
 export const couponSchema = z.object({
+    name: z.string().max(80).optional(),
     code: z.string().min(2).max(30),
+    campaignType: z.enum(['regular', 'seasonal', 'festival']).default('regular'),
+    campaignLabel: z.string().max(80).optional(),
+    bannerText: z.string().max(240).optional(),
+    featuredOnStore: z.boolean().default(false),
+    priority: z.number().int().min(0).default(0),
     discountType: z.enum(['percentage', 'flat']),
     discountValue: z.number().positive(),
     minOrderAmount: z.number().min(0).default(0),

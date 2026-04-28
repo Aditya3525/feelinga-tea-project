@@ -55,6 +55,20 @@ npm run build
 npm start
 ```
 
+`npm start` now includes a guard that refuses to boot if `dist/` is older than `src/`.
+If it stops with a stale-build message, run `npm run build` and start again.
+
+## Security Controls
+
+- Passwords are hashed with `bcrypt` and unique per-password salts.
+- Login supports enforced MFA (email OTP) via `ENFORCE_LOGIN_MFA=true`.
+- Refresh/access tokens are also issued as secure HttpOnly cookies.
+- Password reset uses single-use, time-limited hashed tokens.
+- Optional HaveIBeenPwned checks are available via `HIBP_ENFORCE=true`.
+- Optional Hunter mailbox verification is available via `EMAIL_VERIFIER_PROVIDER=hunter` + `HUNTER_API_KEY`.
+
+Set `ENFORCE_HTTPS=true` behind a trusted TLS proxy/load balancer in production.
+
 ## Testing
 
 Run the integration test suite:

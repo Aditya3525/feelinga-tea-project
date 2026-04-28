@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { authenticate, authorize } from '../../middleware/auth.js';
 import { validate } from '../../middleware/validate.js';
 import * as ctrl from './controller.js';
-import { createOrderSchema, bulkStatusSchema } from './schema.js';
+import { createOrderSchema, bulkStatusSchema, updateOrderStatusSchema } from './schema.js';
 
 const router = Router();
 
@@ -15,6 +15,6 @@ router.patch('/:id/cancel',   authenticate,                              ctrl.ca
 
 // Admin
 router.patch('/bulk-status',  authenticate, authorize('admin'), validate(bulkStatusSchema), ctrl.bulkStatus);
-router.patch('/:id/status',   authenticate, authorize('admin'),                             ctrl.updateStatus);
+router.patch('/:id/status',   authenticate, authorize('admin'), validate(updateOrderStatusSchema), ctrl.updateStatus);
 
 export default router;

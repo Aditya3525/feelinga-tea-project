@@ -1,10 +1,22 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
 import { apiRequest } from '../../utils/api';
 import { useToast } from '../../components/Toast';
+import AppIcon from '../../components/AppIcon';
+import {
+    ActivityTab,
+    CouponsTab,
+    MessagesTab,
+    NewsletterTab,
+    OrdersTab,
+    OverviewTab,
+    ProductsTab,
+    TestimonialsTab,
+    UsersTab,
+} from './components/TabSections';
 
 type AdminRecord = Record<string, any>;
 type AdminList = AdminRecord[];
@@ -14,6 +26,14 @@ type AdminPagination = {
 };
 type AdminUserPagination = AdminPagination & {
     total: number;
+};
+
+type ConfirmDialogState = {
+    title: string;
+    message: string;
+    confirmLabel: string;
+    tone?: 'danger' | 'default';
+    onConfirm: () => Promise<void> | void;
 };
 
 export default function Admin() {
@@ -55,7 +75,24 @@ export default function Admin() {
     const [couponsLoading, setCouponsLoading] = useState(false);
     const [showCouponForm, setShowCouponForm] = useState(false);
     const [editingCoupon, setEditingCoupon] = useState<AdminRecord | null>(null);
-    const emptyCoupon: AdminRecord = { code: '', discountType: 'percentage', discountValue: '', minOrderAmount: '', maxDiscount: '', usageLimit: '', perUserLimit: '', validFrom: '', validTo: '', active: true };
+    const emptyCoupon: AdminRecord = {
+        name: '',
+        code: '',
+        campaignType: 'regular',
+        campaignLabel: '',
+        bannerText: '',
+        featuredOnStore: false,
+        priority: 0,
+        discountType: 'percentage',
+        discountValue: '',
+        minOrderAmount: '',
+        maxDiscount: '',
+        usageLimit: '',
+        perUserLimit: '',
+        validFrom: '',
+        validTo: '',
+        active: true,
+    };
     const [couponForm, setCouponForm] = useState<AdminRecord>(emptyCoupon);
 
     // Testimonials
@@ -84,9 +121,65 @@ export default function Admin() {
     const [loginEmail, setLoginEmail] = useState('');
     const [loginPassword, setLoginPassword] = useState('');
     const [actionLoading, setActionLoading] = useState<string | null>(null);
+    const [tabErrors, setTabErrors] = useState<Record<string, string>>({});
+    const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState | null>(null);
+    const [confirmLoading, setConfirmLoading] = useState(false);
+    const confirmButtonRef = useRef<HTMLButtonElement>(null);
+
+    const clearTabError = useCallback((tab: string) => {
+        setTabErrors((prev) => {
+            if (!prev[tab]) return prev;
+            const next = { ...prev };
+            delete next[tab];
+            return next;
+        });
+    }, []);
+
+    const setTabError = useCallback((tab: string, message: string) => {
+        setTabErrors((prev) => ({ ...prev, [tab]: message }));
+    }, []);
+
+    useEffect(() => {
+        if (!confirmDialog) return;
+
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        confirmButtonRef.current?.focus();
+
+        const handleEscape = (event: KeyboardEvent) => {
+            if (event.key === 'Escape' && !confirmLoading) {
+                setConfirmDialog(null);
+            }
+        };
+
+        document.addEventListener('keydown', handleEscape);
+        return () => {
+            document.body.style.overflow = previousOverflow;
+            document.removeEventListener('keydown', handleEscape);
+        };
+    }, [confirmDialog, confirmLoading]);
+
+    const requestConfirmation = useCallback((dialog: ConfirmDialogState) => {
+        setConfirmDialog(dialog);
+    }, []);
+
+    const runConfirmedAction = useCallback(async () => {
+        if (!confirmDialog) return;
+        setConfirmLoading(true);
+        try {
+            await confirmDialog.onConfirm();
+            setConfirmDialog(null);
+        } finally {
+            setConfirmLoading(false);
+        }
+    }, [confirmDialog]);
 
     const adminApi = useCallback(async (path: string, options: Record<string, unknown> = {}): Promise<any> => {
         return apiRequest(path, options);
+    }, []);
+
+    const notifyCampaignRefresh = useCallback(() => {
+        window.dispatchEvent(new Event('campaign:refresh'));
     }, []);
 
     // Sync admin currentUser with AuthContext — single source of truth
@@ -137,85 +230,125 @@ export default function Admin() {
 
     const loadOverview = async () => {
         try {
+            clearTabError('overview');
             const data = await adminApi('/admin/dashboard');
             setOverview(data.data);
-        } catch (err) { console.error(err); }
+        } catch (err) {
+            console.error(err);
+            setTabError('overview', 'Dashboard data could not be loaded.');
+        }
     };
 
     const loadProducts = async (page = 1) => {
         try {
+            clearTabError('products');
             const data = await adminApi(`/products?page=${page}&limit=10`);
             setProducts(data.data || []);
             setProductPagination(data.pagination || { page: 1, totalPages: 1 });
-        } catch (err) { console.error(err); }
+        } catch (err) {
+            console.error(err);
+            setTabError('products', 'Products could not be loaded.');
+        }
     };
 
     const loadOrders = async (page = 1, search = orderSearch, status = orderStatusFilter) => {
         try {
+            clearTabError('orders');
             let url = `/orders?page=${page}&limit=10`;
             if (search) url += `&q=${encodeURIComponent(search)}`;
             if (status) url += `&status=${status}`;
             const data = await adminApi(url);
             setOrders(data.data || []);
             setOrderPagination(data.pagination || { page: 1, totalPages: 1 });
-        } catch (err) { console.error(err); }
+        } catch (err) {
+            console.error(err);
+            setTabError('orders', 'Orders could not be loaded.');
+        }
     };
 
     const loadActivity = async () => {
         try {
+            clearTabError('activity');
             const data = await adminApi('/admin/activity');
             setActivity(data.data || []);
-        } catch (err) { console.error(err); }
+        } catch (err) {
+            console.error(err);
+            setTabError('activity', 'Activity feed could not be loaded.');
+        }
     };
 
     const loadUsers = async (page = 1, search = '') => {
         try {
+            clearTabError('users');
             const data = await adminApi(`/admin/users?page=${page}&limit=20${search ? `&q=${encodeURIComponent(search)}` : ''}`);
             setUsers(data.data || []);
             setUserPagination(data.pagination || { page: 1, totalPages: 1, total: 0 });
-        } catch (err) { console.error(err); }
+        } catch (err) {
+            console.error(err);
+            setTabError('users', 'Users could not be loaded.');
+        }
     };
 
     const loadLowStock = async () => {
         try {
+            clearTabError('overview');
             const data = await adminApi('/admin/low-stock?threshold=10');
             setLowStockProducts(data.data || []);
-        } catch (err) { console.error(err); }
+        } catch (err) {
+            console.error(err);
+            setTabError('overview', 'Low-stock alerts could not be loaded.');
+        }
     };
 
     const loadMessages = async () => {
         setMessagesLoading(true);
         try {
+            clearTabError('messages');
             const data = await adminApi('/contact');
             setMessages(data.data || []);
-        } catch (err) { console.error(err); }
+        } catch (err) {
+            console.error(err);
+            setTabError('messages', 'Messages could not be loaded.');
+        }
         finally { setMessagesLoading(false); }
     };
 
     const loadSubscribers = async () => {
         setSubscribersLoading(true);
         try {
+            clearTabError('newsletter');
             const data = await adminApi('/newsletter');
             setSubscribers(data.data || []);
-        } catch (err) { console.error(err); }
+        } catch (err) {
+            console.error(err);
+            setTabError('newsletter', 'Subscribers could not be loaded.');
+        }
         finally { setSubscribersLoading(false); }
     };
 
     const loadCoupons = async () => {
         setCouponsLoading(true);
         try {
+            clearTabError('coupons');
             const data = await adminApi('/admin/coupons');
             setCoupons(data.data || []);
-        } catch (err) { console.error(err); }
+        } catch (err) {
+            console.error(err);
+            setTabError('coupons', 'Coupons could not be loaded.');
+        }
         finally { setCouponsLoading(false); }
     };
 
     const loadTestimonials = async () => {
         setTestimonialsLoading(true);
         try {
+            clearTabError('testimonials');
             const data = await adminApi('/admin/testimonials');
             setTestimonials(data.data || []);
-        } catch (err) { console.error(err); }
+        } catch (err) {
+            console.error(err);
+            setTabError('testimonials', 'Reviews could not be loaded.');
+        }
         finally { setTestimonialsLoading(false); }
     };
 
@@ -244,11 +377,20 @@ export default function Admin() {
     };
 
     const deleteTestimonial = async (id: string) => {
-        if (!confirm('Delete this testimonial?')) return;
-        try {
-            await adminApi(`/admin/testimonials/${id}`, { method: 'DELETE' });
-            loadTestimonials();
-        } catch (err: any) { showToast(err.message || 'Failed to delete testimonial', 'error'); }
+        requestConfirmation({
+            title: 'Delete review?',
+            message: 'This review will be permanently removed from admin and storefront listings.',
+            confirmLabel: 'Delete review',
+            tone: 'danger',
+            onConfirm: async () => {
+                try {
+                    await adminApi(`/admin/testimonials/${id}`, { method: 'DELETE' });
+                    loadTestimonials();
+                } catch (err: any) {
+                    showToast(err.message || 'Failed to delete testimonial', 'error');
+                }
+            },
+        });
     };
 
     const toggleTestimonialApproval = async (testimonial: AdminRecord) => {
@@ -288,7 +430,13 @@ export default function Admin() {
     const handleCouponSubmit = async (e: any) => {
         e.preventDefault();
         const body = {
+            name: couponForm.name?.trim() || undefined,
             code: couponForm.code.toUpperCase().trim(),
+            campaignType: couponForm.campaignType || 'regular',
+            campaignLabel: couponForm.campaignLabel?.trim() || undefined,
+            bannerText: couponForm.bannerText?.trim() || undefined,
+            featuredOnStore: !!couponForm.featuredOnStore,
+            priority: Number(couponForm.priority || 0),
             discountType: couponForm.discountType,
             discountValue: Number(couponForm.discountValue),
             minOrderAmount: couponForm.minOrderAmount ? Number(couponForm.minOrderAmount) : undefined,
@@ -309,21 +457,38 @@ export default function Admin() {
             setEditingCoupon(null);
             setCouponForm(emptyCoupon);
             loadCoupons();
+            notifyCampaignRefresh();
         } catch (err: any) { showToast(err.message || 'Failed to save coupon', 'error'); }
     };
 
     const deleteCoupon = async (id: string) => {
-        if (!confirm('Delete this coupon?')) return;
-        try {
-            await adminApi(`/admin/coupons/${id}`, { method: 'DELETE' });
-            loadCoupons();
-        } catch (err: any) { showToast(err.message || 'Failed to delete coupon', 'error'); }
+        requestConfirmation({
+            title: 'Delete coupon?',
+            message: 'This coupon will no longer be available for checkout.',
+            confirmLabel: 'Delete coupon',
+            tone: 'danger',
+            onConfirm: async () => {
+                try {
+                    await adminApi(`/admin/coupons/${id}`, { method: 'DELETE' });
+                    loadCoupons();
+                    notifyCampaignRefresh();
+                } catch (err: any) {
+                    showToast(err.message || 'Failed to delete coupon', 'error');
+                }
+            },
+        });
     };
 
     const openEditCoupon = (c: AdminRecord) => {
         setEditingCoupon(c);
         setCouponForm({
+            name: c.name || '',
             code: c.code || '',
+            campaignType: c.campaignType || 'regular',
+            campaignLabel: c.campaignLabel || '',
+            bannerText: c.bannerText || '',
+            featuredOnStore: c.featuredOnStore || false,
+            priority: c.priority || 0,
             discountType: c.discountType || 'percentage',
             discountValue: c.discountValue || '',
             minOrderAmount: c.minOrderAmount || '',
@@ -337,14 +502,39 @@ export default function Admin() {
         setShowCouponForm(true);
     };
 
-    const changeUserRole = async (userId: string, newRole: string) => {
-        if (!confirm(`Change this user's role to "${newRole}"?`)) return;
-        setActionLoading(`role-${userId}`);
+    const toggleCouponStatus = async (coupon: AdminRecord) => {
+        const nextActive = !coupon.active;
         try {
-            await adminApi(`/admin/users/${userId}/role`, { method: 'PATCH', body: JSON.stringify({ role: newRole }) });
-            loadUsers(userPagination.page, userSearch);
-        } catch (err: any) { showToast(err.message || 'Failed to change role', 'error'); }
-        finally { setActionLoading(null); }
+            await adminApi(`/admin/coupons/${coupon._id}`, {
+                method: 'PATCH',
+                body: JSON.stringify({ active: nextActive }),
+            });
+            showToast(`Coupon ${nextActive ? 'enabled' : 'disabled'} successfully`, 'success');
+            loadCoupons();
+            notifyCampaignRefresh();
+        } catch (err: any) {
+            showToast(err.message || 'Failed to update coupon status', 'error');
+        }
+    };
+
+    const changeUserRole = async (userId: string, newRole: string) => {
+        requestConfirmation({
+            title: 'Change user role?',
+            message: `This will update the user role to "${newRole}" immediately.`,
+            confirmLabel: `Set role: ${newRole}`,
+            tone: 'default',
+            onConfirm: async () => {
+                setActionLoading(`role-${userId}`);
+                try {
+                    await adminApi(`/admin/users/${userId}/role`, { method: 'PATCH', body: JSON.stringify({ role: newRole }) });
+                    loadUsers(userPagination.page, userSearch);
+                } catch (err: any) {
+                    showToast(err.message || 'Failed to change role', 'error');
+                } finally {
+                    setActionLoading(null);
+                }
+            },
+        });
     };
 
     const exportCSV = async (type: string) => {
@@ -407,13 +597,23 @@ export default function Admin() {
     };
 
     const deleteProduct = async (id: string, name: string) => {
-        if (!confirm(`Delete "${name}"?`)) return;
-        setActionLoading(`del-${id}`);
-        try {
-            await adminApi(`/products/${id}`, { method: 'DELETE' });
-            loadProducts(productPagination.page);
-        } catch (err: any) { showToast(err.message || 'Failed to delete product', 'error'); }
-        finally { setActionLoading(null); }
+        requestConfirmation({
+            title: 'Delete product?',
+            message: `"${name}" will be removed from active listings and customer browsing.`,
+            confirmLabel: 'Delete product',
+            tone: 'danger',
+            onConfirm: async () => {
+                setActionLoading(`del-${id}`);
+                try {
+                    await adminApi(`/products/${id}`, { method: 'DELETE' });
+                    loadProducts(productPagination.page);
+                } catch (err: any) {
+                    showToast(err.message || 'Failed to delete product', 'error');
+                } finally {
+                    setActionLoading(null);
+                }
+            },
+        });
     };
 
     const openCreateProduct = () => {
@@ -595,15 +795,15 @@ export default function Admin() {
     }
 
     const navItems = [
-        { key: 'overview', icon: '📊', label: 'Overview' },
-        { key: 'products', icon: '🍵', label: 'Products' },
-        { key: 'orders', icon: '📦', label: 'Orders' },
-        { key: 'users', icon: '👥', label: 'Users' },
-        { key: 'coupons', icon: '🎟️', label: 'Coupons' },
-        { key: 'testimonials', icon: '⭐', label: 'Reviews' },
-        { key: 'messages', icon: '💬', label: 'Messages' },
-        { key: 'newsletter', icon: '📧', label: 'Newsletter' },
-        { key: 'activity', icon: '📋', label: 'Activity' },
+        { key: 'overview', icon: 'barChart', label: 'Overview' },
+        { key: 'products', icon: 'leaf', label: 'Products' },
+        { key: 'orders', icon: 'package', label: 'Orders' },
+        { key: 'users', icon: 'users', label: 'Users' },
+        { key: 'coupons', icon: 'ticket', label: 'Coupons' },
+        { key: 'testimonials', icon: 'star', label: 'Reviews' },
+        { key: 'messages', icon: 'message', label: 'Messages' },
+        { key: 'newsletter', icon: 'mail', label: 'Newsletter' },
+        { key: 'activity', icon: 'clipboard', label: 'Activity' },
     ];
 
     const currentSectionLabel = navItems.find(item => item.key === activeSection)?.label || capitalize(activeSection);
@@ -628,16 +828,16 @@ export default function Admin() {
                 <nav className="admin__nav">
                     {navItems.map(item => (
                         <button key={item.key} className={`admin__nav-item ${activeSection === item.key ? 'active' : ''}`} data-section={item.key} onClick={() => { setActiveSection(item.key); setSidebarOpen(false); }}>
-                            <span>{item.icon}</span> {item.label}
+                            <span><AppIcon name={item.icon} size={14} aria-hidden /></span> {item.label}
                         </button>
                     ))}
                 </nav>
                 <div className="admin__sidebar-footer">
                     <Link href="/" className="admin__nav-item admin__footer-link">
-                        <span>🏪</span> Back to Store
+                        <span><AppIcon name="store" size={14} aria-hidden /></span> Back to Store
                     </Link>
                     <button className="admin__nav-item admin__footer-logout" onClick={logout}>
-                        <span>🚪</span> Logout
+                        <span><AppIcon name="logout" size={14} aria-hidden /></span> Logout
                     </button>
                 </div>
             </aside>
@@ -663,641 +863,190 @@ export default function Admin() {
                 </header>
 
                 <div className="admin__content">
-                    {/* OVERVIEW */}
-                    {activeSection === 'overview' && overview && (
-                        <div className="admin__section active" id="sectionOverview">
-                            {/* KPI Stats */}
-                            <div className="admin__stats">
-                                <div className="stat-card">
-                                    <div className="stat-card__icon" style={{ background: '#eff6ff', color: '#3b82f6', fontSize: '1.4rem' }}>👥</div>
-                                    <div><span className="stat-card__value">{overview.totals.users}</span><span className="stat-card__label">Total Users</span></div>
-                                </div>
-                                <div className="stat-card">
-                                    <div className="stat-card__icon" style={{ background: '#f0fdf4', color: '#22c55e', fontSize: '1.4rem' }}>🍵</div>
-                                    <div><span className="stat-card__value">{overview.totals.products}</span><span className="stat-card__label">Products</span></div>
-                                </div>
-                                <div className="stat-card">
-                                    <div className="stat-card__icon" style={{ background: '#fefce8', color: '#eab308', fontSize: '1.4rem' }}>📦</div>
-                                    <div><span className="stat-card__value">{overview.totals.orders}</span><span className="stat-card__label">Orders</span></div>
-                                </div>
-                                <div className="stat-card">
-                                    <div className="stat-card__icon" style={{ background: '#fdf4f3', color: '#8b6f47', fontSize: '1.4rem' }}>💰</div>
-                                    <div><span className="stat-card__value">₹{(overview.totals.revenue || 0).toLocaleString()}</span><span className="stat-card__label">Revenue</span></div>
-                                </div>
-                            </div>
-
-                            {/* Two-column insights row */}
-                            <div className="admin__insights">
-                                {/* Order Status Breakdown */}
-                                {overview.statusBreakdown && Object.keys(overview.statusBreakdown).length > 0 && (
-                                    <div className="admin__card">
-                                        <div className="admin__card-title">Order Status Breakdown</div>
-                                        <div className="admin__card-body">
-                                            <div className="overview-status-grid">
-                                                {Object.entries(overview.statusBreakdown).map(([status, count]) => (
-                                                    <div key={status} className="overview-status-chip" style={{ background: statusColors[status] || '#888' }}>
-                                                        {capitalize(status)}: {count as number}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Revenue Chart */}
-                                {overview.monthlyRevenue?.length > 0 && (
-                                    <div className="admin__card">
-                                        <div className="admin__card-title">Monthly Revenue</div>
-                                        <div className="admin__card-body">
-                                            <div className="overview-chart">
-                                                {(() => {
-                                                    const maxR = Math.max(...overview.monthlyRevenue.map((m: AdminRecord) => m.revenue), 1);
-                                                    const months = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                                                    return overview.monthlyRevenue.map((m: AdminRecord, i: number) => (
-                                                        <div key={i} className="overview-chart__col">
-                                                            <span className="overview-chart__value">₹{(m.revenue / 1000).toFixed(1)}k</span>
-                                                            <div
-                                                                className="overview-chart__bar"
-                                                                style={{ height: `${Math.max((m.revenue / maxR) * 140, 4)}px` }}
-                                                                title={`₹${m.revenue.toLocaleString()} (${m.orders} orders)`}
-                                                            />
-                                                            <span className="overview-chart__label">{months[m._id.month]}</span>
-                                                        </div>
-                                                    ));
-                                                })()}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Recent Orders */}
-                            {overview.recentOrders?.length > 0 && (
-                                <div className="admin__card overview-card">
-                                    <div className="admin__card-title">Recent Orders</div>
-                                    <div className="admin__table-wrap">
-                                        <table className="admin__table">
-                                            <thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead>
-                                            <tbody>
-                                                {overview.recentOrders.map((order: AdminRecord) => (
-                                                    <tr key={order._id}>
-                                                        <td>{order.orderNumber}</td>
-                                                        <td>{order.user?.name || 'N/A'}</td>
-                                                        <td>₹{order.total?.toLocaleString()}</td>
-                                                        <td><span className="overview-status-chip overview-status-chip--sm" style={{ background: statusColors[order.status] || '#888' }}>{order.status}</span></td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Low-Stock Alerts */}
-                            {lowStockProducts.length > 0 && (
-                                <div className="admin__card overview-card overview-card--warning">
-                                    <div className="admin__card-title overview-card-title--warning">⚠️ Low Stock Alert ({lowStockProducts.length} items)</div>
-                                    <div className="admin__card-body">
-                                        <div className="overview-lowstock">
-                                            {lowStockProducts.slice(0, 8).map(p => (
-                                                <div key={p._id} className={`overview-lowstock__row ${p.stock <= 3 ? 'overview-lowstock__row--critical' : ''}`}>
-                                                    <span className="overview-lowstock__name">{p.name}</span>
-                                                    <span className={`overview-lowstock__count ${p.stock <= 3 ? 'overview-lowstock__count--critical' : ''}`}>
-                                                        {p.stock === 0 ? 'OUT OF STOCK' : `${p.stock} left`}
-                                                    </span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Export Buttons */}
-                            <div className="admin__card overview-card">
-                                <div className="admin__card-title">Export Data</div>
-                                <div className="admin__card-body">
-                                    <div className="overview-export">
-                                        <button className="btn btn--ghost btn--sm" onClick={() => exportCSV('orders')} disabled={!!actionLoading}>{actionLoading === 'export-orders' ? '⏳ Exporting...' : '📥 Export Orders CSV'}</button>
-                                        <button className="btn btn--ghost btn--sm" onClick={() => exportCSV('products')} disabled={!!actionLoading}>{actionLoading === 'export-products' ? '⏳ Exporting...' : '📥 Export Products CSV'}</button>
-                                        <button className="btn btn--ghost btn--sm" onClick={() => exportCSV('users')} disabled={!!actionLoading}>{actionLoading === 'export-users' ? '⏳ Exporting...' : '📥 Export Users CSV'}</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    {activeSection === 'overview' && (
+                        <OverviewTab
+                            overview={overview}
+                            lowStockProducts={lowStockProducts}
+                            statusColors={statusColors}
+                            capitalize={capitalize}
+                            exportCSV={exportCSV}
+                            actionLoading={actionLoading}
+                            error={tabErrors.overview}
+                            onRetry={() => {
+                                void loadOverview();
+                                void loadLowStock();
+                            }}
+                        />
                     )}
 
-                    {/* PRODUCTS */}
                     {activeSection === 'products' && (
-                        <div className="admin__section active" id="sectionProducts">
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
-                                <h3>{products.length} Products</h3>
-                                <button className="btn btn--primary btn--sm" onClick={openCreateProduct}>+ Add Product</button>
-                            </div>
-
-                            {/* Product Form Modal */}
-                            {showProductForm && (
-                                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} onClick={(e) => { if (e.target === e.currentTarget) setShowProductForm(false); }}>
-                                    <div style={{ background: 'var(--color-bg)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-xl)', width: '100%', maxWidth: 700, maxHeight: '90vh', overflowY: 'auto' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
-                                            <h2>{editingProduct ? 'Edit Product' : 'Add Product'}</h2>
-                                            <button onClick={() => setShowProductForm(false)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
-                                        </div>
-                                        <form onSubmit={handleProductSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-md)' }}>
-                                            <div><label>Name *</label><input type="text" required value={productForm.name} onChange={e => handleProductFormChange('name', e.target.value)} style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
-                                            <div><label>Slug</label><input type="text" value={productForm.slug} onChange={e => handleProductFormChange('slug', e.target.value)} placeholder="auto-generated" style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
-                                            <div>
-                                                <label>Type *</label>
-                                                <select value={productForm.type} onChange={e => handleProductFormChange('type', e.target.value)} style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }}>
-                                                    {['Black Tea', 'Green Tea', 'White Tea', 'Oolong', 'Herbal', 'Herbal Infusion', 'Masala Chai', 'Matcha'].map(t => <option key={t} value={t}>{t}</option>)}
-                                                </select>
-                                            </div>
-                                            <div><label>Origin *</label><input type="text" required value={productForm.origin} onChange={e => handleProductFormChange('origin', e.target.value)} style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
-                                            <div style={{ gridColumn: '1 / -1' }}><label>Description *</label><textarea required value={productForm.description} onChange={e => handleProductFormChange('description', e.target.value)} style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', minHeight: 80 }} /></div>
-                                            <div style={{ gridColumn: '1 / -1' }}><label>Short Description</label><input type="text" maxLength={200} value={productForm.shortDescription} onChange={e => handleProductFormChange('shortDescription', e.target.value)} style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
-
-                                            <h4 style={{ gridColumn: '1 / -1', margin: 'var(--space-sm) 0 0' }}>Pricing</h4>
-                                            <div><label>50g (₹)</label><input type="number" min={0} value={productForm['price50g']} onChange={e => handleProductFormChange('price50g', e.target.value)} style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
-                                            <div><label>100g (₹) *</label><input type="number" min={0} required value={productForm['price100g']} onChange={e => handleProductFormChange('price100g', e.target.value)} style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
-                                            <div><label>200g (₹)</label><input type="number" min={0} value={productForm['price200g']} onChange={e => handleProductFormChange('price200g', e.target.value)} style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
-                                            <div><label>Stock</label><input type="number" min={0} value={productForm.stock} onChange={e => handleProductFormChange('stock', e.target.value)} style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
-
-                                            <div>
-                                                <label>Caffeine</label>
-                                                <select value={productForm.caffeine} onChange={e => handleProductFormChange('caffeine', e.target.value)} style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }}>
-                                                    {['none', 'low', 'medium', 'high'].map(c => <option key={c} value={c}>{capitalize(c)}</option>)}
-                                                </select>
-                                            </div>
-                                            <div><label>Tasting Notes</label><input type="text" placeholder="floral, citrus, malty" value={productForm.tastingNotes} onChange={e => handleProductFormChange('tastingNotes', e.target.value)} style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
-                                            <div><label>Brewing Temperature</label><input type="text" placeholder="e.g. 85°C" value={productForm.brewTemp} onChange={e => handleProductFormChange('brewTemp', e.target.value)} style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
-                                            <div><label>Steep Time</label><input type="text" placeholder="e.g. 2-3 minutes" value={productForm.brewSteep} onChange={e => handleProductFormChange('brewSteep', e.target.value)} style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
-                                            <div><label>Tea Amount</label><input type="text" placeholder="e.g. 1 tsp per 200ml" value={productForm.brewAmount} onChange={e => handleProductFormChange('brewAmount', e.target.value)} style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
-                                            <div><label>Tags</label><input type="text" placeholder="premium, bestseller" value={productForm.tags} onChange={e => handleProductFormChange('tags', e.target.value)} style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
-                                            <div style={{ gridColumn: '1 / -1' }}>
-                                                <label style={{ display: 'block', marginBottom: 'var(--space-xs)' }}>Product Images</label>
-                                                {/* Thumbnail previews */}
-                                                {productForm.images.length > 0 && (
-                                                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 'var(--space-sm)' }}>
-                                                        {productForm.images.map((url: string, i: number) => (
-                                                            <div key={i} style={{ position: 'relative', width: 72, height: 72, borderRadius: 'var(--radius-sm)', overflow: 'hidden', border: '1px solid var(--color-border)' }}>
-                                                                <Image src={url} alt={`Product ${i + 1}`} width={72} height={72} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                                                <button type="button" onClick={() => removeImage(i)} style={{ position: 'absolute', top: 2, right: 2, width: 20, height: 20, borderRadius: '50%', background: 'rgba(0,0,0,0.6)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>✕</button>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                                {/* Drop zone + browse */}
-                                                <div
-                                                    onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-                                                    onDragLeave={() => setDragOver(false)}
-                                                    onDrop={handleDrop}
-                                                    onClick={() => document.getElementById('productImageInput')?.click()}
-                                                    style={{
-                                                        border: `2px dashed ${dragOver ? 'var(--color-accent)' : 'var(--color-border)'}`,
-                                                        borderRadius: 'var(--radius-md)',
-                                                        padding: 'var(--space-lg)',
-                                                        textAlign: 'center',
-                                                        cursor: 'pointer',
-                                                        background: dragOver ? 'var(--color-accent-light, rgba(139,111,71,0.06))' : 'transparent',
-                                                        transition: 'all 0.2s ease',
-                                                    }}
-                                                >
-                                                    <input
-                                                        id="productImageInput"
-                                                        type="file"
-                                                        accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
-                                                        multiple
-                                                        style={{ display: 'none' }}
-                                                        onChange={(e) => uploadImages(e.target.files)}
-                                                    />
-                                                    {uploading ? (
-                                                        <span style={{ color: 'var(--color-accent)', fontWeight: 600 }}>⏳ Uploading...</span>
-                                                    ) : (
-                                                        <>
-                                                            <div style={{ fontSize: '1.5rem', marginBottom: 4 }}>📁</div>
-                                                            <span style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>Drag &amp; drop images here, or <strong style={{ color: 'var(--color-accent)' }}>browse from PC</strong></span>
-                                                            <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: 4 }}>JPEG, PNG, WebP, GIF, AVIF · Max 5 MB each</div>
-                                                        </>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            <div style={{ gridColumn: '1 / -1' }}>
-                                                <label style={{ marginBottom: 'var(--space-xs)', display: 'block' }}>Moods</label>
-                                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                                                    {['energize', 'relax', 'focus', 'detox', 'glow', 'immunity'].map(mood => (
-                                                        <button type="button" key={mood} onClick={() => toggleMood(mood)} style={{ padding: '4px 12px', borderRadius: '16px', border: '1px solid var(--color-border)', background: productForm.moods.includes(mood) ? 'var(--color-primary)' : 'transparent', color: productForm.moods.includes(mood) ? '#fff' : 'inherit', cursor: 'pointer', fontSize: '0.85rem' }}>{capitalize(mood)}</button>
-                                                    ))}
-                                                </div>
-                                            </div>
-
-                                            <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 'var(--space-lg)', flexWrap: 'wrap' }}>
-                                                <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}><input type="checkbox" checked={productForm.inStock} onChange={e => handleProductFormChange('inStock', e.target.checked)} /> In Stock</label>
-                                                <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}><input type="checkbox" checked={productForm.isBestSeller} onChange={e => handleProductFormChange('isBestSeller', e.target.checked)} /> Best Seller</label>
-                                                <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}><input type="checkbox" checked={productForm.isNewArrival} onChange={e => handleProductFormChange('isNewArrival', e.target.checked)} /> New Arrival</label>
-                                            </div>
-
-                                            <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 'var(--space-sm)', marginTop: 'var(--space-md)' }}>
-                                                <button type="submit" className="btn btn--primary">{editingProduct ? 'Update Product' : 'Create Product'}</button>
-                                                <button type="button" className="btn btn--ghost" onClick={() => setShowProductForm(false)}>Cancel</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            )}
-
-                            <table className="admin__table">
-                                <thead><tr><th>Name</th><th>Type</th><th>Price (100g)</th><th>Stock</th><th>Actions</th></tr></thead>
-                                <tbody>
-                                    {products.map(p => (
-                                        <tr key={p._id}>
-                                            <td>{p.name}</td>
-                                            <td>{p.type}</td>
-                                            <td>₹{p.prices?.['100g'] || '-'}</td>
-                                            <td>{p.stock}</td>
-                                            <td style={{ display: 'flex', gap: 4 }}>
-                                                <button className="btn btn--ghost btn--sm" onClick={() => openEditProduct(p)}>Edit</button>
-                                                <button className="btn btn--ghost btn--sm" style={{ color: 'var(--color-error)' }} onClick={() => deleteProduct(p._id, p.name)} disabled={actionLoading === `del-${p._id}`}>{actionLoading === `del-${p._id}` ? '⏳' : 'Delete'}</button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                            {productPagination.totalPages > 1 && (
-                                <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 'var(--space-lg)' }}>
-                                    {Array.from({ length: productPagination.totalPages }, (_, i) => (
-                                        <button key={i} className={`btn btn--sm ${productPagination.page === i + 1 ? 'btn--primary' : 'btn--ghost'}`} onClick={() => loadProducts(i + 1)}>{i + 1}</button>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+                        <ProductsTab
+                            products={products}
+                            productPagination={productPagination}
+                            openCreateProduct={openCreateProduct}
+                            showProductForm={showProductForm}
+                            setShowProductForm={setShowProductForm}
+                            editingProduct={editingProduct}
+                            productForm={productForm}
+                            handleProductSubmit={handleProductSubmit}
+                            handleProductFormChange={handleProductFormChange}
+                            capitalize={capitalize}
+                            uploading={uploading}
+                            dragOver={dragOver}
+                            setDragOver={setDragOver}
+                            handleDrop={handleDrop}
+                            uploadImages={uploadImages}
+                            removeImage={removeImage}
+                            toggleMood={toggleMood}
+                            openEditProduct={openEditProduct}
+                            deleteProduct={deleteProduct}
+                            actionLoading={actionLoading}
+                            loadProducts={loadProducts}
+                            error={tabErrors.products}
+                            onRetry={() => { void loadProducts(productPagination.page); }}
+                        />
                     )}
 
-                    {/* ORDERS */}
                     {activeSection === 'orders' && (
-                        <div className="admin__section active" id="sectionOrders">
-                            {/* Search & Filter */}
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)', gap: 'var(--space-md)', flexWrap: 'wrap' }}>
-                                <h3>{orders.length} Orders</h3>
-                                <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center' }}>
-                                    <select
-                                        value={orderStatusFilter}
-                                        onChange={(e) => { setOrderStatusFilter(e.target.value); loadOrders(1, orderSearch, e.target.value); }}
-                                        style={{ padding: '6px 12px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }}
-                                    >
-                                        <option value="">All Statuses</option>
-                                        {['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'].map(s => (
-                                            <option key={s} value={s}>{capitalize(s)}</option>
-                                        ))}
-                                    </select>
-                                    <input
-                                        type="text"
-                                        placeholder="Search orders..."
-                                        value={orderSearch}
-                                        onChange={e => setOrderSearch(e.target.value)}
-                                        onKeyDown={e => e.key === 'Enter' && loadOrders(1, orderSearch, orderStatusFilter)}
-                                        style={{ padding: '6px 12px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', minWidth: 200 }}
-                                    />
-                                    <button className="btn btn--ghost btn--sm" onClick={() => loadOrders(1, orderSearch, orderStatusFilter)}>Search</button>
-                                </div>
-                            </div>
-                            <table className="admin__table">
-                                <thead><tr><th>Order #</th><th>Date & Time</th><th>Customer</th><th>Total</th><th>Status</th><th>Tracking</th><th>Actions</th></tr></thead>
-                                <tbody>
-                                    {orders.map(order => (
-                                        <tr key={order._id}>
-                                            <td>{order.orderNumber}</td>
-                                            <td style={{ fontSize: '0.82rem', whiteSpace: 'nowrap', color: 'var(--color-text-muted)' }}>{order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}<br/>{order.createdAt ? new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }) : ''}</td>
-                                            <td>{order.user?.name || order.user?.email || 'N/A'}</td>
-                                            <td>₹{order.total}</td>
-                                            <td><span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '0.8rem', background: statusColors[order.status] || '#888', color: '#fff' }}>{order.status}</span></td>
-                                            <td>
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 140 }}>
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Tracking #"
-                                                        defaultValue={order.trackingNumber || ''}
-                                                        onBlur={(e) => {
-                                                            const val = e.target.value.trim();
-                                                            if (val !== (order.trackingNumber || '')) {
-                                                                updateTracking(order._id, val, order.trackingUrl || '');
-                                                            }
-                                                        }}
-                                                        style={{ padding: '3px 6px', fontSize: '0.8rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', width: '100%' }}
-                                                    />
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Tracking URL"
-                                                        defaultValue={order.trackingUrl || ''}
-                                                        onBlur={(e) => {
-                                                            const val = e.target.value.trim();
-                                                            if (val !== (order.trackingUrl || '')) {
-                                                                updateTracking(order._id, order.trackingNumber || '', val);
-                                                            }
-                                                        }}
-                                                        style={{ padding: '3px 6px', fontSize: '0.8rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', width: '100%' }}
-                                                    />
-                                                </div>
-                                            </td>
-                                            <td style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-                                                <select value={order.status} onChange={(e) => updateOrderStatus(order._id, e.target.value)} disabled={actionLoading === `status-${order._id}`} style={{ padding: '4px 8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)' }}>
-                                                    {['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'].map(s => (
-                                                        <option key={s} value={s}>{capitalize(s)}</option>
-                                                    ))}
-                                                </select>
-                                                <button className="btn btn--ghost btn--sm" title="Download Invoice" onClick={() => downloadInvoice(order._id)} disabled={actionLoading === `invoice-${order._id}`} style={{ fontSize: '0.85rem', padding: '4px 8px' }}>{actionLoading === `invoice-${order._id}` ? '⏳' : '🧾'}</button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                            {orderPagination.totalPages > 1 && (
-                                <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 'var(--space-lg)' }}>
-                                    {Array.from({ length: orderPagination.totalPages }, (_, i) => (
-                                        <button key={i} className={`btn btn--sm ${orderPagination.page === i + 1 ? 'btn--primary' : 'btn--ghost'}`} onClick={() => loadOrders(i + 1)}>{i + 1}</button>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+                        <OrdersTab
+                            orders={orders}
+                            orderPagination={orderPagination}
+                            orderSearch={orderSearch}
+                            setOrderSearch={setOrderSearch}
+                            orderStatusFilter={orderStatusFilter}
+                            setOrderStatusFilter={setOrderStatusFilter}
+                            loadOrders={loadOrders}
+                            capitalize={capitalize}
+                            statusColors={statusColors}
+                            updateTracking={updateTracking}
+                            updateOrderStatus={updateOrderStatus}
+                            downloadInvoice={downloadInvoice}
+                            actionLoading={actionLoading}
+                            error={tabErrors.orders}
+                            onRetry={() => { void loadOrders(orderPagination.page, orderSearch, orderStatusFilter); }}
+                        />
                     )}
 
-                    {/* USERS */}
                     {activeSection === 'users' && (
-                        <div className="admin__section active" id="sectionUsers">
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)', gap: 'var(--space-md)', flexWrap: 'wrap' }}>
-                                <h3>{userPagination.total || users.length} Users</h3>
-                                <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
-                                    <input
-                                        type="text"
-                                        placeholder="Search users..."
-                                        value={userSearch}
-                                        onChange={e => setUserSearch(e.target.value)}
-                                        onKeyDown={e => e.key === 'Enter' && loadUsers(1, userSearch)}
-                                        style={{ padding: '6px 12px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', minWidth: 200 }}
-                                    />
-                                    <button className="btn btn--ghost btn--sm" onClick={() => loadUsers(1, userSearch)}>Search</button>
-                                </div>
-                            </div>
-                            <table className="admin__table">
-                                <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Orders</th><th>Spent</th><th>Joined</th><th>Actions</th></tr></thead>
-                                <tbody>
-                                    {users.map(u => (
-                                        <tr key={u._id}>
-                                            <td>{u.name}</td>
-                                            <td style={{ fontSize: '0.85rem' }}>{u.email}</td>
-                                            <td><span style={{ padding: '2px 10px', borderRadius: 12, fontSize: '0.8rem', background: u.role === 'admin' ? '#8b6f47' : 'var(--color-bg-alt)', color: u.role === 'admin' ? '#fff' : 'inherit', fontWeight: 600 }}>{u.role}</span></td>
-                                            <td>{u.orderCount}</td>
-                                            <td>₹{(u.totalSpent || 0).toLocaleString()}</td>
-                                            <td style={{ fontSize: '0.85rem' }}>{new Date(u.createdAt).toLocaleDateString('en-IN')}</td>
-                                            <td>
-                                                <select
-                                                    value={u.role}
-                                                    onChange={(e) => changeUserRole(u._id, e.target.value)}
-                                                    style={{ padding: '4px 8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)', fontSize: '0.85rem' }}
-                                                >
-                                                    <option value="customer">Customer</option>
-                                                    <option value="admin">Admin</option>
-                                                </select>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                            {userPagination.totalPages > 1 && (
-                                <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 'var(--space-lg)' }}>
-                                    {Array.from({ length: userPagination.totalPages }, (_, i) => (
-                                        <button key={i} className={`btn btn--sm ${userPagination.page === i + 1 ? 'btn--primary' : 'btn--ghost'}`} onClick={() => loadUsers(i + 1, userSearch)}>{i + 1}</button>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+                        <UsersTab
+                            users={users}
+                            userPagination={userPagination}
+                            userSearch={userSearch}
+                            setUserSearch={setUserSearch}
+                            loadUsers={loadUsers}
+                            changeUserRole={changeUserRole}
+                            error={tabErrors.users}
+                            onRetry={() => { void loadUsers(userPagination.page, userSearch); }}
+                        />
                     )}
 
-                    {/* ACTIVITY */}
-                    {activeSection === 'activity' && (
-                        <div className="admin__section active" id="sectionActivity">
-                            <div className="activity-feed">
-                                {activity.length === 0 ? (
-                                    <p style={{ color: 'var(--color-text-muted)' }}>No activity yet.</p>
-                                ) : (
-                                    activity.map((item, i) => (
-                                        <div key={i} className="activity-item" style={{ padding: 'var(--space-md)', borderBottom: '1px solid var(--color-border)' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                                <strong>{item.summary}</strong>
-                                                <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>{new Date(item.createdAt).toLocaleString('en-IN')}</span>
-                                            </div>
-                                            <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginTop: 4 }}>
-                                                {item.actorName} · {item.action}
-                                            </div>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* MESSAGES (Contact Submissions) */}
-                    {activeSection === 'messages' && (
-                        <div className="admin__section active">
-                            <h3 style={{ marginBottom: 'var(--space-lg)' }}>Contact Messages</h3>
-                            {messagesLoading ? (
-                                <p style={{ color: 'var(--color-text-muted)' }}>Loading messages...</p>
-                            ) : messages.length === 0 ? (
-                                <p style={{ color: 'var(--color-text-muted)' }}>No messages yet.</p>
-                            ) : (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
-                                    {messages.map((msg, i) => (
-                                        <div key={msg._id || i} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: 'var(--space-lg)' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--space-sm)' }}>
-                                                <div>
-                                                    <strong>{msg.name}</strong>
-                                                    <span style={{ marginLeft: 12, fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{msg.email}</span>
-                                                </div>
-                                                <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>{new Date(msg.createdAt).toLocaleString('en-IN')}</span>
-                                            </div>
-                                            {msg.subject && <div style={{ fontWeight: 600, marginBottom: 'var(--space-xs)' }}>{msg.subject}</div>}
-                                            <p style={{ color: 'var(--color-text-muted)', lineHeight: 1.7 }}>{msg.message}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {/* NEWSLETTER Subscribers */}
-                    {activeSection === 'newsletter' && (
-                        <div className="admin__section active">
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
-                                <h3>{subscribers.length} Subscriber{subscribers.length !== 1 ? 's' : ''}</h3>
-                            </div>
-                            {subscribersLoading ? (
-                                <p style={{ color: 'var(--color-text-muted)' }}>Loading subscribers...</p>
-                            ) : subscribers.length === 0 ? (
-                                <p style={{ color: 'var(--color-text-muted)' }}>No subscribers yet.</p>
-                            ) : (
-                                <table className="admin__table">
-                                    <thead><tr><th>Email</th><th>Subscribed</th></tr></thead>
-                                    <tbody>
-                                        {subscribers.map((sub, i) => (
-                                            <tr key={sub._id || i}>
-                                                <td>{sub.email}</td>
-                                                <td style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{new Date(sub.createdAt).toLocaleDateString('en-IN')}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            )}
-                        </div>
-                    )}
-
-                    {/* COUPONS */}
                     {activeSection === 'coupons' && (
-                        <div className="admin__section active">
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
-                                <h3>{coupons.length} Coupon{coupons.length !== 1 ? 's' : ''}</h3>
-                                <button className="btn btn--primary btn--sm" onClick={() => { setEditingCoupon(null); setCouponForm(emptyCoupon); setShowCouponForm(true); }}>+ Add Coupon</button>
-                            </div>
-
-                            {/* Coupon Form Modal */}
-                            {showCouponForm && (
-                                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} onClick={(e) => { if (e.target === e.currentTarget) setShowCouponForm(false); }}>
-                                    <div style={{ background: 'var(--color-bg)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-xl)', width: '100%', maxWidth: 520, maxHeight: '90vh', overflowY: 'auto' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
-                                            <h2>{editingCoupon ? 'Edit Coupon' : 'Create Coupon'}</h2>
-                                            <button onClick={() => setShowCouponForm(false)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
-                                        </div>
-                                        <form onSubmit={handleCouponSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-md)' }}>
-                                            <div style={{ gridColumn: '1 / -1' }}><label>Code *</label><input type="text" required value={couponForm.code} onChange={e => setCouponForm(f => ({ ...f, code: e.target.value }))} placeholder="e.g. WELCOME20" style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', textTransform: 'uppercase' }} /></div>
-                                            <div>
-                                                <label>Discount Type</label>
-                                                <select value={couponForm.discountType} onChange={e => setCouponForm(f => ({ ...f, discountType: e.target.value }))} style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }}>
-                                                    <option value="percentage">Percentage (%)</option>
-                                                    <option value="flat">Flat (₹)</option>
-                                                </select>
-                                            </div>
-                                            <div><label>Discount Value *</label><input type="number" required min={1} value={couponForm.discountValue} onChange={e => setCouponForm(f => ({ ...f, discountValue: e.target.value }))} style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
-                                            <div><label>Min Order (₹)</label><input type="number" min={0} value={couponForm.minOrderAmount} onChange={e => setCouponForm(f => ({ ...f, minOrderAmount: e.target.value }))} style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
-                                            <div><label>Max Discount (₹)</label><input type="number" min={0} value={couponForm.maxDiscount} onChange={e => setCouponForm(f => ({ ...f, maxDiscount: e.target.value }))} style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
-                                            <div><label>Usage Limit</label><input type="number" min={0} value={couponForm.usageLimit} onChange={e => setCouponForm(f => ({ ...f, usageLimit: e.target.value }))} style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
-                                            <div><label>Per-User Limit</label><input type="number" min={0} value={couponForm.perUserLimit} onChange={e => setCouponForm(f => ({ ...f, perUserLimit: e.target.value }))} style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
-                                            <div><label>Valid From</label><input type="date" value={couponForm.validFrom} onChange={e => setCouponForm(f => ({ ...f, validFrom: e.target.value }))} style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
-                                            <div><label>Valid To</label><input type="date" value={couponForm.validTo} onChange={e => setCouponForm(f => ({ ...f, validTo: e.target.value }))} style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
-                                            <div style={{ gridColumn: '1 / -1' }}><label style={{ display: 'flex', alignItems: 'center', gap: 8 }}><input type="checkbox" checked={couponForm.active} onChange={e => setCouponForm(f => ({ ...f, active: e.target.checked }))} /> Active</label></div>
-                                            <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 'var(--space-sm)', marginTop: 'var(--space-md)' }}>
-                                                <button type="submit" className="btn btn--primary">{editingCoupon ? 'Update Coupon' : 'Create Coupon'}</button>
-                                                <button type="button" className="btn btn--ghost" onClick={() => setShowCouponForm(false)}>Cancel</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            )}
-
-                            {couponsLoading ? (
-                                <p style={{ color: 'var(--color-text-muted)' }}>Loading coupons...</p>
-                            ) : coupons.length === 0 ? (
-                                <p style={{ color: 'var(--color-text-muted)' }}>No coupons yet. Create one to offer discounts!</p>
-                            ) : (
-                                <table className="admin__table">
-                                    <thead><tr><th>Code</th><th>Discount</th><th>Min Order</th><th>Usage</th><th>Valid Until</th><th>Status</th><th>Actions</th></tr></thead>
-                                    <tbody>
-                                        {coupons.map(c => (
-                                            <tr key={c._id}>
-                                                <td><strong>{c.code}</strong></td>
-                                                <td>{c.discountType === 'percentage' ? `${c.discountValue}%` : `₹${c.discountValue}`}{c.maxDiscount ? ` (max ₹${c.maxDiscount})` : ''}</td>
-                                                <td>{c.minOrderAmount ? `₹${c.minOrderAmount}` : '—'}</td>
-                                                <td>{c.usedCount || 0}{c.usageLimit ? `/${c.usageLimit}` : ''}</td>
-                                                <td style={{ fontSize: '0.85rem' }}>{c.validTo ? new Date(c.validTo).toLocaleDateString('en-IN') : '∞'}</td>
-                                                <td><span style={{ padding: '2px 10px', borderRadius: 12, fontSize: '0.8rem', fontWeight: 600, background: c.active ? '#10b981' : '#6b7280', color: '#fff' }}>{c.active ? 'Active' : 'Inactive'}</span></td>
-                                                <td style={{ display: 'flex', gap: 4 }}>
-                                                    <button className="btn btn--ghost btn--sm" onClick={() => openEditCoupon(c)}>Edit</button>
-                                                    <button className="btn btn--ghost btn--sm" style={{ color: 'var(--color-error)' }} onClick={() => deleteCoupon(c._id)}>Delete</button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            )}
-                        </div>
+                        <CouponsTab
+                            coupons={coupons}
+                            couponsLoading={couponsLoading}
+                            showCouponForm={showCouponForm}
+                            setShowCouponForm={setShowCouponForm}
+                            editingCoupon={editingCoupon}
+                            setEditingCoupon={setEditingCoupon}
+                            couponForm={couponForm}
+                            setCouponForm={setCouponForm}
+                            emptyCoupon={emptyCoupon}
+                            handleCouponSubmit={handleCouponSubmit}
+                            openEditCoupon={openEditCoupon}
+                            deleteCoupon={deleteCoupon}
+                            toggleCouponStatus={toggleCouponStatus}
+                            error={tabErrors.coupons}
+                            onRetry={() => { void loadCoupons(); }}
+                        />
                     )}
 
-                    {/* TESTIMONIALS / REVIEWS */}
                     {activeSection === 'testimonials' && (
-                        <div className="admin__section active">
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
-                                <h3>{testimonials.length} Review{testimonials.length !== 1 ? 's' : ''} · {testimonials.filter(t => t.approved).length} Approved</h3>
-                                <button className="btn btn--primary btn--sm" onClick={() => { setEditingTestimonial(null); setTestimonialForm(emptyTestimonial); setShowTestimonialForm(true); }}>+ Add Review</button>
-                            </div>
+                        <TestimonialsTab
+                            testimonials={testimonials}
+                            testimonialsLoading={testimonialsLoading}
+                            showTestimonialForm={showTestimonialForm}
+                            setShowTestimonialForm={setShowTestimonialForm}
+                            editingTestimonial={editingTestimonial}
+                            setEditingTestimonial={setEditingTestimonial}
+                            testimonialForm={testimonialForm}
+                            setTestimonialForm={setTestimonialForm}
+                            emptyTestimonial={emptyTestimonial}
+                            handleTestimonialSubmit={handleTestimonialSubmit}
+                            toggleTestimonialApproval={toggleTestimonialApproval}
+                            toggleTestimonialFeatured={toggleTestimonialFeatured}
+                            openEditTestimonial={openEditTestimonial}
+                            deleteTestimonial={deleteTestimonial}
+                            error={tabErrors.testimonials}
+                            onRetry={() => { void loadTestimonials(); }}
+                        />
+                    )}
 
-                            {/* Testimonial Form Modal */}
-                            {showTestimonialForm && (
-                                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} onClick={(e) => { if (e.target === e.currentTarget) setShowTestimonialForm(false); }}>
-                                    <div style={{ background: 'var(--color-bg)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-xl)', width: '100%', maxWidth: 560, maxHeight: '90vh', overflowY: 'auto' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
-                                            <h2>{editingTestimonial ? 'Edit Review' : 'Add Review'}</h2>
-                                            <button onClick={() => setShowTestimonialForm(false)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
-                                        </div>
-                                        <form onSubmit={handleTestimonialSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-md)' }}>
-                                            <div><label>Author Name *</label><input type="text" required value={testimonialForm.author} onChange={e => setTestimonialForm(f => ({ ...f, author: e.target.value }))} placeholder="e.g. Priya Sharma" style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
-                                            <div><label>Role / Location</label><input type="text" value={testimonialForm.role} onChange={e => setTestimonialForm(f => ({ ...f, role: e.target.value }))} placeholder="e.g. Tea Enthusiast, Mumbai" style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
-                                            <div style={{ gridColumn: '1 / -1' }}><label>Review Text *</label><textarea required rows={4} value={testimonialForm.text} onChange={e => setTestimonialForm(f => ({ ...f, text: e.target.value }))} placeholder="Write the customer's review text..." style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', resize: 'vertical' }} /></div>
-                                            <div>
-                                                <label>Rating</label>
-                                                <select value={testimonialForm.rating} onChange={e => setTestimonialForm(f => ({ ...f, rating: Number(e.target.value) }))} style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }}>
-                                                    <option value={5}>★★★★★ (5)</option>
-                                                    <option value={4}>★★★★☆ (4)</option>
-                                                    <option value={3}>★★★☆☆ (3)</option>
-                                                    <option value={2}>★★☆☆☆ (2)</option>
-                                                    <option value={1}>★☆☆☆☆ (1)</option>
-                                                </select>
-                                            </div>
-                                            <div><label>Display Order</label><input type="number" min={0} value={testimonialForm.order} onChange={e => setTestimonialForm(f => ({ ...f, order: Number(e.target.value) || 0 }))} placeholder="0" style={{ width: '100%', padding: '8px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }} /></div>
-                                            <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 'var(--space-lg)' }}>
-                                                <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}><input type="checkbox" checked={testimonialForm.approved} onChange={e => setTestimonialForm(f => ({ ...f, approved: e.target.checked }))} /> Approved (visible on homepage)</label>
-                                                <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}><input type="checkbox" checked={testimonialForm.featured} onChange={e => setTestimonialForm(f => ({ ...f, featured: e.target.checked }))} /> Featured (shown first)</label>
-                                            </div>
-                                            <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 'var(--space-sm)', marginTop: 'var(--space-md)' }}>
-                                                <button type="submit" className="btn btn--primary">{editingTestimonial ? 'Update Review' : 'Add Review'}</button>
-                                                <button type="button" className="btn btn--ghost" onClick={() => setShowTestimonialForm(false)}>Cancel</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            )}
+                    {activeSection === 'messages' && (
+                        <MessagesTab
+                            messages={messages}
+                            messagesLoading={messagesLoading}
+                            error={tabErrors.messages}
+                            onRetry={() => { void loadMessages(); }}
+                        />
+                    )}
 
-                            {testimonialsLoading ? (
-                                <p style={{ color: 'var(--color-text-muted)' }}>Loading reviews...</p>
-                            ) : testimonials.length === 0 ? (
-                                <p style={{ color: 'var(--color-text-muted)' }}>No reviews yet. Add customer reviews to display on the homepage!</p>
-                            ) : (
-                                <div style={{ display: 'grid', gap: 'var(--space-md)' }}>
-                                    {testimonials.map(t => (
-                                        <div key={t._id} style={{ padding: 'var(--space-lg)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', background: t.approved ? 'var(--color-bg)' : 'var(--color-bg-alt, var(--color-bg))', opacity: t.approved ? 1 : 0.7, position: 'relative' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--space-sm)' }}>
-                                                <div>
-                                                    <strong style={{ fontSize: '1.05rem' }}>{t.author}</strong>
-                                                    <span style={{ marginLeft: 10, fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{t.role}</span>
-                                                    {t.featured && <span style={{ marginLeft: 8, padding: '1px 8px', borderRadius: 8, fontSize: '0.75rem', fontWeight: 600, background: '#f59e0b', color: '#fff' }}>Featured</span>}
-                                                </div>
-                                                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                                                    <span style={{ padding: '2px 10px', borderRadius: 12, fontSize: '0.8rem', fontWeight: 600, background: t.approved ? '#10b981' : '#ef4444', color: '#fff' }}>{t.approved ? 'Approved' : 'Pending'}</span>
-                                                </div>
-                                            </div>
-                                            <div style={{ color: '#f59e0b', marginBottom: 'var(--space-xs)', fontSize: '0.95rem' }}>{'★'.repeat(t.rating)}{'☆'.repeat(5 - t.rating)}</div>
-                                            <p style={{ color: 'var(--color-text-muted)', lineHeight: 1.7, marginBottom: 'var(--space-md)', fontStyle: 'italic' }}>"{t.text}"</p>
-                                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                                                <button className="btn btn--ghost btn--sm" style={{ color: t.approved ? 'var(--color-error)' : '#10b981', fontWeight: 600 }} onClick={() => toggleTestimonialApproval(t)}>{t.approved ? '✕ Reject' : '✓ Approve'}</button>
-                                                <button className="btn btn--ghost btn--sm" style={{ color: t.featured ? 'var(--color-text-muted)' : '#f59e0b' }} onClick={() => toggleTestimonialFeatured(t)}>{t.featured ? 'Unfeature' : '★ Feature'}</button>
-                                                <button className="btn btn--ghost btn--sm" onClick={() => openEditTestimonial(t)}>Edit</button>
-                                                <button className="btn btn--ghost btn--sm" style={{ color: 'var(--color-error)' }} onClick={() => deleteTestimonial(t._id)}>Delete</button>
-                                                <span style={{ marginLeft: 'auto', fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Order: {t.order} · {new Date(t.createdAt).toLocaleDateString('en-IN')}</span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+                    {activeSection === 'newsletter' && (
+                        <NewsletterTab
+                            subscribers={subscribers}
+                            subscribersLoading={subscribersLoading}
+                            error={tabErrors.newsletter}
+                            onRetry={() => { void loadSubscribers(); }}
+                        />
+                    )}
+
+                    {activeSection === 'activity' && (
+                        <ActivityTab
+                            activity={activity}
+                            error={tabErrors.activity}
+                            onRetry={() => { void loadActivity(); }}
+                        />
                     )}
                 </div>
             </div>
+
+            {confirmDialog && (
+                <div
+                    className="admin-confirm-overlay"
+                    role="presentation"
+                    onClick={() => { if (!confirmLoading) setConfirmDialog(null); }}
+                >
+                    <div
+                        className="admin-confirm-modal"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="admin-confirm-title"
+                        aria-describedby="admin-confirm-description"
+                        onClick={(event) => event.stopPropagation()}
+                    >
+                        <h2 id="admin-confirm-title" className="admin-confirm-title">{confirmDialog.title}</h2>
+                        <p id="admin-confirm-description" className="admin-confirm-description">{confirmDialog.message}</p>
+                        <div className="admin-confirm-actions">
+                            <button
+                                type="button"
+                                className="btn btn--ghost"
+                                onClick={() => setConfirmDialog(null)}
+                                disabled={confirmLoading}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                ref={confirmButtonRef}
+                                type="button"
+                                className={`btn btn--primary ${confirmDialog.tone === 'danger' ? 'admin-confirm-actions__danger' : ''}`}
+                                onClick={() => { void runConfirmedAction(); }}
+                                disabled={confirmLoading}
+                            >
+                                {confirmLoading ? 'Working...' : confirmDialog.confirmLabel}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

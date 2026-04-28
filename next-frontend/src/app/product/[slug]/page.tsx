@@ -1,15 +1,16 @@
 'use client';
 import Layout from '../../../components/Layout';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import type { FormEvent } from 'react';
+import type { FormEvent, KeyboardEvent } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useCart } from '../../../context/CartContext';
 import { useAuth } from '../../../context/AuthContext';
 import { useToast } from '../../../components/Toast';
 import ProductGridSkeleton from '../../../components/ProductGridSkeleton';
 import EmptyState from '../../../components/EmptyState';
+import AppIcon from '../../../components/AppIcon';
 import { apiRequest } from '../../../utils/api';
 
 type ProductBrewingInstructions = {
@@ -72,8 +73,21 @@ function getErrorMessage(err: unknown, fallback: string): string {
     return err instanceof Error ? err.message : fallback;
 }
 
+function sizeToGrams(size: string): number | null {
+    const match = size.match(/(\d+)\s*g/i);
+    if (!match) return null;
+    const grams = Number(match[1]);
+    return Number.isFinite(grams) && grams > 0 ? grams : null;
+}
+
+const PDP_TABS = ['description', 'brewing', 'reviews'] as const;
+type PdpTab = (typeof PDP_TABS)[number];
+
+const BUY_NOW_STORAGE_KEY = 'feelinga_buy_now';
+
 export default function ProductDetail() {
     const params = useParams<{ slug: string }>();
+    const router = useRouter();
     const slug = params?.slug;
     const [product, setProduct] = useState<ProductDetailData | null>(null);
     const [loading, setLoading] = useState(true);
@@ -92,7 +106,7 @@ export default function ProductDetail() {
     const [reviewsLoading, setReviewsLoading] = useState(false);
     const [reviewForm, setReviewForm] = useState<ReviewFormState>({ rating: 5, title: '', body: '' });
     const [reviewSubmitting, setReviewSubmitting] = useState(false);
-    const [activeTab, setActiveTab] = useState('description');
+    const [activeTab, setActiveTab] = useState<PdpTab>('description');
 
     // Related products
     const [related, setRelated] = useState<RelatedProduct[]>([]);
@@ -142,7 +156,7 @@ export default function ProductDetail() {
         try {
             const data = await apiRequest(`/auth/wishlist/${product._id}`, { method: 'POST' }) as { action?: string };
             setWishlisted(data.action === 'added');
-            showToast(data.action === 'added' ? '❤️ Added to wishlist' : 'Removed from wishlist', 'success');
+            showToast(data.action === 'added' ? 'Added to wishlist' : 'Removed from wishlist', 'success');
         } catch (err: unknown) {
             showToast(getErrorMessage(err, 'Failed to update wishlist'), 'error');
         } finally {
@@ -193,6 +207,23 @@ export default function ProductDetail() {
         showToast(`${product.name} (${selectedSize}) × ${qty} added to cart!`, 'success');
     };
 
+    const handleBuyNow = () => {
+        if (!product || !product.inStock) return;
+
+        const payload = {
+            id: product._id,
+            slug: product.slug,
+            name: product.name,
+            price: currentPrice,
+            size: selectedSize,
+            img: product.images?.[0] || '/images/darjeeling-tea.png',
+            qty,
+        };
+
+        sessionStorage.setItem(BUY_NOW_STORAGE_KEY, JSON.stringify(payload));
+        router.push('/checkout?mode=buy-now');
+    };
+
     const handleReviewSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!isAuthenticated) { openAuthModal(); return; }
@@ -216,15 +247,44 @@ export default function ProductDetail() {
     const renderStars = (rating: number, interactive = false, onChange?: (n: number) => void) => {
         return (
             <span className={`pdp-stars ${interactive ? 'is-interactive' : ''}`}>
-                {[1, 2, 3, 4, 5].map(n => (
-                    <span
-                        key={n}
-                        className={`pdp-star ${n <= rating ? 'active' : ''}`}
-                        onClick={interactive ? () => onChange?.(n) : undefined}
-                    >★</span>
-                ))}
+                {[1, 2, 3, 4, 5].map(n => {
+                    if (!interactive) {
+                        return (
+                            <span
+                                key={n}
+                                className={`pdp-star ${n <= rating ? 'active' : ''}`}
+                            >★</span>
+                        );
+                    }
+
+                    return (
+                        <button
+                            key={n}
+                            type="button"
+                            className={`pdp-star ${n <= rating ? 'active' : ''}`}
+                            onClick={() => onChange?.(n)}
+                            aria-label={`Rate ${n} star${n > 1 ? 's' : ''}`}
+                            aria-pressed={n === rating}
+                        >★</button>
+                    );
+                })}
             </span>
         );
+    };
+
+    const handleTabKeyDown = (event: KeyboardEvent<HTMLButtonElement>, tab: PdpTab) => {
+        const currentIndex = PDP_TABS.indexOf(tab);
+        if (currentIndex < 0) return;
+
+        if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+            event.preventDefault();
+            const direction = event.key === 'ArrowRight' ? 1 : -1;
+            const nextIndex = (currentIndex + direction + PDP_TABS.length) % PDP_TABS.length;
+            const nextTab = PDP_TABS[nextIndex];
+            setActiveTab(nextTab);
+            const nextButton = document.getElementById(`pdp-tab-${nextTab}`);
+            if (nextButton) nextButton.focus();
+        }
     };
 
     // Lightbox navigation
@@ -239,7 +299,7 @@ export default function ProductDetail() {
     // Keyboard navigation for lightbox
     useEffect(() => {
         if (!lightboxOpen) return;
-        const handler = (e: KeyboardEvent) => {
+        const handler = (e: globalThis.KeyboardEvent) => {
             if (e.key === 'Escape') { setLightboxOpen(false); setLightboxZoom(false); }
             if (e.key === 'ArrowRight') lightboxNext();
             if (e.key === 'ArrowLeft') lightboxPrev();
@@ -261,7 +321,7 @@ export default function ProductDetail() {
             <Layout>
                 <div className="container section">
                     <EmptyState
-                        icon="🍵"
+                        icon="leaf"
                         iconSize="lg"
                         title="Product Not Found"
                         message={error || 'This tea could not be found.'}
@@ -276,10 +336,28 @@ export default function ProductDetail() {
 
     const currentPrice = product.prices?.[selectedSize] || product.prices?.['100g'] || 0;
     const availableSizes = product.prices ? Object.entries(product.prices).filter(([, v]) => v) as [string, number][] : [];
+    const bestValueSize = availableSizes.reduce<{ size: string; unitPrice: number } | null>((best, [size, price]) => {
+        const grams = sizeToGrams(size);
+        if (!grams) return best;
+        const unitPrice = price / grams;
+        if (!best || unitPrice < best.unitPrice) return { size, unitPrice };
+        return best;
+    }, null)?.size;
+    const perGramBySize = availableSizes
+        .map(([size, price]) => {
+            const grams = sizeToGrams(size);
+            if (!grams) return null;
+            return { size, perGram: price / grams };
+        })
+        .filter((entry): entry is { size: string; perGram: number } => Boolean(entry));
+    const selectedPerGram = perGramBySize.find(entry => entry.size === selectedSize)?.perGram;
     const avgRating = reviews.length > 0 ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) : null;
     const productImages = product.images || [];
     const tastingNotes = product.tastingNotes || [];
     const stockCount = product.stock || 0;
+    const maxSelectableQty = product.inStock ? Math.max(1, stockCount || 99) : 1;
+    const titleCharsLeft = 100 - reviewForm.title.length;
+    const bodyCharsLeft = 1000 - reviewForm.body.length;
     const brewingInstructions = product.brewingInstructions;
     const brewingSteps = brewingInstructions?.steps || [];
 
@@ -295,11 +373,11 @@ export default function ProductDetail() {
             </div>
 
             {/* Main PDP */}
-            <div className="container">
+            <div className="container pdp-page">
                 <div className="section pdp-grid">
                     {/* Image Panel */}
                     <div className="pdp-gallery">
-                        <div className="pdp-media" style={{ cursor: 'zoom-in' }} onClick={() => setLightboxOpen(true)}>
+                        <div className="pdp-media pdp-media--zoomable" onClick={() => setLightboxOpen(true)}>
                             <Image
                                 src={productImages[selectedImage] || productImages[0] || '/images/darjeeling-tea.png'}
                                 alt={product.name}
@@ -315,7 +393,7 @@ export default function ProductDetail() {
                                 aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
                                 title={wishlisted ? 'Remove from wishlist' : 'Save to wishlist'}
                             >
-                                {wishlisted ? '❤️' : '🤍'}
+                                <AppIcon name={wishlisted ? 'heart' : 'heartOff'} size={16} aria-hidden />
                             </button>
                         </div>
                         {/* Thumbnail gallery */}
@@ -364,13 +442,31 @@ export default function ProductDetail() {
                                     {availableSizes.map(([size, price]) => (
                                         <button
                                             key={size}
+                                            type="button"
                                             className={`btn btn--sm ${selectedSize === size ? 'btn--primary' : 'btn--ghost'}`}
                                             onClick={() => setSelectedSize(size)}
                                         >
                                             {size} — ₹{price}
+                                            {bestValueSize === size && (
+                                                <span className="pdp-size-best-value">Best value</span>
+                                            )}
                                         </button>
                                     ))}
                                 </div>
+                                {perGramBySize.length > 0 && (
+                                    <div className="pdp-value-grid">
+                                        {selectedPerGram !== undefined && (
+                                            <div className="pdp-value-grid__selected">
+                                                Selected value: ₹{selectedPerGram.toFixed(2)}/g
+                                            </div>
+                                        )}
+                                        <div className="pdp-value-grid__list">
+                                            {perGramBySize.map((entry) => (
+                                                <span key={entry.size}>{entry.size}: ₹{entry.perGram.toFixed(2)}/g</span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
 
@@ -378,42 +474,51 @@ export default function ProductDetail() {
                         <div className="pdp-qty">
                             <label className="pdp-label">Qty</label>
                             <div className="pdp-qty-control">
-                                <button className="pdp-qty-btn" onClick={() => setQty(Math.max(1, qty - 1))}>−</button>
+                                <button type="button" className="pdp-qty-btn" aria-label="Decrease quantity" disabled={qty <= 1} onClick={() => setQty(Math.max(1, qty - 1))}>−</button>
                                 <span className="pdp-qty-count">{qty}</span>
-                                <button className="pdp-qty-btn" onClick={() => setQty(Math.min(stockCount || 99, qty + 1))}>+</button>
+                                <button type="button" className="pdp-qty-btn" aria-label="Increase quantity" disabled={qty >= maxSelectableQty} onClick={() => setQty(Math.min(maxSelectableQty, qty + 1))}>+</button>
                             </div>
                         </div>
 
                         {/* Price + CTA */}
                         <div className="pdp-price-cta">
                             <div className="pdp-price">₹{(currentPrice * qty).toLocaleString()}</div>
-                            <button
-                                className="btn btn--primary pdp-cta"
-                                onClick={handleAddToCart}
-                                disabled={!product.inStock}
-                            >
-                                {product.inStock ? '🛒  Add to Cart' : 'Out of Stock'}
-                            </button>
+                            <div className="pdp-price-cta__actions">
+                                <button
+                                    className="btn btn--ghost pdp-cta"
+                                    onClick={handleAddToCart}
+                                    disabled={!product.inStock}
+                                >
+                                    {product.inStock ? <><AppIcon name="shopping" size={16} aria-hidden /> Add to Cart</> : 'Out of Stock'}
+                                </button>
+                                <button
+                                    className="btn btn--primary pdp-cta"
+                                    onClick={handleBuyNow}
+                                    disabled={!product.inStock}
+                                >
+                                    {product.inStock ? <><AppIcon name="flame" size={16} aria-hidden /> Buy Now</> : 'Out of Stock'}
+                                </button>
+                            </div>
                         </div>
 
                         {/* Highlights */}
                         <div className="pdp-highlights">
-                            {product.origin && <div><strong>🗺 Origin</strong><br />{product.origin}</div>}
+                            {product.origin && <div><strong><AppIcon name="mapPin" size={14} aria-hidden /> Origin</strong><br />{product.origin}</div>}
                             {product.caffeine && <div><strong>☕ Caffeine</strong><br /><span className="pdp-text-cap">{product.caffeine}</span></div>}
-                            {tastingNotes.length > 0 && <div className="pdp-highlight-full"><strong>👅 Tasting Notes</strong><br />{tastingNotes.join(' · ')}</div>}
+                            {tastingNotes.length > 0 && <div className="pdp-highlight-full"><strong><AppIcon name="award" size={14} aria-hidden /> Tasting Notes</strong><br />{tastingNotes.join(' · ')}</div>}
                         </div>
 
                         {/* Low stock warning */}
                         {product.inStock && stockCount > 0 && stockCount <= 10 && (
                             <div className="pdp-lowstock">
-                                ⚡ Only {stockCount} left — order soon!
+                                <AppIcon name="flame" size={14} aria-hidden /> Only {stockCount} left - order soon!
                             </div>
                         )}
 
                         {/* Benefits badges */}
                         <div className="pdp-benefits">
                             {['Free shipping over ₹999', '100% Natural', 'Garden Fresh'].map(b => (
-                                <span key={b} className="benefit-pill">✓ {b}</span>
+                                <span key={b} className="benefit-pill"><AppIcon name="check" size={14} aria-hidden /> {b}</span>
                             ))}
                         </div>
 
@@ -421,25 +526,45 @@ export default function ProductDetail() {
                         <div className="pdp-share">
                             <span className="pdp-share__label">Share:</span>
                             <button
+                                type="button"
                                 onClick={() => window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(`Check out ${product.name} on Feelinga! ${window.location.href}`)}`, '_blank')}
                                 className="share-btn share-btn--whatsapp"
                                 aria-label="Share on WhatsApp"
                             >WhatsApp</button>
                             <button
+                                type="button"
                                 onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank', 'width=600,height=400')}
                                 className="share-btn share-btn--facebook"
                                 aria-label="Share on Facebook"
                             >Facebook</button>
                             <button
-                                onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${product.name} — premium tea from Feelinga 🍵`)}&url=${encodeURIComponent(window.location.href)}`, '_blank', 'width=600,height=400')}
+                                type="button"
+                                onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${product.name} - premium tea from Feelinga`)}&url=${encodeURIComponent(window.location.href)}`, '_blank', 'width=600,height=400')}
                                 className="share-btn share-btn--x"
                                 aria-label="Share on X (Twitter)"
                             >𝕏 Post</button>
                             <button
-                                onClick={() => { navigator.clipboard.writeText(window.location.href); }}
+                                type="button"
+                                onClick={async () => {
+                                    try {
+                                        const shareUrl = window.location.href;
+                                        if (navigator.share) {
+                                            await navigator.share({
+                                                title: product.name,
+                                                text: `Check out ${product.name} on Feelinga`,
+                                                url: shareUrl,
+                                            });
+                                            return;
+                                        }
+                                        await navigator.clipboard.writeText(shareUrl);
+                                        showToast('Link copied!', 'success');
+                                    } catch {
+                                        showToast('Could not copy link', 'error');
+                                    }
+                                }}
                                 className="share-btn"
                                 aria-label="Copy link"
-                            >🔗 Copy Link</button>
+                            ><AppIcon name="chevronRight" size={14} aria-hidden /> Share / Copy</button>
                         </div>
                     </div>
                 </div>
@@ -447,7 +572,7 @@ export default function ProductDetail() {
                 {/* Tabs: Description / Brewing / Reviews */}
                 <div className="pdp-tabs">
                     <div className="pdp-tablist" role="tablist" aria-label="Product information">
-                        {['description', 'brewing', 'reviews'].map(tab => (
+                        {PDP_TABS.map(tab => (
                             <button
                                 key={tab}
                                 role="tab"
@@ -455,6 +580,7 @@ export default function ProductDetail() {
                                 aria-selected={activeTab === tab}
                                 aria-controls={`pdp-panel-${tab}`}
                                 onClick={() => setActiveTab(tab)}
+                                onKeyDown={(event) => handleTabKeyDown(event, tab)}
                                 className={`pdp-tab ${activeTab === tab ? 'active' : ''}`}
                             >
                                 {tab === 'reviews' ? `Reviews (${reviews.length})` : tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -484,12 +610,12 @@ export default function ProductDetail() {
                                 <div>
                                     <div className="pdp-brew-grid">
                                         {[
-                                            { icon: '🌡️', label: 'Temperature', val: brewingInstructions.temperature },
-                                            { icon: '⏱️', label: 'Steep Time', val: brewingInstructions.steepTime },
-                                            { icon: '🥄', label: 'Amount', val: brewingInstructions.amount },
+                                            { icon: 'activity', label: 'Temperature', val: brewingInstructions.temperature },
+                                            { icon: 'timer', label: 'Steep Time', val: brewingInstructions.steepTime },
+                                            { icon: 'award', label: 'Amount', val: brewingInstructions.amount },
                                         ].filter(x => x.val).map(x => (
                                             <div key={x.label} className="pdp-brew-card">
-                                                <div className="pdp-brew-icon">{x.icon}</div>
+                                                <div className="pdp-brew-icon"><AppIcon name={x.icon} size={16} aria-hidden /></div>
                                                 <div className="pdp-brew-label">{x.label}</div>
                                                 <div className="pdp-brew-value">{x.val}</div>
                                             </div>
@@ -545,40 +671,44 @@ export default function ProductDetail() {
                             )}
 
                             {/* Write a Review */}
-                            <div style={{ marginBottom: 'var(--space-2xl)', padding: 'var(--space-xl)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)' }}>
-                                <h3 style={{ marginBottom: 'var(--space-lg)' }}>Write a Review</h3>
+                            <div className="pdp-review-form-wrap">
+                                <h3 className="pdp-review-form-wrap__title">Write a Review</h3>
                                 {isAuthenticated ? (
-                                    <form onSubmit={handleReviewSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
-                                        <div>
-                                            <label style={{ display: 'block', fontWeight: 600, marginBottom: 'var(--space-xs)' }}>Your Rating</label>
+                                    <form onSubmit={handleReviewSubmit} className="pdp-review-form">
+                                        <div className="pdp-review-form__field">
+                                            <label className="pdp-review-form__label">Your Rating</label>
                                             {renderStars(reviewForm.rating, true, (n) => setReviewForm((f) => ({ ...f, rating: n })))}
                                         </div>
-                                        <div>
-                                            <label style={{ display: 'block', fontWeight: 600, marginBottom: 'var(--space-xs)' }}>Title <span style={{ fontWeight: 400, color: 'var(--color-text-muted)' }}>(optional)</span></label>
+                                        <div className="pdp-review-form__field">
+                                            <label className="pdp-review-form__label">Title <span className="pdp-review-form__hint">(optional)</span></label>
                                             <input
                                                 type="text" maxLength={100} placeholder="Summarise your experience"
                                                 value={reviewForm.title}
                                                 onChange={e => setReviewForm((f) => ({ ...f, title: e.target.value }))}
-                                                style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }}
+                                                aria-describedby="pdp-review-title-counter"
+                                                className="pdp-review-form__input"
                                             />
+                                            <div id="pdp-review-title-counter" className="pdp-review-form__counter">{titleCharsLeft} characters left</div>
                                         </div>
-                                        <div>
-                                            <label style={{ display: 'block', fontWeight: 600, marginBottom: 'var(--space-xs)' }}>Review <span style={{ fontWeight: 400, color: 'var(--color-text-muted)' }}>(optional)</span></label>
+                                        <div className="pdp-review-form__field">
+                                            <label className="pdp-review-form__label">Review <span className="pdp-review-form__hint">(optional)</span></label>
                                             <textarea
                                                 rows={4} maxLength={1000} placeholder="Share your experience with this tea..."
                                                 value={reviewForm.body}
                                                 onChange={e => setReviewForm((f) => ({ ...f, body: e.target.value }))}
-                                                style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', resize: 'vertical' }}
+                                                aria-describedby="pdp-review-body-counter"
+                                                className="pdp-review-form__textarea"
                                             />
+                                            <div id="pdp-review-body-counter" className="pdp-review-form__counter">{bodyCharsLeft} characters left</div>
                                         </div>
                                         <div>
                                             <button type="submit" className="btn btn--primary" disabled={reviewSubmitting}>
-                                                {reviewSubmitting ? '⏳ Posting...' : 'Post Review'}
+                                                {reviewSubmitting ? 'Posting...' : 'Post Review'}
                                             </button>
                                         </div>
                                     </form>
                                 ) : (
-                                    <div style={{ textAlign: 'center', padding: 'var(--space-lg) 0', color: 'var(--color-text-muted)' }}>
+                                    <div className="pdp-review-auth-prompt">
                                         <p>Please <button className="btn btn--ghost btn--sm" onClick={openAuthModal}>sign in</button> to leave a review.</p>
                                     </div>
                                 )}
@@ -586,25 +716,25 @@ export default function ProductDetail() {
 
                             {/* Review List */}
                             {reviewsLoading ? (
-                                <div style={{ textAlign: 'center', padding: 'var(--space-xl)', color: 'var(--color-text-muted)' }}>Loading reviews...</div>
+                                <div className="pdp-reviews-state">Loading reviews...</div>
                             ) : reviews.length === 0 ? (
-                                <div style={{ textAlign: 'center', padding: 'var(--space-xl)', color: 'var(--color-text-muted)' }}>
+                                <div className="pdp-reviews-state">
                                     <p>No reviews yet. Be the first to share your experience!</p>
                                 </div>
                             ) : (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
+                                <div className="pdp-reviews-list">
                                     {reviews.map(review => (
-                                        <div key={review._id} style={{ padding: 'var(--space-lg)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--space-sm)' }}>
+                                        <div key={review._id} className="pdp-review-card">
+                                            <div className="pdp-review-card__head">
                                                 <div>
                                                     {renderStars(review.rating)}
-                                                    {review.title && <div style={{ fontWeight: 600, marginTop: 4 }}>{review.title}</div>}
+                                                    {review.title && <div className="pdp-review-card__title">{review.title}</div>}
                                                 </div>
-                                                <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+                                                <div className="pdp-review-card__meta">
                                                     {review.user?.name || 'Anonymous'} · {new Date(review.createdAt).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}
                                                 </div>
                                             </div>
-                                            {review.body && <p style={{ color: 'var(--color-text-muted)', lineHeight: 1.7 }}>{review.body}</p>}
+                                            {review.body && <p className="pdp-review-card__body">{review.body}</p>}
                                         </div>
                                     ))}
                                 </div>
@@ -622,12 +752,12 @@ export default function ProductDetail() {
                             <p className="overline">You May Also Like</p>
                             <h2>More {product.type}</h2>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--space-lg)', marginTop: 'var(--space-2xl)' }}>
+                        <div className="pdp-related-grid">
                             {related.map(p => (
                                 <div className="product-card" key={p._id}>
                                     <Link href={`/product/${p.slug}`}>
                                         <div className="product-card__img">
-                                            <Image src={p.images?.[0] || '/images/darjeeling-tea.png'} alt={p.name} width={300} height={300} style={{ objectFit: 'contain', width: '100%', height: 'auto' }} />
+                                            <Image src={p.images?.[0] || '/images/darjeeling-tea.png'} alt={p.name} width={300} height={300} className="img-contain-full" />
                                         </div>
                                     </Link>
                                     <div className="product-card__body">
@@ -638,7 +768,7 @@ export default function ProductDetail() {
                                             <div className="product-card__price">₹{p.prices?.['100g']?.toLocaleString() || '—'}</div>
                                             <div className="product-card__rating">{'★'.repeat(Math.round(p.rating || 5))} <span>({p.reviewCount || 0})</span></div>
                                         </div>
-                                        <Link href={`/product/${p.slug}`} className="btn btn--ghost btn--sm" style={{ width: '100%', textAlign: 'center', marginTop: 12 }}>View Details</Link>
+                                        <Link href={`/product/${p.slug}`} className="btn btn--ghost btn--sm pdp-related__cta">View Details</Link>
                                     </div>
                                 </div>
                             ))}
@@ -650,13 +780,7 @@ export default function ProductDetail() {
             {/* Lightbox / Image Zoom Modal */}
             {lightboxOpen && (
                 <div
-                    className="lightbox-overlay"
-                    style={{
-                        position: 'fixed', inset: 0, zIndex: 9999,
-                        background: 'rgba(0,0,0,0.92)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        cursor: lightboxZoom ? 'zoom-out' : 'zoom-in',
-                    }}
+                    className={`lightbox-overlay ${lightboxZoom ? 'lightbox-overlay--zoomed' : ''}`}
                     onClick={(e) => {
                         if (e.target === e.currentTarget) { setLightboxOpen(false); setLightboxZoom(false); }
                     }}
@@ -673,25 +797,15 @@ export default function ProductDetail() {
                     <button
                         onClick={() => { setLightboxOpen(false); setLightboxZoom(false); }}
                         aria-label="Close lightbox"
-                        style={{
-                            position: 'absolute', top: 16, right: 16, zIndex: 10001,
-                            background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '50%',
-                            width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            color: '#fff', fontSize: 22, cursor: 'pointer',
-                        }}
-                    >✕</button>
+                        className="lightbox-overlay__control lightbox-overlay__close"
+                    ><AppIcon name="xCircle" size={18} aria-hidden /></button>
 
                     {/* Prev button */}
                     {imageCount > 1 && (
                         <button
                             onClick={(e) => { e.stopPropagation(); lightboxPrev(); }}
                             aria-label="Previous image"
-                            style={{
-                                position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', zIndex: 10001,
-                                background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '50%',
-                                width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                color: '#fff', fontSize: 22, cursor: 'pointer',
-                            }}
+                            className="lightbox-overlay__control lightbox-overlay__prev"
                         >‹</button>
                     )}
 
@@ -700,40 +814,28 @@ export default function ProductDetail() {
                         <button
                             onClick={(e) => { e.stopPropagation(); lightboxNext(); }}
                             aria-label="Next image"
-                            style={{
-                                position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', zIndex: 10001,
-                                background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '50%',
-                                width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                color: '#fff', fontSize: 22, cursor: 'pointer',
-                            }}
+                            className="lightbox-overlay__control lightbox-overlay__next"
                         >›</button>
                     )}
 
                     {/* Image */}
                     <div
                         onClick={() => setLightboxZoom(z => !z)}
-                        style={{
-                            transition: 'transform 0.3s ease',
-                            transform: lightboxZoom ? 'scale(1.8)' : 'scale(1)',
-                            maxWidth: '90vw', maxHeight: '90vh',
-                        }}
+                        className={`lightbox-overlay__image-wrap ${lightboxZoom ? 'is-zoomed' : ''}`}
                     >
                         <Image
                             src={product.images?.[selectedImage] || product.images?.[0] || '/images/darjeeling-tea.png'}
                             alt={product.name}
                             width={800}
                             height={800}
-                            style={{ objectFit: 'contain', width: '100%', height: 'auto', maxHeight: '85vh' }}
+                            className="lightbox-overlay__image"
                             priority
                         />
                     </div>
 
                     {/* Image counter */}
                     {imageCount > 1 && (
-                        <div style={{
-                            position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)',
-                            color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', zIndex: 10001,
-                        }}>
+                        <div className="lightbox-overlay__counter">
                             {selectedImage + 1} / {imageCount}
                         </div>
                     )}
@@ -746,13 +848,22 @@ export default function ProductDetail() {
                     <div className="pdp-sticky-cta__price">₹{(currentPrice * qty).toLocaleString('en-IN')}</div>
                     <div className="pdp-sticky-cta__label">{selectedSize} · Qty {qty}</div>
                 </div>
-                <button
-                    className="btn btn--primary pdp-sticky-cta__btn"
-                    onClick={handleAddToCart}
-                    disabled={!product.inStock}
-                >
-                    {product.inStock ? '🛒 Add to Cart' : 'Out of Stock'}
-                </button>
+                <div className="pdp-sticky-cta__actions">
+                    <button
+                        className="btn btn--ghost pdp-sticky-cta__btn"
+                        onClick={handleAddToCart}
+                        disabled={!product.inStock}
+                    >
+                        {product.inStock ? <><AppIcon name="shopping" size={14} aria-hidden /> Cart</> : 'Out'}
+                    </button>
+                    <button
+                        className="btn btn--primary pdp-sticky-cta__btn"
+                        onClick={handleBuyNow}
+                        disabled={!product.inStock}
+                    >
+                        {product.inStock ? <><AppIcon name="flame" size={14} aria-hidden /> Buy Now</> : 'Out'}
+                    </button>
+                </div>
             </div>
         </Layout>
     );

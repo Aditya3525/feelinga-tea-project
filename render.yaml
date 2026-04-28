@@ -9,16 +9,19 @@ services:
     startCommand: npm start
     healthCheckPath: /api/v1/health
     envVars:
+      # Runtime
       - key: NODE_VERSION
         value: 20
       - key: NODE_ENV
         value: production
+      - key: PORT
+        value: 5000
+
+      # Database
       - key: MONGODB_URI
         sync: false
-      - key: CLIENT_URL
-        sync: false
-      - key: ADMIN_EMAIL
-        sync: false
+
+      # JWT
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_EXPIRES_IN
@@ -27,10 +30,28 @@ services:
         generateValue: true
       - key: JWT_REFRESH_EXPIRES_IN
         value: 7d
+
+      # Cookie / session security
+      - key: COOKIE_SAMESITE
+        value: none          # Required for cross-origin cookies (Vercel → Render)
+      - key: ENFORCE_HTTPS
+        value: true
+
+      # CORS — set to your Vercel frontend URL
+      - key: CLIENT_URL
+        sync: false           # e.g. https://feelinga-tea.vercel.app
+
+      # Admin
+      - key: ADMIN_EMAIL
+        sync: false
+
+      # Google OAuth
       - key: GOOGLE_CLIENT_ID
         sync: false
+
+      # Email
       - key: EMAIL_FROM
-        sync: false
+        sync: false           # e.g. "Feelinga Tea" <noreply@yourdomain.com>
       - key: SMTP_HOST
         sync: false
       - key: SMTP_PORT
@@ -41,3 +62,41 @@ services:
         sync: false
       - key: SMTP_PASS
         sync: false
+
+      # MFA
+      - key: ENFORCE_LOGIN_MFA
+        value: true
+      - key: MFA_TOKEN_EXPIRES_IN
+        value: 10m
+      - key: MFA_CODE_TTL_MS
+        value: 600000
+      - key: MFA_MAX_ATTEMPTS
+        value: 5
+      - key: LOGIN_LOCK_MS
+        value: 900000
+
+      # Password breach checks (HaveIBeenPwned)
+      - key: HIBP_ENFORCE
+        value: false
+      - key: HIBP_MIN_BREACH_COUNT
+        value: 1
+      - key: HIBP_TIMEOUT_MS
+        value: 4000
+      - key: HIBP_CACHE_TTL_MS
+        value: 21600000
+      - key: HIBP_FAIL_CLOSED
+        value: false
+
+      # Email verification (Hunter.io — set provider to 'hunter' to enable)
+      - key: EMAIL_VERIFIER_PROVIDER
+        value: none
+      - key: HUNTER_API_KEY
+        sync: false
+      - key: HUNTER_TIMEOUT_MS
+        value: 8000
+      - key: HUNTER_REJECT_UNKNOWN
+        value: false
+      - key: HUNTER_REJECT_GIBBERISH
+        value: true
+      - key: HUNTER_FAIL_OPEN
+        value: true

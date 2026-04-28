@@ -36,7 +36,7 @@ export interface AuthContextValue {
     login: (email: string, password: string) => Promise<any>;
     register: (name: string, email: string, password: string) => Promise<any>;
     googleLogin: (credential: string) => Promise<any>;
-    logout: () => void;
+    logout: () => Promise<void>;
     updateProfile: (updates: Record<string, unknown>) => Promise<any>;
     openAuthModal: () => void;
     closeAuthModal: () => void;
@@ -113,6 +113,10 @@ export interface ProductSearchResult {
 export interface OrderItem {
     id?: string;
     productId?: string;
+    product?: {
+        slug?: string;
+        images?: string[];
+    } | string;
     name: string;
     size: string;
     qty: number;

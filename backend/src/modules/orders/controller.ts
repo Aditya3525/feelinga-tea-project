@@ -11,88 +11,210 @@ import { logAdminAction } from '../../utils/auditLog.js';
 import { escapeRegex } from '../../utils/sanitize.js';
 import { sendOrderConfirmationEmail, sendOrderStatusEmail, sendLowStockAlert } from '../../utils/email.js';
 
+const ORDER_STATUS_TRANSITIONS: Record<string, string[]> = {
+    pending: ['confirmed', 'cancelled'],
+    confirmed: ['processing', 'cancelled'],
+    processing: ['shipped', 'cancelled'],
+    shipped: ['delivered'],
+    delivered: [],
+    cancelled: [],
+};
+
+const isTransactionNotSupportedError = (err: unknown): boolean => {
+    if (!err || typeof err !== 'object') return false;
+
+    const errorObj = err as { message?: string; errmsg?: string; cause?: unknown };
+    const msg = `${errorObj.message || ''} ${errorObj.errmsg || ''}`;
+    if (/Transaction numbers are only allowed on a replica set member or mongos/i.test(msg)) return true;
+
+    return isTransactionNotSupportedError(errorObj.cause);
+};
+
+const canTransitionStatus = (currentStatus: string, nextStatus: string) => {
+    if (currentStatus === nextStatus) return true;
+    return (ORDER_STATUS_TRANSITIONS[currentStatus] || []).includes(nextStatus);
+};
+
 // POST /orders
 export const create = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { items, shippingAddress, paymentMethod, couponCode, notes } = req.body;
+        const userId = req.user!._id;
+        const now = new Date();
+        let order: any = null;
+        let orderProductIds: string[] = [];
 
-        const orderItems = [];
-        for (const item of items) {
-            const product = await Product.findById(item.productId);
-            if (!product) throw new AppError(`Product ${item.productId} not found`, 404);
-            if (!product.inStock) throw new AppError(`${product.name} is out of stock`, 400);
-            const price = (product.prices as Record<string, number>)?.[item.size] || (product.prices as any)?.['100g'];
-            if (!price) throw new AppError(`Invalid size ${item.size} for ${product.name}`, 400);
-            orderItems.push({ product: product._id, name: product.name, size: item.size, price, qty: item.qty, image: product.images?.[0] });
-        }
+        const createOrderRecord = async (session?: mongoose.ClientSession) => {
+            const productIds = [...new Set(items.map((item: any) => String(item.productId)))];
+            const productsQuery = Product.find({ _id: { $in: productIds } });
+            if (session) productsQuery.session(session);
+            const products = await productsQuery;
+            const productMap = new Map(products.map(product => [product._id.toString(), product]));
 
-        const subtotal = orderItems.reduce((sum, i) => sum + i.price * i.qty, 0);
-        const shipping = subtotal >= 999 ? 0 : 79;
-        const tax = Math.round(subtotal * 0.05);
-
-        let discount = 0;
-        let appliedCoupon: string | null = null;
-        if (couponCode) {
-            const coupon = await Coupon.findOne({ code: couponCode.toUpperCase(), active: true, validFrom: { $lte: new Date() }, validTo: { $gte: new Date() } });
-            if (!coupon) throw new AppError('Invalid or expired coupon code', 400);
-            if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) throw new AppError('Coupon usage limit reached', 400);
-            if (subtotal < coupon.minOrderAmount) throw new AppError(`Minimum order amount for this coupon is ₹${coupon.minOrderAmount}`, 400);
-            if (coupon.perUserLimit) {
-                const userUsage = await Order.countDocuments({ user: req.user!._id, couponCode: coupon.code });
-                if (userUsage >= coupon.perUserLimit) throw new AppError('You have already used this coupon', 400);
+            const orderItems = [];
+            for (const item of items) {
+                const product = productMap.get(String(item.productId));
+                if (!product) throw new AppError(`Product ${item.productId} not found`, 404);
+                if (!product.inStock) throw new AppError(`${product.name} is out of stock`, 400);
+                const price = (product.prices as Record<string, number>)?.[item.size] || (product.prices as any)?.['100g'];
+                if (!price) throw new AppError(`Invalid size ${item.size} for ${product.name}`, 400);
+                orderItems.push({ product: product._id, name: product.name, size: item.size, price, qty: item.qty, image: product.images?.[0] });
             }
-            if (coupon.discountType === 'percentage') {
-                discount = Math.round(subtotal * coupon.discountValue / 100);
-                if (coupon.maxDiscount) discount = Math.min(discount, coupon.maxDiscount);
-            } else { discount = coupon.discountValue; }
-            appliedCoupon = coupon.code;
-        }
 
-        const total = subtotal + shipping + tax - discount;
+            const subtotal = orderItems.reduce((sum, i) => sum + i.price * i.qty, 0);
+            const shipping = subtotal >= 999 ? 0 : 79;
+            const tax = Math.round(subtotal * 0.05);
 
-        // Atomic stock decrement with rollback
-        for (const item of orderItems) {
-            const updated = await Product.findOneAndUpdate({ _id: item.product, stock: { $gte: item.qty } }, { $inc: { stock: -item.qty } }, { new: true });
-            if (!updated) {
-                for (const prev of orderItems) {
-                    if (prev.product.toString() === item.product.toString()) break;
-                    await Product.findByIdAndUpdate(prev.product, { $inc: { stock: prev.qty } });
+            let discount = 0;
+            let couponDoc: any = null;
+            let appliedCoupon: string | null = null;
+            const normalizedCouponCode = typeof couponCode === 'string' ? couponCode.trim().toUpperCase() : '';
+
+            if (normalizedCouponCode) {
+                const couponQuery = Coupon.findOne({
+                    code: normalizedCouponCode,
+                    active: true,
+                    validFrom: { $lte: now },
+                    validTo: { $gte: now },
+                });
+                if (session) couponQuery.session(session);
+                couponDoc = await couponQuery;
+
+                if (!couponDoc) throw new AppError('Invalid or expired coupon code', 400);
+                if (couponDoc.usageLimit && couponDoc.usedCount >= couponDoc.usageLimit) throw new AppError('Coupon usage limit reached', 400);
+                if (subtotal < couponDoc.minOrderAmount) throw new AppError(`Minimum order amount for this coupon is ₹${couponDoc.minOrderAmount}`, 400);
+
+                if (couponDoc.perUserLimit) {
+                    const userUsageQuery = Order.countDocuments({ user: userId, couponCode: couponDoc.code });
+                    if (session) userUsageQuery.session(session);
+                    const userUsage = await userUsageQuery;
+                    if (userUsage >= couponDoc.perUserLimit) throw new AppError('You have already used this coupon', 400);
                 }
-                throw new AppError(`Insufficient stock for ${item.name}`, 400);
+
+                if (couponDoc.discountType === 'percentage') {
+                    discount = Math.round(subtotal * couponDoc.discountValue / 100);
+                    if (couponDoc.maxDiscount) discount = Math.min(discount, couponDoc.maxDiscount);
+                } else {
+                    discount = couponDoc.discountValue;
+                }
+                appliedCoupon = couponDoc.code;
             }
-            if (updated.stock === 0) await Product.findByIdAndUpdate(updated._id, { inStock: false });
-        }
 
-        // Low stock alert
-        const lowStockProducts = await Product.find({ stock: { $lte: 10 }, deletedAt: null }, { name: 1, slug: 1, stock: 1 }).lean();
-        const adminEmail = process.env.ADMIN_EMAIL;
-        if (lowStockProducts.length > 0 && adminEmail) sendLowStockAlert(adminEmail, lowStockProducts as any).catch(() => {});
+            const total = subtotal + shipping + tax - discount;
 
-        // Retry on duplicate orderNumber
-        let order;
-        for (let attempt = 0; attempt < 5; attempt++) {
-            try {
-                order = await Order.create({ user: req.user!._id, items: orderItems, shippingAddress, subtotal, shipping, tax, discount, couponCode: appliedCoupon, total, paymentMethod, paymentStatus: 'pending', notes });
-                break;
-            } catch (createErr: any) {
-                if (createErr.code === 11000 && createErr.keyPattern?.orderNumber) {
-                    const highest = await Order.findOne({}, { orderNumber: 1 }).sort({ orderNumber: -1 }).lean();
-                    if (highest?.orderNumber) {
-                        const m = highest.orderNumber.match(/FLG-(\d+)/);
-                        if (m) await mongoose.connection.db!.collection('counters').updateOne({ _id: 'orderNumber' as any }, { $set: { seq: parseInt(m[1]) - 100000 } });
+            for (const item of orderItems) {
+                const updated = await Product.findOneAndUpdate(
+                    { _id: item.product, stock: { $gte: item.qty } },
+                    { $inc: { stock: -item.qty } },
+                    session ? { new: true, session } : { new: true }
+                );
+                if (!updated) throw new AppError(`Insufficient stock for ${item.name}`, 400);
+                if (updated.stock === 0 && updated.inStock) {
+                    await Product.findByIdAndUpdate(updated._id, { inStock: false }, session ? { session } : {});
+                }
+            }
+
+            let createdOrder: any = null;
+            for (let attempt = 0; attempt < 5; attempt++) {
+                try {
+                    createdOrder = new Order({
+                        user: userId,
+                        items: orderItems,
+                        shippingAddress,
+                        subtotal,
+                        shipping,
+                        tax,
+                        discount,
+                        couponCode: appliedCoupon,
+                        total,
+                        paymentMethod,
+                        paymentStatus: 'pending',
+                        notes,
+                    });
+                    if (session) {
+                        await createdOrder.save({ session });
+                    } else {
+                        await createdOrder.save();
                     }
-                    continue;
+                    break;
+                } catch (createErr: any) {
+                    if (createErr.code === 11000 && createErr.keyPattern?.orderNumber) {
+                        const highestQuery = Order.findOne({}, { orderNumber: 1 }).sort({ orderNumber: -1 }).lean();
+                        if (session) highestQuery.session(session);
+                        const highest = await highestQuery;
+                        if (highest?.orderNumber) {
+                            const m = highest.orderNumber.match(/FLG-(\d+)/);
+                            if (m) {
+                                await mongoose.connection.db!.collection('counters').updateOne(
+                                    { _id: 'orderNumber' as any },
+                                    { $set: { seq: parseInt(m[1], 10) - 100000 } }
+                                );
+                            }
+                        }
+                        continue;
+                    }
+                    throw createErr;
                 }
-                throw createErr;
             }
+
+            if (!createdOrder) throw new AppError('Failed to create order — please try again', 500);
+
+            if (couponDoc) {
+                const couponFilter: Record<string, any> = { _id: couponDoc._id };
+                if (couponDoc.usageLimit) couponFilter.usedCount = { $lt: couponDoc.usageLimit };
+
+                const usageResult = await Coupon.updateOne(
+                    couponFilter,
+                    { $inc: { usedCount: 1 } },
+                    session ? { session } : {}
+                );
+                if (usageResult.modifiedCount !== 1) throw new AppError('Coupon usage limit reached', 400);
+            }
+
+            await Cart.findOneAndUpdate(
+                { user: userId },
+                { $set: { items: [] } },
+                session ? { session } : {}
+            );
+
+            return {
+                createdOrder,
+                createdOrderProductIds: [...new Set(orderItems.map(item => item.product.toString()))],
+            };
+        };
+
+        const session = await mongoose.startSession();
+        try {
+            try {
+                await session.withTransaction(async () => {
+                    const result = await createOrderRecord(session);
+                    order = result.createdOrder;
+                    orderProductIds = result.createdOrderProductIds;
+                });
+            } catch (txErr) {
+                if (!isTransactionNotSupportedError(txErr)) throw txErr;
+                const result = await createOrderRecord();
+                order = result.createdOrder;
+                orderProductIds = result.createdOrderProductIds;
+            }
+        } finally {
+            await session.endSession();
         }
+
         if (!order) throw new AppError('Failed to create order — please try again', 500);
 
-        if (appliedCoupon) await Coupon.findOneAndUpdate({ code: appliedCoupon }, { $inc: { usedCount: 1 } });
-        await Cart.findOneAndUpdate({ user: req.user!._id }, { $set: { items: [] } });
+        const [orderUser, lowStockProducts] = await Promise.all([
+            User.findById(userId).lean(),
+            Product.find({ _id: { $in: orderProductIds }, stock: { $lte: 10 }, deletedAt: null }, { name: 1, slug: 1, stock: 1 }).lean(),
+        ]);
 
-        const orderUser = await User.findById(req.user!._id);
-        if (orderUser?.email) sendOrderConfirmationEmail(orderUser.email, order).catch(err => console.error('Email send error:', err.message));
+        const adminEmail = process.env.ADMIN_EMAIL;
+        if (lowStockProducts.length > 0 && adminEmail) {
+            sendLowStockAlert(adminEmail, lowStockProducts as any).catch(() => {});
+        }
+        if (orderUser?.email) {
+            sendOrderConfirmationEmail(orderUser.email, order).catch(err => console.error('Email send error:', err.message));
+        }
 
         res.status(201).json({ status: 'success', data: order });
     } catch (err) { next(err); }
@@ -150,13 +272,16 @@ export const cancel = async (req: Request, res: Response, next: NextFunction) =>
         order.cancelReason = req.body.reason || 'Customer requested cancellation';
         await order.save();
 
-        for (const item of order.items) {
-            const updated = await Product.findByIdAndUpdate(item.product, { $inc: { stock: item.qty } }, { new: true });
-            if (updated && !updated.inStock && updated.stock > 0) await Product.findByIdAndUpdate(updated._id, { inStock: true });
-        }
+        await restoreStock(order);
+        await rollbackCouponUsage(order.couponCode);
 
         res.json({ status: 'success', data: order });
     } catch (err) { next(err); }
+};
+
+const rollbackCouponUsage = async (couponCode?: string | null) => {
+    if (!couponCode) return;
+    await Coupon.findOneAndUpdate({ code: couponCode, usedCount: { $gt: 0 } }, { $inc: { usedCount: -1 } });
 };
 
 // Helper: restore stock for cancelled orders
@@ -171,9 +296,21 @@ const restoreStock = async (order: any) => {
 export const bulkStatus = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { orderIds, status } = req.body;
+        const targetOrders = await Order.find({ _id: { $in: orderIds } });
+        const invalidTransitionOrder = targetOrders.find(order => !canTransitionStatus(order.status, status));
+        if (invalidTransitionOrder) {
+            throw new AppError(
+                `Invalid status transition from "${invalidTransitionOrder.status}" to "${status}" for order ${invalidTransitionOrder.orderNumber}`,
+                400,
+            );
+        }
+
         if (status === 'cancelled') {
-            const ordersToCancel = await Order.find({ _id: { $in: orderIds }, status: { $ne: 'cancelled' } });
-            for (const order of ordersToCancel) await restoreStock(order);
+            const ordersToCancel = targetOrders.filter(order => order.status !== 'cancelled');
+            for (const order of ordersToCancel) {
+                await restoreStock(order);
+                await rollbackCouponUsage(order.couponCode);
+            }
         }
         const result = await Order.updateMany({ _id: { $in: orderIds } }, { $set: { status } });
         await logAdminAction({ actor: req.user!, action: 'order.bulk_status_update', entityType: 'order', summary: `Bulk updated ${result.modifiedCount} orders to "${status}"`, meta: { requested: orderIds.length, modified: result.modifiedCount, status } });
@@ -192,8 +329,16 @@ export const updateStatus = async (req: Request, res: Response, next: NextFuncti
         if (!order) throw new AppError('Order not found', 404);
 
         const previousStatus = order.status;
+        if (!canTransitionStatus(previousStatus, status)) {
+            throw new AppError(`Invalid status transition from "${previousStatus}" to "${status}"`, 400);
+        }
         order.status = status;
-        if (status === 'cancelled' && previousStatus !== 'cancelled') { order.cancelledAt = new Date(); await order.save(); await restoreStock(order); }
+        if (status === 'cancelled' && previousStatus !== 'cancelled') {
+            order.cancelledAt = new Date();
+            await order.save();
+            await restoreStock(order);
+            await rollbackCouponUsage(order.couponCode);
+        }
         else { await order.save(); }
 
         await logAdminAction({ actor: req.user!, action: 'order.status_update', entityType: 'order', entityId: order._id, summary: `Updated ${order.orderNumber} from "${previousStatus}" to "${status}"`, meta: { orderNumber: order.orderNumber, previousStatus, status } });
@@ -263,6 +408,10 @@ export const invoice = async (req: Request, res: Response, next: NextFunction) =
         doc.text('Shipping', 380, y).text(order.shipping === 0 ? 'FREE' : `₹${order.shipping}`, 460, y, { width: 85, align: 'right' });
         y += 16;
         doc.text('Tax (GST 5%)', 380, y).text(`₹${order.tax}`, 460, y, { width: 85, align: 'right' });
+        if ((order.discount || 0) > 0) {
+            y += 16;
+            doc.text('Discount', 380, y).text(`-₹${order.discount?.toLocaleString('en-IN')}`, 460, y, { width: 85, align: 'right' });
+        }
         y += 18;
         doc.moveTo(350, y).lineTo(545, y).stroke('#ddd');
         y += 10;

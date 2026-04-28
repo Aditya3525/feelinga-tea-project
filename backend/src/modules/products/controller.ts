@@ -8,7 +8,10 @@ import { escapeRegex } from '../../utils/sanitize.js';
 // GET /products
 export const list = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const cacheKey = `products:${JSON.stringify(req.query)}`;
+        const normalizedQuery = Object.fromEntries(
+            Object.entries(req.query).sort(([a], [b]) => a.localeCompare(b)),
+        );
+        const cacheKey = `products:${JSON.stringify(normalizedQuery)}`;
         const cached = cache.get(cacheKey);
         if (cached) return res.json(cached);
 
@@ -179,16 +182,19 @@ export const bulkStockUpdate = async (req: Request, res: Response, next: NextFun
 export const bulkDelete = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { productIds } = req.body;
-        const result = await Product.deleteMany({ _id: { $in: productIds } });
+        const result = await Product.updateMany(
+            { _id: { $in: productIds } },
+            { $set: { deletedAt: new Date() } },
+        );
         cache.invalidate('products:');
         await logAdminAction({
             actor: req.user!,
             action: 'product.bulk_delete',
             entityType: 'product',
-            summary: `Bulk deleted ${result.deletedCount} products`,
-            meta: { requested: productIds.length, deleted: result.deletedCount },
+            summary: `Bulk soft-deleted ${result.modifiedCount} products`,
+            meta: { requested: productIds.length, modified: result.modifiedCount },
         });
-        res.json({ status: 'success', data: { deleted: result.deletedCount } });
+        res.json({ status: 'success', data: { deleted: result.modifiedCount, modified: result.modifiedCount } });
     } catch (err) {
         next(err);
     }

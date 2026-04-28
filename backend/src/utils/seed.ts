@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import crypto from 'node:crypto';
 import mongoose from 'mongoose';
 import Product from '../models/Product.js';
 import User from '../models/User.js';
@@ -16,7 +17,7 @@ const products = [
         caffeine: 'high',
         tastingNotes: ['Malt', 'Honey', 'Caramel'],
         brewingInstructions: { temperature: '95°C', steepTime: '3-5 min', amount: '2g per cup' },
-        images: ['/images/products/assam-breakfast.png'],
+        images: ['/images/products/assam-breakfast.jpg'],
         rating: 4.8, reviewCount: 156,
         isBestSeller: false, isNewArrival: true,
         tags: ['morning', 'bold', 'classic', 'milk-tea'],
@@ -33,7 +34,7 @@ const products = [
         caffeine: 'medium',
         tastingNotes: ['Grass', 'Jasmine', 'Sweet Melon'],
         brewingInstructions: { temperature: '75°C', steepTime: '2-3 min', amount: '2g per cup' },
-        images: ['/images/products/himalayan-green.png'],
+        images: ['/images/products/himalayan-green.jpg'],
         rating: 4.7, reviewCount: 203,
         isBestSeller: false, isNewArrival: true,
         tags: ['fresh', 'light', 'everyday'],
@@ -50,7 +51,7 @@ const products = [
         caffeine: 'high',
         tastingNotes: ['Cardamom', 'Ginger', 'Cinnamon'],
         brewingInstructions: { temperature: '100°C', steepTime: '5-7 min', amount: '3g per cup' },
-        images: ['/images/products/heritage-chai.png'],
+        images: ['/images/products/heritage-chai.jpg'],
         rating: 4.9, reviewCount: 312,
         isBestSeller: true, isNew: true,
         tags: ['chai', 'spiced', 'traditional', 'winter'],
@@ -67,7 +68,7 @@ const products = [
         caffeine: 'low',
         tastingNotes: ['Honey', 'White Flowers', 'Vanilla'],
         brewingInstructions: { temperature: '70°C', steepTime: '4-5 min', amount: '3g per cup' },
-        images: ['/images/products/silver-needle.png'],
+        images: ['/images/products/silver-needle.jpg'],
         rating: 4.6, reviewCount: 89,
         isBestSeller: false, isNewArrival: true,
         tags: ['premium', 'delicate', 'antioxidant'],
@@ -84,7 +85,7 @@ const products = [
         caffeine: 'medium',
         tastingNotes: ['Muscatel', 'Floral', 'Citrus'],
         brewingInstructions: { temperature: '90°C', steepTime: '3-4 min', amount: '2g per cup' },
-        images: ['/images/products/darjeeling-ff.png'],
+        images: ['/images/products/darjeeling-ff.jpg'],
         rating: 4.8, reviewCount: 178,
         isBestSeller: true, isNew: false,
         tags: ['premium', 'muscatel', 'spring'],
@@ -101,7 +102,7 @@ const products = [
         caffeine: 'medium',
         tastingNotes: ['Saffron', 'Almond', 'Cardamom'],
         brewingInstructions: { temperature: '80°C', steepTime: '4-5 min', amount: '2g per cup' },
-        images: ['/images/products/kashmiri-kahwa.png'],
+        images: ['/images/products/kashmiri-kahwa.jpg'],
         rating: 4.7, reviewCount: 145,
         isBestSeller: false, isNewArrival: true,
         tags: ['saffron', 'luxury', 'traditional'],
@@ -118,7 +119,7 @@ const products = [
         caffeine: 'none',
         tastingNotes: ['Chamomile', 'Lavender', 'Honey'],
         brewingInstructions: { temperature: '100°C', steepTime: '5-7 min', amount: '2g per cup' },
-        images: ['/images/products/chamomile-lavender.png'],
+        images: ['/images/products/chamomile-lavender.jpg'],
         rating: 4.5, reviewCount: 98,
         isBestSeller: false, isNewArrival: true,
         tags: ['herbal', 'sleep', 'caffeine-free', 'evening'],
@@ -135,7 +136,7 @@ const products = [
         caffeine: 'medium',
         tastingNotes: ['Honey', 'Peach', 'Roasted'],
         brewingInstructions: { temperature: '85°C', steepTime: '3-5 min', amount: '3g per cup' },
-        images: ['/images/products/oolong-beauty.png'],
+        images: ['/images/products/oolong-beauty.jpg'],
         rating: 4.6, reviewCount: 67,
         isBestSeller: false, isNewArrival: true,
         tags: ['oolong', 'complex', 'multi-steep'],
@@ -152,7 +153,7 @@ const products = [
         caffeine: 'high',
         tastingNotes: ['Umami', 'Sweet Grass', 'Cream'],
         brewingInstructions: { temperature: '70°C', steepTime: 'Whisk 15s', amount: '2g per bowl' },
-        images: ['/images/products/matcha-ceremonial.png'],
+        images: ['/images/products/matcha-ceremonial.jpg'],
         rating: 4.9, reviewCount: 234,
         isBestSeller: true, isNew: false,
         tags: ['matcha', 'premium', 'superfood'],
@@ -169,7 +170,7 @@ const products = [
         caffeine: 'none',
         tastingNotes: ['Tulsi', 'Ginger', 'Pepper'],
         brewingInstructions: { temperature: '100°C', steepTime: '5-7 min', amount: '2g per cup' },
-        images: ['/images/products/tulsi-ginger.png'],
+        images: ['/images/products/tulsi-ginger.jpg'],
         rating: 4.4, reviewCount: 112,
         isBestSeller: false, isNewArrival: true,
         tags: ['herbal', 'immunity', 'ayurvedic', 'caffeine-free'],
@@ -186,7 +187,7 @@ const products = [
         caffeine: 'high',
         tastingNotes: ['Bergamot', 'Citrus', 'Malt'],
         brewingInstructions: { temperature: '95°C', steepTime: '3-4 min', amount: '2g per cup' },
-        images: ['/images/products/earl-grey.png'],
+        images: ['/images/products/earl-grey.jpg'],
         rating: 4.7, reviewCount: 189,
         isBestSeller: false, isNew: false,
         tags: ['classic', 'aromatic', 'everyday'],
@@ -203,17 +204,19 @@ const products = [
         caffeine: 'low',
         tastingNotes: ['Rose', 'Green Apple', 'Honey'],
         brewingInstructions: { temperature: '75°C', steepTime: '2-3 min', amount: '2g per cup' },
-        images: ['/images/products/rose-green.png'],
+        images: ['/images/products/rose-green.jpg'],
         rating: 4.5, reviewCount: 134,
         isBestSeller: false, isNewArrival: true,
         tags: ['floral', 'skincare', 'antioxidant'],
     },
 ];
 
+const generatedSeedPassword = crypto.randomBytes(16).toString('hex');
+
 const adminUser = {
-    name: 'Kailas Mane',
-    email: 'kailasmane777@gmail.com',
-    password: 'Admin@123456',
+    name: process.env.SEED_ADMIN_NAME || 'Admin',
+    email: process.env.SEED_ADMIN_EMAIL || process.env.ADMIN_EMAIL || 'admin@example.com',
+    password: process.env.SEED_ADMIN_PASS || generatedSeedPassword,
     role: 'admin',
 };
 
@@ -234,6 +237,9 @@ const seed = async () => {
         // Seed admin user
         const admin = await User.create(adminUser);
         console.log(`✓ Created admin user: ${admin.email}`);
+        if (!process.env.SEED_ADMIN_PASS) {
+            console.log('⚠ SEED_ADMIN_PASS not provided; generated one-time random seed password.');
+        }
 
         console.log('\n— Seed complete! —');
         console.log(`  Admin login: ${adminUser.email} / ${adminUser.password}\n`);

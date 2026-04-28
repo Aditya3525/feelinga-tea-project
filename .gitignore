@@ -1,6 +1,19 @@
 **/node_modules/
+
+# Secrets and local env files (contain secrets - never commit)
 .env
-.env.*
+.env.local
+.env*.local
+**/.env
+**/.env.local
+**/.env*.local
+
+# Block Vercel-generated env snapshot (contains OIDC tokens)
+**/.env.vercel.*
+
+# Allow example/template files - safe to commit
+!.env.example
+!**/.env.example
 
 # Local sensitive documents
 user data/
@@ -8,6 +21,7 @@ user data/
 # Build outputs
 backend/dist/
 *.tsbuildinfo
+.next/
 
 # OS files
 .DS_Store

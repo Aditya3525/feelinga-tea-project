@@ -14,7 +14,6 @@ export const API_ROUTES = {
     googleLogin: '/auth/google',
     forgotPassword: '/auth/forgot-password',
     resetPassword: '/auth/reset-password',
-    verifyEmail: '/auth/verify-email',
     addresses: '/auth/addresses',
     wishlist: '/auth/wishlist',
     dataExport: '/auth/data-export',

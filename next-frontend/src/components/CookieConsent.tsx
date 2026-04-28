@@ -33,58 +33,23 @@ export default function CookieConsent() {
         <div
             role="dialog"
             aria-label="Cookie consent"
-            style={{
-                position: 'fixed',
-                bottom: '1.5rem',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                zIndex: 9999,
-                width: '94%',
-                maxWidth: '520px',
-                background: 'var(--color-surface)',
-                color: 'var(--color-text)',
-                border: '1px solid var(--color-border)',
-                borderRadius: '14px',
-                padding: '1.25rem 1.5rem',
-                boxShadow: '0 8px 32px rgba(0,0,0,.12)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.75rem',
-                animation: 'fadeInUp .4s ease',
-            }}
+            className="cookie-consent"
         >
-            <p style={{ margin: 0, fontSize: '0.92rem', lineHeight: 1.55 }}>
+            <p className="cookie-consent__copy">
                 We use cookies and local storage to keep you signed in and remember your cart.
                 No third-party tracking. See our{' '}
-                <Link href="/privacy" style={{ textDecoration: 'underline' }}>Privacy Policy</Link>.
+                <Link href="/privacy" className="cookie-consent__link">Privacy Policy</Link>.
             </p>
-            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+            <div className="cookie-consent__actions">
                 <button
                     onClick={decline}
-                    style={{
-                        background: 'transparent',
-                        border: '1px solid var(--color-border)',
-                        borderRadius: '8px',
-                        padding: '0.45rem 1rem',
-                        cursor: 'pointer',
-                        fontSize: '0.85rem',
-                        color: 'inherit',
-                    }}
+                    className="cookie-consent__btn cookie-consent__btn--ghost"
                 >
                     Decline
                 </button>
                 <button
                     onClick={accept}
-                    style={{
-                        background: 'var(--color-accent)',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: '8px',
-                        padding: '0.45rem 1.2rem',
-                        cursor: 'pointer',
-                        fontSize: '0.85rem',
-                        fontWeight: 600,
-                    }}
+                    className="cookie-consent__btn cookie-consent__btn--primary"
                 >
                     Accept
                 </button>

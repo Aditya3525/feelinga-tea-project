@@ -1,12 +1,40 @@
 import mongoose from 'mongoose';
 
 const couponSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        trim: true,
+        default: '',
+    },
     code: {
         type: String,
         required: true,
         unique: true,
         uppercase: true,
         trim: true,
+    },
+    campaignType: {
+        type: String,
+        enum: ['regular', 'seasonal', 'festival'],
+        default: 'regular',
+    },
+    campaignLabel: {
+        type: String,
+        trim: true,
+        default: '',
+    },
+    bannerText: {
+        type: String,
+        trim: true,
+        default: '',
+    },
+    featuredOnStore: {
+        type: Boolean,
+        default: false,
+    },
+    priority: {
+        type: Number,
+        default: 0,
     },
     description: { type: String, default: '' },
     discountType: {
@@ -56,6 +84,7 @@ const couponSchema = new mongoose.Schema({
 });
 
 couponSchema.index({ validTo: 1 });
+couponSchema.index({ featuredOnStore: 1, active: 1, validFrom: 1, validTo: 1, priority: -1 });
 
 const Coupon = mongoose.model('Coupon', couponSchema);
 
