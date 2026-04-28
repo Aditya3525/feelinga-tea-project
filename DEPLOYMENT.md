@@ -121,6 +121,43 @@ Go to **Vercel â†’ Project â†’ Settings â†’ Environment Variables
 
 ---
 
+## 6 - GitHub CI/CD (Auto deploy frontend + backend)
+
+This repo includes a GitHub Actions workflow:
+
+- `.github/workflows/ci-cd.yml`
+
+It runs on every push to `main` and does:
+
+1. Backend build check
+2. Frontend typecheck + build check
+3. Triggers production deploy hooks for:
+   - Vercel frontend
+   - Render backend
+
+### One-time setup
+
+In GitHub repo settings:
+
+`Settings -> Secrets and variables -> Actions -> New repository secret`
+
+Add these 2 secrets:
+
+- `VERCEL_DEPLOY_HOOK_URL`
+- `RENDER_DEPLOY_HOOK_URL`
+
+### Where to get deploy hook URLs
+
+- **Vercel:** Project -> Settings -> Git -> Deploy Hooks -> Create Hook (Production, branch `main`)
+- **Render:** Service -> Settings -> Deploy Hook -> Copy URL
+
+### Important note
+
+Local `commit` alone does not trigger CI/CD.  
+You must `push` commits to GitHub (typically `main`) for automatic deployment.
+
+---
+
 ## Local Development
 
 ```bash
