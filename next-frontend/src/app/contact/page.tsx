@@ -146,7 +146,7 @@ export default function Contact() {
                                 <div className="contact-info__icon"><AppIcon name="mail" size={18} aria-hidden /></div>
                                 <div className="contact-info__text">
                                     <h4>Email</h4>
-                                    <p><a href="mailto:hello@feelinga.com" className="contact-link">hello@feelinga.com</a></p>
+                                    <p><a href="mailto:kailasmane777@gmail.com" className="contact-link">kailasmane777@gmail.com</a></p>
                                 </div>
                             </div>
                             <div className="contact-info__item">
