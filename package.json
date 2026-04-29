@@ -8,7 +8,8 @@
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd next-frontend && npm run dev",
-    "install:all": "npm install && cd backend && npm install && cd ../next-frontend && npm install"
+    "install:all": "npm install && cd backend && npm install && cd ../next-frontend && npm install",
+    "postinstall": "npm install --prefix next-frontend"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
