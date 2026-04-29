@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { apiRequest } from '../../utils/api';
 import { useToast } from '../../components/Toast';
 import AppIcon from '../../components/AppIcon';
+import { resolveProductImageList, resolveProductImageUrl } from '../../utils/image';
 import {
     ActivityTab,
     CouponsTab,
@@ -641,7 +642,7 @@ export default function Admin() {
             brewTemp: p.brewingInstructions?.temperature || '',
             brewSteep: p.brewingInstructions?.steepTime || '',
             brewAmount: p.brewingInstructions?.amount || '',
-            images: p.images || [],
+            images: resolveProductImageList(p.images || []),
             moods: p.moods || [],
             isBestSeller: p.isBestSeller || false,
             isNewArrival: p.isNewArrival || false,
@@ -682,7 +683,10 @@ export default function Admin() {
             });
             const data = await res.json().catch(() => ({}));
             if (!res.ok) throw new Error(data.message || 'Upload failed');
-            setProductForm(prev => ({ ...prev, images: [...prev.images, ...data.data.urls] }));
+            const uploadedUrls = Array.isArray(data?.data?.urls)
+                ? data.data.urls.map((url: string) => resolveProductImageUrl(url))
+                : [];
+            setProductForm(prev => ({ ...prev, images: [...prev.images, ...uploadedUrls] }));
         } catch (err: any) {
             showToast(err.message || 'Upload failed', 'error');
         } finally {

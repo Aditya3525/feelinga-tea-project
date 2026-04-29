@@ -124,7 +124,7 @@ app.use('/api/v1/products', (req, res, next) => {
 const isDev = process.env.NODE_ENV !== 'production';
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: isDev ? 500 : 100,
+    max: isDev ? 1200 : 450,
     message: { status: 'error', message: 'Too many requests, please try again later' },
 });
 app.use('/api', limiter);
@@ -132,12 +132,12 @@ app.use('/api', limiter);
 // Stricter rate limit for auth routes
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: isDev ? 200 : 50,
+    max: isDev ? 500 : 140,
     message: { status: 'error', message: 'Too many auth attempts, please try again later' },
 });
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: isDev ? 30 : 10,
+    max: isDev ? 80 : 25,
     skipSuccessfulRequests: true,
     keyGenerator: (req) => {
         const email = String(req.body?.email || '').trim().toLowerCase();

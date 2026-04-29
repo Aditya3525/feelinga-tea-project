@@ -11,8 +11,8 @@ const configuredApiOrigin = process.env.NEXT_PUBLIC_API_URL?.trim().replace(/^"(
 const configuredApiBase = configuredApiOrigin ? normalizeApiBase(configuredApiOrigin) : null;
 const FALLBACK_PROD_API_BASE = 'https://feelinga-tea-api.onrender.com/api/v1';
 const RETRYABLE_STATUS = new Set([502, 503, 504]);
-const GET_RETRY_COUNT = 2;
-const RETRY_DELAY_MS = 900;
+const GET_RETRY_COUNT = 4;
+const RETRY_DELAY_MS = 1200;
 
 function unique<T>(items: T[]): T[] {
     return Array.from(new Set(items));
@@ -20,6 +20,11 @@ function unique<T>(items: T[]): T[] {
 
 function getApiBases(): string[] {
     const candidates: string[] = [];
+
+    // Prefer same-origin proxy first in browsers to avoid CORS failures and double-request bursts.
+    if (typeof window !== 'undefined') {
+        candidates.push('/api/v1');
+    }
 
     if (configuredApiBase) candidates.push(configuredApiBase);
 
@@ -29,7 +34,10 @@ function getApiBases(): string[] {
         if (isDeployedFrontend) candidates.push(FALLBACK_PROD_API_BASE);
     }
 
-    candidates.push('/api/v1');
+    // Server-side / non-browser fallback.
+    if (typeof window === 'undefined') {
+        candidates.push('/api/v1');
+    }
     return unique(candidates);
 }
 

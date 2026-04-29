@@ -9,6 +9,7 @@ import { useToast } from '../../components/Toast';
 import { apiRequest } from '../../utils/api';
 import EmptyState from '../../components/EmptyState';
 import AppIcon from '../../components/AppIcon';
+import { resolveProductImageUrl } from '../../utils/image';
 
 type WishlistProduct = {
     _id: string;
@@ -21,6 +22,7 @@ type WishlistProduct = {
     rating?: number;
     reviewCount?: number;
     inStock?: boolean;
+    stock?: number;
 };
 
 function getErrorMessage(err: unknown, fallback: string): string {
@@ -80,7 +82,7 @@ export default function Wishlist() {
                 name: p.name,
                 price: p.prices?.['100g'] || 0,
                 size: '100g',
-                img: p.images?.[0] || '/images/darjeeling-tea.png',
+                img: resolveProductImageUrl(p.images?.[0], '/images/darjeeling-tea.png'),
             });
             showToast(`${p.name} added to cart!`, 'success');
         } finally {
@@ -139,12 +141,15 @@ export default function Wishlist() {
                         <div className="plp-products">
                             {products.map((p) => {
                                 const price = p.prices?.['100g'] || 0;
-                                const img = p.images?.[0] || '/images/darjeeling-tea.png';
+                                const img = resolveProductImageUrl(p.images?.[0], '/images/darjeeling-tea.png');
+                                const computedInStock = typeof p.inStock === 'boolean'
+                                    ? p.inStock
+                                    : Number(p.stock || 0) > 0;
                                 const isRemoving = removingIds.includes(p._id);
                                 const isAdding = addingIds.includes(p._id);
                                 return (
                                     <div className="product-card" key={p._id}>
-                                        {!p.inStock && <span className="product-card__badge product-card__badge--danger">Sold Out</span>}
+                                        {!computedInStock && <span className="product-card__badge product-card__badge--danger">Sold Out</span>}
                                         <Link href={`/product/${p.slug}`}>
                                             <div className="product-card__img">
                                                 <Image src={img} alt={p.name} width={300} height={300} className="img-contain-full" />
@@ -162,10 +167,10 @@ export default function Wishlist() {
                                                 <button
                                                     className="btn btn--primary btn--sm wishlist-card__add"
                                                     onClick={() => handleAddToCart(p)}
-                                                    disabled={!p.inStock || isAdding}
+                                                    disabled={!computedInStock || isAdding}
                                                     aria-busy={isAdding}
                                                 >
-                                                    {p.inStock ? (isAdding ? 'Adding...' : 'Add to Cart') : 'Sold Out'}
+                                                    {computedInStock ? (isAdding ? 'Adding...' : 'Add to Cart') : 'Sold Out'}
                                                 </button>
                                                 <button
                                                     className="btn btn--ghost btn--sm wishlist-card__remove"

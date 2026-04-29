@@ -11,6 +11,7 @@ import { useCart } from '../context/CartContext';
 import useCounter from '../hooks/useCounter';
 import { renderStars } from '../utils/renderStars';
 import { apiRequest } from '../utils/api';
+import { resolveProductImageUrl } from '../utils/image';
 import type { FormEvent, KeyboardEvent as ReactKeyboardEvent } from 'react';
 
 type HomeProduct = {
@@ -99,11 +100,17 @@ export default function Home() {
     useEffect(() => {
         async function fetchProducts() {
             try {
-                const [newData, initialBestData] = await Promise.all([
+                const [initialNewData, initialBestData] = await Promise.all([
                     apiRequest('/products?limit=4&isNewArrival=true&sort=-createdAt'),
                     apiRequest('/products?limit=4&isBestSeller=true&sort=-reviewCount'),
                 ]);
+                let newData = initialNewData;
                 let bestData = initialBestData;
+
+                // Fallback: if no products are explicitly marked as new arrivals, use latest teas.
+                if (!newData.data || newData.data.length === 0) {
+                    newData = await apiRequest('/products?limit=4&sort=-createdAt');
+                }
 
                 // Fallback: if no products are flagged as best sellers, use top-rated
                 if (!bestData.data || bestData.data.length === 0) {
@@ -116,7 +123,7 @@ export default function Home() {
                     name: p.name,
                     type: p.type,
                     price: p.prices?.['100g'] || 0,
-                    img: p.images?.[0] || '/images/darjeeling-tea.png',
+                    img: resolveProductImageUrl(p.images?.[0], '/images/darjeeling-tea.png'),
                     note: p.shortDescription || (p.description ? p.description.substring(0, 60) + '...' : ''),
                     reviews: p.reviewCount || 0,
                     stars: clampRating(p.rating),

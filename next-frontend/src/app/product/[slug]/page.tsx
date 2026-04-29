@@ -12,6 +12,7 @@ import ProductGridSkeleton from '../../../components/ProductGridSkeleton';
 import EmptyState from '../../../components/EmptyState';
 import AppIcon from '../../../components/AppIcon';
 import { apiRequest } from '../../../utils/api';
+import { resolveProductImageList, resolveProductImageUrl } from '../../../utils/image';
 
 type ProductBrewingInstructions = {
     temperature?: string;
@@ -121,7 +122,11 @@ export default function ProductDetail() {
             try {
                 setLoading(true);
                 const data = await apiRequest(`/products/${slug}`) as { data: ProductDetailData };
-                setProduct(data.data);
+                const normalizedImages = resolveProductImageList(data.data.images);
+                setProduct({
+                    ...data.data,
+                    images: normalizedImages.length > 0 ? normalizedImages : data.data.images,
+                });
                 // Set default size to first available
                 const sizes = Object.entries(data.data.prices || {}).filter(([, v]) => v);
                 if (sizes.length > 0) setSelectedSize(sizes[0][0]);
@@ -186,7 +191,11 @@ export default function ProductDetail() {
         async function fetchRelated() {
             try {
                 const data = await apiRequest(`/products?type=${encodeURIComponent(productType)}&limit=4`) as { data?: RelatedProduct[] };
-                setRelated((data.data || []).filter((p) => p.slug !== slug).slice(0, 3));
+                const normalized = (data.data || []).map((item) => ({
+                    ...item,
+                    images: resolveProductImageList(item.images),
+                }));
+                setRelated(normalized.filter((p) => p.slug !== slug).slice(0, 3));
             } catch { /* silent */ }
         }
 
@@ -203,7 +212,7 @@ export default function ProductDetail() {
             name: product.name,
             price: currentPrice,
             size: selectedSize,
-            img: product.images?.[0] || '/images/darjeeling-tea.png',
+            img: resolveProductImageUrl(product.images?.[0], '/images/darjeeling-tea.png'),
             qty,
         });
         showToast(`${product.name} (${selectedSize}) × ${qty} added to cart!`, 'success');
@@ -218,7 +227,7 @@ export default function ProductDetail() {
             name: product.name,
             price: currentPrice,
             size: selectedSize,
-            img: product.images?.[0] || '/images/darjeeling-tea.png',
+            img: resolveProductImageUrl(product.images?.[0], '/images/darjeeling-tea.png'),
             qty,
         };
 

@@ -318,7 +318,7 @@ export const checkEmail = async (req: Request, res: Response, next: NextFunction
 
 export const getWishlist = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const user = await User.findById(req.user!._id).populate('wishlist', 'name slug images prices type rating reviewCount');
+        const user = await User.findById(req.user!._id).populate('wishlist', 'name slug images prices type shortDescription rating reviewCount inStock stock');
         res.json({ status: 'success', data: user?.wishlist || [] });
     } catch (err) { next(err); }
 };

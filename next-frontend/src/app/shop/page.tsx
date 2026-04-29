@@ -8,6 +8,8 @@ import EmptyState from '../../components/EmptyState';
 import AppIcon from '../../components/AppIcon';
 import { useCart } from '../../context/CartContext';
 import { renderStars } from '../../utils/renderStars';
+import { apiRequest } from '../../utils/api';
+import { resolveProductImageUrl } from '../../utils/image';
 import type { ChangeEvent } from 'react';
 
 type ShopSort = 'popular' | 'newest' | 'price-asc' | 'price-desc';
@@ -125,9 +127,7 @@ function ShopInner() {
                     params.set('origin', filters.origin[0]);
                 }
 
-                const res = await fetch(`/api/v1/products?${params}`, { signal: controller.signal });
-                if (!res.ok) throw new Error('Could not load teas right now.');
-                const data = await res.json().catch(() => ({}));
+                const data = await apiRequest(`/products?${params.toString()}`, { signal: controller.signal }) as any;
                 if (data.data) {
                     setProducts(data.data.map((p: any): ShopProduct => ({
                         // Prepare badges by priority for the product card
@@ -157,7 +157,7 @@ function ShopInner() {
                         ]
                             .filter(([, value]) => Number.isFinite(Number(value)) && Number(value) > 0)
                             .map(([size, value]) => ({ size, value: Number(value) })),
-                        img: p.images?.[0] || '/images/products/darjeeling-ff.jpg',
+                        img: resolveProductImageUrl(p.images?.[0], '/images/products/darjeeling-ff.jpg'),
                         note: p.shortDescription || (p.description ? p.description.substring(0, 70) + '...' : ''),
                         reviews: p.reviewCount || 0,
                         stars: Math.round(p.rating || 0),
