@@ -9,7 +9,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\scripts\\ensure-dist-fresh.mjs",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_scripts_ensure_dist_fresh_mjs",
-      "community": 17,
+      "community": 16,
       "norm_label": "ensure-dist-fresh.mjs"
     },
     {
@@ -18,7 +18,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\scripts\\ensure-dist-fresh.mjs",
       "source_location": "L11",
       "id": "ensure_dist_fresh_latestmtimems",
-      "community": 17,
+      "community": 16,
       "norm_label": "latestmtimems()"
     },
     {
@@ -27,7 +27,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\scripts\\ensure-dist-fresh.mjs",
       "source_location": "L39",
       "id": "ensure_dist_fresh_toiso",
-      "community": 17,
+      "community": 16,
       "norm_label": "toiso()"
     },
     {
@@ -36,16 +36,16 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\app.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_app_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "app.ts"
     },
     {
       "label": "start()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\app.ts",
-      "source_location": "L180",
+      "source_location": "L194",
       "id": "app_start",
-      "community": 3,
+      "community": 2,
       "norm_label": "start()"
     },
     {
@@ -54,7 +54,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\config\\db.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_config_db_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "db.ts"
     },
     {
@@ -63,7 +63,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\config\\db.ts",
       "source_location": "L4",
       "id": "db_connectdb",
-      "community": 3,
+      "community": 2,
       "norm_label": "connectdb()"
     },
     {
@@ -81,7 +81,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\middleware\\auth.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_middleware_auth_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "auth.ts"
     },
     {
@@ -90,7 +90,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\middleware\\auth.ts",
       "source_location": "L8",
       "id": "auth_authenticate",
-      "community": 3,
+      "community": 2,
       "norm_label": "authenticate()"
     },
     {
@@ -99,7 +99,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\middleware\\auth.ts",
       "source_location": "L32",
       "id": "auth_authorize",
-      "community": 3,
+      "community": 2,
       "norm_label": "authorize()"
     },
     {
@@ -108,7 +108,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\middleware\\auth.ts",
       "source_location": "L42",
       "id": "auth_optionalauth",
-      "community": 3,
+      "community": 2,
       "norm_label": "optionalauth()"
     },
     {
@@ -117,7 +117,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\middleware\\errorHandler.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_middleware_errorhandler_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "errorhandler.ts"
     },
     {
@@ -126,7 +126,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\middleware\\errorHandler.ts",
       "source_location": "L4",
       "id": "errorhandler_apperror",
-      "community": 3,
+      "community": 2,
       "norm_label": "apperror"
     },
     {
@@ -135,7 +135,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\middleware\\errorHandler.ts",
       "source_location": "L8",
       "id": "errorhandler_apperror_constructor",
-      "community": 3,
+      "community": 2,
       "norm_label": ".constructor()"
     },
     {
@@ -144,7 +144,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\middleware\\errorHandler.ts",
       "source_location": "L16",
       "id": "errorhandler_errorhandler",
-      "community": 3,
+      "community": 2,
       "norm_label": "errorhandler()"
     },
     {
@@ -153,7 +153,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\middleware\\validate.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_middleware_validate_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "validate.ts"
     },
     {
@@ -162,7 +162,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\middleware\\validate.ts",
       "source_location": "L6",
       "id": "validate_validate",
-      "community": 3,
+      "community": 2,
       "norm_label": "validate()"
     },
     {
@@ -180,7 +180,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\models\\Cart.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_models_cart_ts",
-      "community": 6,
+      "community": 10,
       "norm_label": "cart.ts"
     },
     {
@@ -189,7 +189,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\models\\ContactMessage.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_models_contactmessage_ts",
-      "community": 10,
+      "community": 2,
       "norm_label": "contactmessage.ts"
     },
     {
@@ -207,7 +207,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\models\\Coupon.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_models_coupon_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "coupon.ts"
     },
     {
@@ -225,7 +225,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\models\\NewsletterSubscriber.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_models_newslettersubscriber_ts",
-      "community": 10,
+      "community": 2,
       "norm_label": "newslettersubscriber.ts"
     },
     {
@@ -261,7 +261,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\models\\Testimonial.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_models_testimonial_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "testimonial.ts"
     },
     {
@@ -288,7 +288,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\admin\\controller.ts",
       "source_location": "L17",
       "id": "controller_dashboard",
-      "community": 0,
+      "community": 1,
       "norm_label": "dashboard()"
     },
     {
@@ -459,7 +459,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\admin\\routes.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_modules_admin_routes_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "routes.ts"
     },
     {
@@ -468,7 +468,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\admin\\schema.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_modules_admin_schema_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "schema.ts"
     },
     {
@@ -558,7 +558,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\auth\\controller.ts",
       "source_location": "L111",
       "id": "controller_logout",
-      "community": 7,
+      "community": 6,
       "norm_label": "logout()"
     },
     {
@@ -702,7 +702,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\auth\\routes.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_modules_auth_routes_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "routes.ts"
     },
     {
@@ -711,7 +711,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\auth\\schema.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_modules_auth_schema_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "schema.ts"
     },
     {
@@ -720,7 +720,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\cart\\controller.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_modules_cart_controller_ts",
-      "community": 6,
+      "community": 10,
       "norm_label": "controller.ts"
     },
     {
@@ -729,7 +729,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\cart\\controller.ts",
       "source_location": "L7",
       "id": "controller_get",
-      "community": 6,
+      "community": 10,
       "norm_label": "get()"
     },
     {
@@ -738,7 +738,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\cart\\controller.ts",
       "source_location": "L38",
       "id": "controller_additem",
-      "community": 6,
+      "community": 10,
       "norm_label": "additem()"
     },
     {
@@ -747,7 +747,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\cart\\controller.ts",
       "source_location": "L63",
       "id": "controller_updateitem",
-      "community": 6,
+      "community": 10,
       "norm_label": "updateitem()"
     },
     {
@@ -756,7 +756,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\cart\\controller.ts",
       "source_location": "L84",
       "id": "controller_removeitem",
-      "community": 6,
+      "community": 0,
       "norm_label": "removeitem()"
     },
     {
@@ -765,7 +765,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\cart\\controller.ts",
       "source_location": "L99",
       "id": "controller_sync",
-      "community": 6,
+      "community": 10,
       "norm_label": "sync()"
     },
     {
@@ -774,7 +774,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\cart\\controller.ts",
       "source_location": "L136",
       "id": "controller_clear",
-      "community": 6,
+      "community": 10,
       "norm_label": "clear()"
     },
     {
@@ -783,7 +783,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\cart\\routes.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_modules_cart_routes_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "routes.ts"
     },
     {
@@ -792,7 +792,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\cart\\schema.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_modules_cart_schema_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "schema.ts"
     },
     {
@@ -801,7 +801,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\contact\\controller.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_modules_contact_controller_ts",
-      "community": 10,
+      "community": 2,
       "norm_label": "controller.ts"
     },
     {
@@ -810,7 +810,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\contact\\controller.ts",
       "source_location": "L7",
       "id": "controller_submitcontact",
-      "community": 10,
+      "community": 2,
       "norm_label": "submitcontact()"
     },
     {
@@ -819,7 +819,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\contact\\controller.ts",
       "source_location": "L16",
       "id": "controller_listmessages",
-      "community": 10,
+      "community": 2,
       "norm_label": "listmessages()"
     },
     {
@@ -828,7 +828,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\contact\\controller.ts",
       "source_location": "L44",
       "id": "controller_updatemessagestatus",
-      "community": 10,
+      "community": 2,
       "norm_label": "updatemessagestatus()"
     },
     {
@@ -837,7 +837,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\contact\\controller.ts",
       "source_location": "L54",
       "id": "controller_subscribe",
-      "community": 10,
+      "community": 2,
       "norm_label": "subscribe()"
     },
     {
@@ -846,7 +846,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\contact\\controller.ts",
       "source_location": "L68",
       "id": "controller_unsubscribe",
-      "community": 10,
+      "community": 2,
       "norm_label": "unsubscribe()"
     },
     {
@@ -855,7 +855,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\contact\\controller.ts",
       "source_location": "L84",
       "id": "controller_listsubscribers",
-      "community": 10,
+      "community": 2,
       "norm_label": "listsubscribers()"
     },
     {
@@ -864,7 +864,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\contact\\routes.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_modules_contact_routes_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "routes.ts"
     },
     {
@@ -873,7 +873,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\contact\\schema.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_modules_contact_schema_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "schema.ts"
     },
     {
@@ -882,7 +882,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\coupons\\routes.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_modules_coupons_routes_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "routes.ts"
     },
     {
@@ -990,7 +990,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\orders\\routes.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_modules_orders_routes_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "routes.ts"
     },
     {
@@ -999,7 +999,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\orders\\schema.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_modules_orders_schema_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "schema.ts"
     },
     {
@@ -1042,7 +1042,7 @@
       "label": "bulkStockUpdate()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\products\\controller.ts",
-      "source_location": "L160",
+      "source_location": "L191",
       "id": "controller_bulkstockupdate",
       "community": 1,
       "norm_label": "bulkstockupdate()"
@@ -1051,7 +1051,7 @@
       "label": "bulkDelete()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\products\\controller.ts",
-      "source_location": "L182",
+      "source_location": "L213",
       "id": "controller_bulkdelete",
       "community": 1,
       "norm_label": "bulkdelete()"
@@ -1060,7 +1060,7 @@
       "label": "update()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\products\\controller.ts",
-      "source_location": "L204",
+      "source_location": "L235",
       "id": "controller_update",
       "community": 1,
       "norm_label": "update()"
@@ -1080,7 +1080,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\products\\routes.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_modules_products_routes_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "routes.ts"
     },
     {
@@ -1089,7 +1089,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\products\\schema.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_modules_products_schema_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "schema.ts"
     },
     {
@@ -1107,7 +1107,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\reviews\\routes.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_modules_reviews_routes_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "routes.ts"
     },
     {
@@ -1116,7 +1116,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\reviews\\schema.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_modules_reviews_schema_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "schema.ts"
     },
     {
@@ -1125,7 +1125,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\testimonials\\routes.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_modules_testimonials_routes_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "routes.ts"
     },
     {
@@ -1134,7 +1134,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\upload\\routes.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_modules_upload_routes_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "routes.ts"
     },
     {
@@ -1143,7 +1143,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\upload\\routes.ts",
       "source_location": "L26",
       "id": "routes_filefilter",
-      "community": 3,
+      "community": 2,
       "norm_label": "filefilter()"
     },
     {
@@ -1179,7 +1179,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\utils\\cache.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_utils_cache_ts",
-      "community": 6,
+      "community": 1,
       "norm_label": "cache.ts"
     },
     {
@@ -1188,7 +1188,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\utils\\cache.ts",
       "source_location": "L11",
       "id": "cache_memorycache",
-      "community": 6,
+      "community": 1,
       "norm_label": "memorycache"
     },
     {
@@ -1197,7 +1197,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\utils\\cache.ts",
       "source_location": "L15",
       "id": "cache_memorycache_constructor",
-      "community": 6,
+      "community": 1,
       "norm_label": ".constructor()"
     },
     {
@@ -1215,7 +1215,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\utils\\cache.ts",
       "source_location": "L32",
       "id": "cache_memorycache_set",
-      "community": 0,
+      "community": 1,
       "norm_label": ".set()"
     },
     {
@@ -1224,7 +1224,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\utils\\cache.ts",
       "source_location": "L37",
       "id": "cache_memorycache_del",
-      "community": 6,
+      "community": 1,
       "norm_label": ".del()"
     },
     {
@@ -1242,7 +1242,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\utils\\cache.ts",
       "source_location": "L51",
       "id": "cache_memorycache_flush",
-      "community": 6,
+      "community": 10,
       "norm_label": ".flush()"
     },
     {
@@ -1251,7 +1251,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\utils\\cache.ts",
       "source_location": "L55",
       "id": "cache_memorycache_evictexpired",
-      "community": 6,
+      "community": 1,
       "norm_label": ".evictexpired()"
     },
     {
@@ -1260,7 +1260,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\utils\\cookies.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_utils_cookies_ts",
-      "community": 7,
+      "community": 6,
       "norm_label": "cookies.ts"
     },
     {
@@ -1269,7 +1269,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\utils\\cookies.ts",
       "source_location": "L7",
       "id": "cookies_resolvesamesite",
-      "community": 7,
+      "community": 6,
       "norm_label": "resolvesamesite()"
     },
     {
@@ -1278,7 +1278,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\utils\\cookies.ts",
       "source_location": "L13",
       "id": "cookies_tokenmaxage",
-      "community": 7,
+      "community": 6,
       "norm_label": "tokenmaxage()"
     },
     {
@@ -1287,7 +1287,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\utils\\cookies.ts",
       "source_location": "L20",
       "id": "cookies_basecookieoptions",
-      "community": 7,
+      "community": 6,
       "norm_label": "basecookieoptions()"
     },
     {
@@ -1296,7 +1296,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\utils\\cookies.ts",
       "source_location": "L34",
       "id": "cookies_setauthcookies",
-      "community": 7,
+      "community": 6,
       "norm_label": "setauthcookies()"
     },
     {
@@ -1305,7 +1305,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\utils\\cookies.ts",
       "source_location": "L40",
       "id": "cookies_clearauthcookies",
-      "community": 7,
+      "community": 6,
       "norm_label": "clearauthcookies()"
     },
     {
@@ -1314,7 +1314,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\utils\\cookies.ts",
       "source_location": "L46",
       "id": "cookies_getcookievalue",
-      "community": 3,
+      "community": 2,
       "norm_label": "getcookievalue()"
     },
     {
@@ -1476,7 +1476,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\utils\\logger.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_backend_src_utils_logger_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "logger.ts"
     },
     {
@@ -1593,8 +1593,17 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\next.config.mjs",
       "source_location": "L1",
       "id": "c_engineering_tea_project_next_frontend_next_config_mjs",
-      "community": 55,
+      "community": 20,
       "norm_label": "next.config.mjs"
+    },
+    {
+      "label": "sanitizeApiOrigin()",
+      "file_type": "code",
+      "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\next.config.mjs",
+      "source_location": "L3",
+      "id": "next_config_sanitizeapiorigin",
+      "community": 20,
+      "norm_label": "sanitizeapiorigin()"
     },
     {
       "label": "stitch_fetch.mjs",
@@ -1602,7 +1611,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\stitch_fetch.mjs",
       "source_location": "L1",
       "id": "c_engineering_tea_project_next_frontend_stitch_fetch_mjs",
-      "community": 15,
+      "community": 14,
       "norm_label": "stitch_fetch.mjs"
     },
     {
@@ -1611,7 +1620,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\stitch_fetch.mjs",
       "source_location": "L22",
       "id": "stitch_fetch_mcprequest",
-      "community": 15,
+      "community": 14,
       "norm_label": "mcprequest()"
     },
     {
@@ -1620,7 +1629,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\stitch_fetch.mjs",
       "source_location": "L104",
       "id": "stitch_fetch_downloadfile",
-      "community": 15,
+      "community": 14,
       "norm_label": "downloadfile()"
     },
     {
@@ -1629,7 +1638,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\stitch_fetch.mjs",
       "source_location": "L131",
       "id": "stitch_fetch_main",
-      "community": 15,
+      "community": 14,
       "norm_label": "main()"
     },
     {
@@ -1692,7 +1701,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\error.tsx",
       "source_location": "L1",
       "id": "c_engineering_tea_project_next_frontend_src_app_error_tsx",
-      "community": 56,
+      "community": 55,
       "norm_label": "error.tsx"
     },
     {
@@ -1773,50 +1782,50 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\page.tsx",
       "source_location": "L1",
       "id": "c_engineering_tea_project_next_frontend_src_app_page_tsx",
-      "community": 0,
+      "community": 8,
       "norm_label": "page.tsx"
     },
     {
       "label": "clampRating()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\page.tsx",
-      "source_location": "L59",
+      "source_location": "L60",
       "id": "page_clamprating",
-      "community": 0,
+      "community": 8,
       "norm_label": "clamprating()"
     },
     {
       "label": "renderRatingText()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\page.tsx",
-      "source_location": "L65",
+      "source_location": "L66",
       "id": "page_renderratingtext",
-      "community": 0,
+      "community": 8,
       "norm_label": "renderratingtext()"
     },
     {
       "label": "fetchProducts()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\shop\\page.tsx",
-      "source_location": "L91",
+      "source_location": "L101",
       "id": "page_fetchproducts",
-      "community": 0,
+      "community": 1,
       "norm_label": "fetchproducts()"
     },
     {
       "label": "fetchTestimonials()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\page.tsx",
-      "source_location": "L139",
+      "source_location": "L146",
       "id": "page_fetchtestimonials",
-      "community": 0,
+      "community": 8,
       "norm_label": "fetchtestimonials()"
     },
     {
       "label": "handleAddToCart()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\wishlist\\page.tsx",
-      "source_location": "L73",
+      "source_location": "L75",
       "id": "page_handleaddtocart",
       "community": 0,
       "norm_label": "handleaddtocart()"
@@ -1827,25 +1836,25 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\profile\\page.tsx",
       "source_location": "L361",
       "id": "page_handletabkeydown",
-      "community": 0,
+      "community": 8,
       "norm_label": "handletabkeydown()"
     },
     {
       "label": "scrollTestimonials()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\page.tsx",
-      "source_location": "L179",
+      "source_location": "L186",
       "id": "page_scrolltestimonials",
-      "community": 0,
+      "community": 8,
       "norm_label": "scrolltestimonials()"
     },
     {
       "label": "handleNewsletterSubmit()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\page.tsx",
-      "source_location": "L184",
+      "source_location": "L191",
       "id": "page_handlenewslettersubmit",
-      "community": 0,
+      "community": 8,
       "norm_label": "handlenewslettersubmit()"
     },
     {
@@ -1890,8 +1899,17 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\about\\page.tsx",
       "source_location": "L1",
       "id": "c_engineering_tea_project_next_frontend_src_app_about_page_tsx",
-      "community": 57,
+      "community": 27,
       "norm_label": "page.tsx"
+    },
+    {
+      "label": "About()",
+      "file_type": "code",
+      "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\about\\page.tsx",
+      "source_location": "L8",
+      "id": "page_about",
+      "community": 27,
+      "norm_label": "about()"
     },
     {
       "label": "layout.tsx",
@@ -1899,7 +1917,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\layout.tsx",
       "source_location": "L1",
       "id": "c_engineering_tea_project_next_frontend_src_app_admin_layout_tsx",
-      "community": 27,
+      "community": 28,
       "norm_label": "layout.tsx"
     },
     {
@@ -1908,7 +1926,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\layout.tsx",
       "source_location": "L10",
       "id": "layout_adminlayout",
-      "community": 27,
+      "community": 28,
       "norm_label": "adminlayout()"
     },
     {
@@ -1917,331 +1935,331 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
       "source_location": "L1",
       "id": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
-      "community": 2,
+      "community": 3,
       "norm_label": "page.tsx"
     },
     {
       "label": "handleEscape()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\shop\\page.tsx",
-      "source_location": "L77",
+      "source_location": "L87",
       "id": "page_handleescape",
-      "community": 2,
+      "community": 3,
       "norm_label": "handleescape()"
     },
     {
       "label": "handleAdminLogin()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L197",
+      "source_location": "L198",
       "id": "page_handleadminlogin",
-      "community": 2,
+      "community": 3,
       "norm_label": "handleadminlogin()"
     },
     {
       "label": "loadOverview()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L231",
+      "source_location": "L232",
       "id": "page_loadoverview",
-      "community": 2,
+      "community": 3,
       "norm_label": "loadoverview()"
     },
     {
       "label": "loadProducts()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L242",
+      "source_location": "L243",
       "id": "page_loadproducts",
-      "community": 2,
+      "community": 3,
       "norm_label": "loadproducts()"
     },
     {
       "label": "loadOrders()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L254",
+      "source_location": "L255",
       "id": "page_loadorders",
-      "community": 2,
+      "community": 3,
       "norm_label": "loadorders()"
     },
     {
       "label": "loadActivity()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L269",
+      "source_location": "L270",
       "id": "page_loadactivity",
-      "community": 2,
+      "community": 3,
       "norm_label": "loadactivity()"
     },
     {
       "label": "loadUsers()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L280",
+      "source_location": "L281",
       "id": "page_loadusers",
-      "community": 2,
+      "community": 3,
       "norm_label": "loadusers()"
     },
     {
       "label": "loadLowStock()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L292",
+      "source_location": "L293",
       "id": "page_loadlowstock",
-      "community": 2,
+      "community": 3,
       "norm_label": "loadlowstock()"
     },
     {
       "label": "loadMessages()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L303",
+      "source_location": "L304",
       "id": "page_loadmessages",
-      "community": 2,
+      "community": 3,
       "norm_label": "loadmessages()"
     },
     {
       "label": "loadSubscribers()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L316",
+      "source_location": "L317",
       "id": "page_loadsubscribers",
-      "community": 2,
+      "community": 3,
       "norm_label": "loadsubscribers()"
     },
     {
       "label": "loadCoupons()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L329",
+      "source_location": "L330",
       "id": "page_loadcoupons",
-      "community": 2,
+      "community": 3,
       "norm_label": "loadcoupons()"
     },
     {
       "label": "loadTestimonials()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L342",
+      "source_location": "L343",
       "id": "page_loadtestimonials",
-      "community": 2,
+      "community": 3,
       "norm_label": "loadtestimonials()"
     },
     {
       "label": "handleTestimonialSubmit()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L355",
+      "source_location": "L356",
       "id": "page_handletestimonialsubmit",
-      "community": 2,
+      "community": 3,
       "norm_label": "handletestimonialsubmit()"
     },
     {
       "label": "deleteTestimonial()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L379",
+      "source_location": "L380",
       "id": "page_deletetestimonial",
-      "community": 2,
+      "community": 3,
       "norm_label": "deletetestimonial()"
     },
     {
       "label": "toggleTestimonialApproval()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L396",
+      "source_location": "L397",
       "id": "page_toggletestimonialapproval",
-      "community": 2,
+      "community": 3,
       "norm_label": "toggletestimonialapproval()"
     },
     {
       "label": "toggleTestimonialFeatured()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L406",
+      "source_location": "L407",
       "id": "page_toggletestimonialfeatured",
-      "community": 2,
+      "community": 3,
       "norm_label": "toggletestimonialfeatured()"
     },
     {
       "label": "openEditTestimonial()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L416",
+      "source_location": "L417",
       "id": "page_openedittestimonial",
-      "community": 2,
+      "community": 3,
       "norm_label": "openedittestimonial()"
     },
     {
       "label": "handleCouponSubmit()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L430",
+      "source_location": "L431",
       "id": "page_handlecouponsubmit",
-      "community": 2,
+      "community": 3,
       "norm_label": "handlecouponsubmit()"
     },
     {
       "label": "deleteCoupon()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L464",
+      "source_location": "L465",
       "id": "page_deletecoupon",
-      "community": 2,
+      "community": 3,
       "norm_label": "deletecoupon()"
     },
     {
       "label": "openEditCoupon()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L482",
+      "source_location": "L483",
       "id": "page_openeditcoupon",
-      "community": 2,
+      "community": 3,
       "norm_label": "openeditcoupon()"
     },
     {
       "label": "toggleCouponStatus()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L505",
+      "source_location": "L506",
       "id": "page_togglecouponstatus",
-      "community": 2,
+      "community": 3,
       "norm_label": "togglecouponstatus()"
     },
     {
       "label": "changeUserRole()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L520",
+      "source_location": "L521",
       "id": "page_changeuserrole",
-      "community": 2,
+      "community": 3,
       "norm_label": "changeuserrole()"
     },
     {
       "label": "exportCSV()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L540",
+      "source_location": "L541",
       "id": "page_exportcsv",
-      "community": 2,
+      "community": 3,
       "norm_label": "exportcsv()"
     },
     {
       "label": "downloadInvoice()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L559",
+      "source_location": "L560",
       "id": "page_downloadinvoice",
-      "community": 2,
+      "community": 3,
       "norm_label": "downloadinvoice()"
     },
     {
       "label": "updateOrderStatus()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L578",
+      "source_location": "L579",
       "id": "page_updateorderstatus",
-      "community": 2,
+      "community": 3,
       "norm_label": "updateorderstatus()"
     },
     {
       "label": "updateTracking()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L587",
+      "source_location": "L588",
       "id": "page_updatetracking",
-      "community": 2,
+      "community": 3,
       "norm_label": "updatetracking()"
     },
     {
       "label": "deleteProduct()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L599",
+      "source_location": "L600",
       "id": "page_deleteproduct",
-      "community": 2,
+      "community": 3,
       "norm_label": "deleteproduct()"
     },
     {
       "label": "openCreateProduct()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L619",
+      "source_location": "L620",
       "id": "page_opencreateproduct",
-      "community": 2,
+      "community": 3,
       "norm_label": "opencreateproduct()"
     },
     {
       "label": "openEditProduct()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L625",
+      "source_location": "L626",
       "id": "page_openeditproduct",
-      "community": 2,
+      "community": 0,
       "norm_label": "openeditproduct()"
     },
     {
       "label": "handleProductFormChange()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L653",
+      "source_location": "L654",
       "id": "page_handleproductformchange",
-      "community": 2,
+      "community": 3,
       "norm_label": "handleproductformchange()"
     },
     {
       "label": "toggleMood()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L657",
+      "source_location": "L665",
       "id": "page_togglemood",
-      "community": 2,
+      "community": 3,
       "norm_label": "togglemood()"
     },
     {
       "label": "uploadImages()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L664",
+      "source_location": "L672",
       "id": "page_uploadimages",
-      "community": 2,
+      "community": 3,
       "norm_label": "uploadimages()"
     },
     {
       "label": "removeImage()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L686",
+      "source_location": "L697",
       "id": "page_removeimage",
-      "community": 2,
+      "community": 3,
       "norm_label": "removeimage()"
     },
     {
       "label": "handleDrop()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L690",
+      "source_location": "L701",
       "id": "page_handledrop",
-      "community": 2,
+      "community": 3,
       "norm_label": "handledrop()"
     },
     {
       "label": "handleProductSubmit()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L697",
+      "source_location": "L708",
       "id": "page_handleproductsubmit",
-      "community": 2,
+      "community": 3,
       "norm_label": "handleproductsubmit()"
     },
     {
       "label": "capitalize()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L739",
+      "source_location": "L815",
       "id": "page_capitalize",
-      "community": 2,
+      "community": 3,
       "norm_label": "capitalize()"
     },
     {
@@ -2250,7 +2268,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\components\\TabSections.tsx",
       "source_location": "L1",
       "id": "c_engineering_tea_project_next_frontend_src_app_admin_components_tabsections_tsx",
-      "community": 28,
+      "community": 8,
       "norm_label": "tabsections.tsx"
     },
     {
@@ -2259,8 +2277,17 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\components\\TabSections.tsx",
       "source_location": "L13",
       "id": "tabsections_sectionerror",
-      "community": 28,
+      "community": 8,
       "norm_label": "sectionerror()"
+    },
+    {
+      "label": "repeat()",
+      "file_type": "code",
+      "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\components\\TabSections.tsx",
+      "source_location": "L1031",
+      "id": "tabsections_repeat",
+      "community": 8,
+      "norm_label": "repeat()"
     },
     {
       "label": "layout.tsx",
@@ -2293,7 +2320,7 @@
       "label": "getErrorMessage()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\wishlist\\page.tsx",
-      "source_location": "L26",
+      "source_location": "L28",
       "id": "page_geterrormessage",
       "community": 0,
       "norm_label": "geterrormessage()"
@@ -2493,7 +2520,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\gifting\\page.tsx",
       "source_location": "L1",
       "id": "c_engineering_tea_project_next_frontend_src_app_gifting_page_tsx",
-      "community": 58,
+      "community": 56,
       "norm_label": "page.tsx"
     },
     {
@@ -2520,7 +2547,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\learn\\page.tsx",
       "source_location": "L1",
       "id": "c_engineering_tea_project_next_frontend_src_app_learn_page_tsx",
-      "community": 59,
+      "community": 57,
       "norm_label": "page.tsx"
     },
     {
@@ -2619,7 +2646,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\layout.tsx",
       "source_location": "L1",
       "id": "c_engineering_tea_project_next_frontend_src_app_product_slug_layout_tsx",
-      "community": 8,
+      "community": 7,
       "norm_label": "layout.tsx"
     },
     {
@@ -2628,7 +2655,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\layout.tsx",
       "source_location": "L14",
       "id": "layout_generatemetadata",
-      "community": 8,
+      "community": 7,
       "norm_label": "generatemetadata()"
     },
     {
@@ -2644,7 +2671,7 @@
       "label": "sizeToGrams()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\page.tsx",
-      "source_location": "L76",
+      "source_location": "L77",
       "id": "page_sizetograms",
       "community": 0,
       "norm_label": "sizetograms()"
@@ -2653,7 +2680,7 @@
       "label": "fetchProduct()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\page.tsx",
-      "source_location": "L119",
+      "source_location": "L121",
       "id": "page_fetchproduct",
       "community": 0,
       "norm_label": "fetchproduct()"
@@ -2662,7 +2689,7 @@
       "label": "checkWishlist()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\page.tsx",
-      "source_location": "L141",
+      "source_location": "L147",
       "id": "page_checkwishlist",
       "community": 0,
       "norm_label": "checkwishlist()"
@@ -2671,7 +2698,7 @@
       "label": "toggleWishlist()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\page.tsx",
-      "source_location": "L151",
+      "source_location": "L157",
       "id": "page_togglewishlist",
       "community": 0,
       "norm_label": "togglewishlist()"
@@ -2680,7 +2707,7 @@
       "label": "fetchReviews()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\page.tsx",
-      "source_location": "L173",
+      "source_location": "L180",
       "id": "page_fetchreviews",
       "community": 0,
       "norm_label": "fetchreviews()"
@@ -2689,7 +2716,7 @@
       "label": "fetchRelated()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\page.tsx",
-      "source_location": "L184",
+      "source_location": "L191",
       "id": "page_fetchrelated",
       "community": 0,
       "norm_label": "fetchrelated()"
@@ -2698,7 +2725,7 @@
       "label": "handleBuyNow()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\page.tsx",
-      "source_location": "L210",
+      "source_location": "L221",
       "id": "page_handlebuynow",
       "community": 0,
       "norm_label": "handlebuynow()"
@@ -2707,7 +2734,7 @@
       "label": "handleReviewSubmit()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\page.tsx",
-      "source_location": "L227",
+      "source_location": "L238",
       "id": "page_handlereviewsubmit",
       "community": 0,
       "norm_label": "handlereviewsubmit()"
@@ -2716,7 +2743,7 @@
       "label": "renderStars()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\page.tsx",
-      "source_location": "L730",
+      "source_location": "L746",
       "id": "page_renderstars",
       "community": 0,
       "norm_label": "renderstars()"
@@ -2727,7 +2754,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\seo.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_next_frontend_src_app_product_slug_seo_ts",
-      "community": 8,
+      "community": 7,
       "norm_label": "seo.ts"
     },
     {
@@ -2736,7 +2763,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\seo.ts",
       "source_location": "L24",
       "id": "seo_normalizebase",
-      "community": 8,
+      "community": 7,
       "norm_label": "normalizebase()"
     },
     {
@@ -2745,7 +2772,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\seo.ts",
       "source_location": "L28",
       "id": "seo_buildproductapiurl",
-      "community": 8,
+      "community": 7,
       "norm_label": "buildproductapiurl()"
     },
     {
@@ -2754,7 +2781,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\seo.ts",
       "source_location": "L39",
       "id": "seo_getapiorigins",
-      "community": 8,
+      "community": 7,
       "norm_label": "getapiorigins()"
     },
     {
@@ -2763,7 +2790,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\seo.ts",
       "source_location": "L51",
       "id": "seo_getproductdescription",
-      "community": 8,
+      "community": 7,
       "norm_label": "getproductdescription()"
     },
     {
@@ -2772,7 +2799,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\seo.ts",
       "source_location": "L56",
       "id": "seo_getproductseotitle",
-      "community": 8,
+      "community": 7,
       "norm_label": "getproductseotitle()"
     },
     {
@@ -2781,7 +2808,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\seo.ts",
       "source_location": "L66",
       "id": "seo_getproductcanonicalpath",
-      "community": 8,
+      "community": 7,
       "norm_label": "getproductcanonicalpath()"
     },
     {
@@ -2790,7 +2817,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\seo.ts",
       "source_location": "L70",
       "id": "seo_getprimaryprice",
-      "community": 8,
+      "community": 7,
       "norm_label": "getprimaryprice()"
     },
     {
@@ -2799,7 +2826,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\seo.ts",
       "source_location": "L76",
       "id": "seo_getabsoluteimageurl",
-      "community": 8,
+      "community": 7,
       "norm_label": "getabsoluteimageurl()"
     },
     {
@@ -2808,7 +2835,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\seo.ts",
       "source_location": "L104",
       "id": "seo_buildproductjsonld",
-      "community": 8,
+      "community": 7,
       "norm_label": "buildproductjsonld()"
     },
     {
@@ -2898,7 +2925,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\profile\\page.tsx",
       "source_location": "L288",
       "id": "page_handlelogout",
-      "community": 7,
+      "community": 6,
       "norm_label": "handlelogout()"
     },
     {
@@ -3015,25 +3042,25 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\shop\\page.tsx",
       "source_location": "L1",
       "id": "c_engineering_tea_project_next_frontend_src_app_shop_page_tsx",
-      "community": 2,
+      "community": 3,
       "norm_label": "page.tsx"
     },
     {
       "label": "toggleFilter()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\shop\\page.tsx",
-      "source_location": "L156",
+      "source_location": "L188",
       "id": "page_togglefilter",
-      "community": 2,
+      "community": 3,
       "norm_label": "togglefilter()"
     },
     {
       "label": "handleSortChange()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\shop\\page.tsx",
-      "source_location": "L166",
+      "source_location": "L198",
       "id": "page_handlesortchange",
-      "community": 2,
+      "community": 3,
       "norm_label": "handlesortchange()"
     },
     {
@@ -3096,7 +3123,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\verify-email\\page.tsx",
       "source_location": "L1",
       "id": "c_engineering_tea_project_next_frontend_src_app_verify_email_page_tsx",
-      "community": 18,
+      "community": 17,
       "norm_label": "page.tsx"
     },
     {
@@ -3105,7 +3132,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\verify-email\\page.tsx",
       "source_location": "L8",
       "id": "page_verifyemailinner",
-      "community": 18,
+      "community": 17,
       "norm_label": "verifyemailinner()"
     },
     {
@@ -3114,7 +3141,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\verify-email\\page.tsx",
       "source_location": "L32",
       "id": "page_verifyemail",
-      "community": 18,
+      "community": 17,
       "norm_label": "verifyemail()"
     },
     {
@@ -3148,7 +3175,7 @@
       "label": "loadWishlist()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\wishlist\\page.tsx",
-      "source_location": "L45",
+      "source_location": "L47",
       "id": "page_loadwishlist",
       "community": 0,
       "norm_label": "loadwishlist()"
@@ -3157,7 +3184,7 @@
       "label": "removeFromWishlist()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\wishlist\\page.tsx",
-      "source_location": "L59",
+      "source_location": "L61",
       "id": "page_removefromwishlist",
       "community": 0,
       "norm_label": "removefromwishlist()"
@@ -3186,7 +3213,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\components\\AppIcon.tsx",
       "source_location": "L1",
       "id": "c_engineering_tea_project_next_frontend_src_components_appicon_tsx",
-      "community": 19,
+      "community": 18,
       "norm_label": "appicon.tsx"
     },
     {
@@ -3195,7 +3222,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\components\\AppIcon.tsx",
       "source_location": "L118",
       "id": "appicon_resolveiconname",
-      "community": 19,
+      "community": 18,
       "norm_label": "resolveiconname()"
     },
     {
@@ -3204,7 +3231,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\components\\AppIcon.tsx",
       "source_location": "L123",
       "id": "appicon_appicon",
-      "community": 19,
+      "community": 18,
       "norm_label": "appicon()"
     },
     {
@@ -3321,7 +3348,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\components\\EmptyState.tsx",
       "source_location": "L1",
       "id": "c_engineering_tea_project_next_frontend_src_components_emptystate_tsx",
-      "community": 60,
+      "community": 58,
       "norm_label": "emptystate.tsx"
     },
     {
@@ -3330,7 +3357,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\components\\Layout.tsx",
       "source_location": "L1",
       "id": "c_engineering_tea_project_next_frontend_src_components_layout_tsx",
-      "community": 7,
+      "community": 6,
       "norm_label": "layout.tsx"
     },
     {
@@ -3339,7 +3366,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\components\\Layout.tsx",
       "source_location": "L58",
       "id": "layout_handlescroll",
-      "community": 7,
+      "community": 6,
       "norm_label": "handlescroll()"
     },
     {
@@ -3348,7 +3375,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\components\\Layout.tsx",
       "source_location": "L72",
       "id": "layout_getfocusable",
-      "community": 7,
+      "community": 6,
       "norm_label": "getfocusable()"
     },
     {
@@ -3357,7 +3384,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\components\\Layout.tsx",
       "source_location": "L83",
       "id": "layout_handlekeydown",
-      "community": 7,
+      "community": 6,
       "norm_label": "handlekeydown()"
     },
     {
@@ -3366,7 +3393,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\components\\Layout.tsx",
       "source_location": "L166",
       "id": "layout_handleglobalsearchshortcut",
-      "community": 7,
+      "community": 6,
       "norm_label": "handleglobalsearchshortcut()"
     },
     {
@@ -3375,7 +3402,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\components\\Layout.tsx",
       "source_location": "L220",
       "id": "layout_handlemobilelogout",
-      "community": 7,
+      "community": 6,
       "norm_label": "handlemobilelogout()"
     },
     {
@@ -3384,7 +3411,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\components\\Layout.tsx",
       "source_location": "L226",
       "id": "layout_refreshcampaign",
-      "community": 7,
+      "community": 6,
       "norm_label": "refreshcampaign()"
     },
     {
@@ -3393,8 +3420,17 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\components\\ProductCard.tsx",
       "source_location": "L1",
       "id": "c_engineering_tea_project_next_frontend_src_components_productcard_tsx",
-      "community": 61,
+      "community": 48,
       "norm_label": "productcard.tsx"
+    },
+    {
+      "label": "formatCaffeine()",
+      "file_type": "code",
+      "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\components\\ProductCard.tsx",
+      "source_location": "L24",
+      "id": "productcard_formatcaffeine",
+      "community": 48,
+      "norm_label": "formatcaffeine()"
     },
     {
       "label": "ProductGridSkeleton.tsx",
@@ -3402,7 +3438,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\components\\ProductGridSkeleton.tsx",
       "source_location": "L1",
       "id": "c_engineering_tea_project_next_frontend_src_components_productgridskeleton_tsx",
-      "community": 62,
+      "community": 59,
       "norm_label": "productgridskeleton.tsx"
     },
     {
@@ -3411,7 +3447,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\components\\Providers.tsx",
       "source_location": "L1",
       "id": "c_engineering_tea_project_next_frontend_src_components_providers_tsx",
-      "community": 16,
+      "community": 15,
       "norm_label": "providers.tsx"
     },
     {
@@ -3420,7 +3456,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\components\\Providers.tsx",
       "source_location": "L11",
       "id": "providers_providers",
-      "community": 16,
+      "community": 15,
       "norm_label": "providers()"
     },
     {
@@ -3501,7 +3537,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\components\\SectionHeader.tsx",
       "source_location": "L1",
       "id": "c_engineering_tea_project_next_frontend_src_components_sectionheader_tsx",
-      "community": 48,
+      "community": 49,
       "norm_label": "sectionheader.tsx"
     },
     {
@@ -3510,7 +3546,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\components\\SectionHeader.tsx",
       "source_location": "L10",
       "id": "sectionheader_sectionheader",
-      "community": 48,
+      "community": 49,
       "norm_label": "sectionheader()"
     },
     {
@@ -3519,7 +3555,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\components\\Toast.tsx",
       "source_location": "L1",
       "id": "c_engineering_tea_project_next_frontend_src_components_toast_tsx",
-      "community": 63,
+      "community": 60,
       "norm_label": "toast.tsx"
     },
     {
@@ -3582,7 +3618,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\context\\ThemeContext.tsx",
       "source_location": "L1",
       "id": "c_engineering_tea_project_next_frontend_src_context_themecontext_tsx",
-      "community": 20,
+      "community": 19,
       "norm_label": "themecontext.tsx"
     },
     {
@@ -3591,7 +3627,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\context\\ThemeContext.tsx",
       "source_location": "L8",
       "id": "themecontext_themeprovider",
-      "community": 20,
+      "community": 19,
       "norm_label": "themeprovider()"
     },
     {
@@ -3600,7 +3636,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\context\\ThemeContext.tsx",
       "source_location": "L73",
       "id": "themecontext_usetheme",
-      "community": 20,
+      "community": 19,
       "norm_label": "usetheme()"
     },
     {
@@ -3609,7 +3645,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\hooks\\useCounter.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_next_frontend_src_hooks_usecounter_ts",
-      "community": 49,
+      "community": 50,
       "norm_label": "usecounter.ts"
     },
     {
@@ -3618,7 +3654,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\hooks\\useCounter.ts",
       "source_location": "L8",
       "id": "usecounter_usecounter",
-      "community": 49,
+      "community": 50,
       "norm_label": "usecounter()"
     },
     {
@@ -3627,7 +3663,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\hooks\\useFadeIn.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_next_frontend_src_hooks_usefadein_ts",
-      "community": 16,
+      "community": 15,
       "norm_label": "usefadein.ts"
     },
     {
@@ -3636,7 +3672,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\hooks\\useFadeIn.ts",
       "source_location": "L5",
       "id": "usefadein_usefadein",
-      "community": 16,
+      "community": 15,
       "norm_label": "usefadein()"
     },
     {
@@ -3645,7 +3681,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\types\\app.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_next_frontend_src_types_app_ts",
-      "community": 64,
+      "community": 61,
       "norm_label": "app.ts"
     },
     {
@@ -3654,7 +3690,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\api.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_next_frontend_src_utils_api_ts",
-      "community": 6,
+      "community": 0,
       "norm_label": "api.ts"
     },
     {
@@ -3663,7 +3699,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\api.ts",
       "source_location": "L3",
       "id": "api_normalizeapibase",
-      "community": 6,
+      "community": 0,
       "norm_label": "normalizeapibase()"
     },
     {
@@ -3672,7 +3708,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\api.ts",
       "source_location": "L17",
       "id": "api_unique",
-      "community": 6,
+      "community": 0,
       "norm_label": "unique()"
     },
     {
@@ -3681,41 +3717,41 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\api.ts",
       "source_location": "L21",
       "id": "api_getapibases",
-      "community": 6,
+      "community": 0,
       "norm_label": "getapibases()"
     },
     {
       "label": "wait()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\api.ts",
-      "source_location": "L36",
+      "source_location": "L44",
       "id": "api_wait",
-      "community": 6,
+      "community": 0,
       "norm_label": "wait()"
     },
     {
       "label": "fetchWithRetry()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\api.ts",
-      "source_location": "L40",
+      "source_location": "L48",
       "id": "api_fetchwithretry",
-      "community": 6,
+      "community": 0,
       "norm_label": "fetchwithretry()"
     },
     {
       "label": "doRefresh()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\api.ts",
-      "source_location": "L68",
+      "source_location": "L76",
       "id": "api_dorefresh",
-      "community": 6,
+      "community": 0,
       "norm_label": "dorefresh()"
     },
     {
       "label": "apiRequest()",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\api.ts",
-      "source_location": "L95",
+      "source_location": "L103",
       "id": "api_apirequest",
       "community": 0,
       "norm_label": "apirequest()"
@@ -3726,7 +3762,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\constants.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_next_frontend_src_utils_constants_ts",
-      "community": 65,
+      "community": 62,
       "norm_label": "constants.ts"
     },
     {
@@ -3856,12 +3892,39 @@
       "norm_label": "getaddressfromcurrentlocation()"
     },
     {
+      "label": "image.ts",
+      "file_type": "code",
+      "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\image.ts",
+      "source_location": "L1",
+      "id": "c_engineering_tea_project_next_frontend_src_utils_image_ts",
+      "community": 0,
+      "norm_label": "image.ts"
+    },
+    {
+      "label": "resolveProductImageUrl()",
+      "file_type": "code",
+      "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\image.ts",
+      "source_location": "L3",
+      "id": "image_resolveproductimageurl",
+      "community": 0,
+      "norm_label": "resolveproductimageurl()"
+    },
+    {
+      "label": "resolveProductImageList()",
+      "file_type": "code",
+      "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\image.ts",
+      "source_location": "L30",
+      "id": "image_resolveproductimagelist",
+      "community": 0,
+      "norm_label": "resolveproductimagelist()"
+    },
+    {
       "label": "indiaAddress.ts",
       "file_type": "code",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\indiaAddress.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_next_frontend_src_utils_indiaaddress_ts",
-      "community": 14,
+      "community": 0,
       "norm_label": "indiaaddress.ts"
     },
     {
@@ -3870,7 +3933,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\indiaAddress.ts",
       "source_location": "L17",
       "id": "indiaaddress_normalizelocationkey",
-      "community": 14,
+      "community": 0,
       "norm_label": "normalizelocationkey()"
     },
     {
@@ -3879,7 +3942,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\indiaAddress.ts",
       "source_location": "L25",
       "id": "indiaaddress_resolvestatekey",
-      "community": 14,
+      "community": 0,
       "norm_label": "resolvestatekey()"
     },
     {
@@ -3888,7 +3951,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\indiaAddress.ts",
       "source_location": "L36",
       "id": "indiaaddress_resolvecitykey",
-      "community": 14,
+      "community": 0,
       "norm_label": "resolvecitykey()"
     },
     {
@@ -3897,7 +3960,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\indiaAddress.ts",
       "source_location": "L45",
       "id": "indiaaddress_getcitiesforstate",
-      "community": 14,
+      "community": 0,
       "norm_label": "getcitiesforstate()"
     },
     {
@@ -3906,7 +3969,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\indiaAddress.ts",
       "source_location": "L51",
       "id": "indiaaddress_getdistrictsforcity",
-      "community": 14,
+      "community": 0,
       "norm_label": "getdistrictsforcity()"
     },
     {
@@ -3969,7 +4032,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\renderStars.ts",
       "source_location": "L1",
       "id": "c_engineering_tea_project_next_frontend_src_utils_renderstars_ts",
-      "community": 50,
+      "community": 8,
       "norm_label": "renderstars.ts"
     },
     {
@@ -3978,7 +4041,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\renderStars.ts",
       "source_location": "L5",
       "id": "renderstars_renderstars",
-      "community": 50,
+      "community": 8,
       "norm_label": "renderstars()"
     },
     {
@@ -3987,7 +4050,7 @@
       "source_file": "C:\\Engineering\\Tea Project\\scripts\\graphify-refresh.ps1",
       "source_location": "L1",
       "id": "c_engineering_tea_project_scripts_graphify_refresh_ps1",
-      "community": 66,
+      "community": 63,
       "norm_label": "graphify-refresh.ps1"
     }
   ],
@@ -4200,7 +4263,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\app.ts",
-      "source_location": "L180",
+      "source_location": "L194",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_backend_src_app_ts",
       "_tgt": "app_start",
@@ -5991,8 +6054,8 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\components\\Layout.tsx",
       "source_location": "L221",
       "weight": 1.0,
-      "_src": "layout_handlemobilelogout",
-      "_tgt": "controller_logout",
+      "_src": "controller_logout",
+      "_tgt": "layout_handlemobilelogout",
       "source": "controller_logout",
       "target": "layout_handlemobilelogout"
     },
@@ -6912,7 +6975,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\products\\controller.ts",
-      "source_location": "L160",
+      "source_location": "L191",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_backend_src_modules_products_controller_ts",
       "_tgt": "controller_bulkstockupdate",
@@ -6924,7 +6987,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\products\\controller.ts",
-      "source_location": "L182",
+      "source_location": "L213",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_backend_src_modules_products_controller_ts",
       "_tgt": "controller_bulkdelete",
@@ -6936,7 +6999,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\products\\controller.ts",
-      "source_location": "L204",
+      "source_location": "L235",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_backend_src_modules_products_controller_ts",
       "_tgt": "controller_update",
@@ -6948,7 +7011,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\modules\\products\\controller.ts",
-      "source_location": "L227",
+      "source_location": "L259",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_backend_src_modules_products_controller_ts",
       "_tgt": "controller_remove",
@@ -7323,8 +7386,8 @@
       "source_file": "C:\\Engineering\\Tea Project\\backend\\src\\utils\\emailCheck.ts",
       "source_location": "L108",
       "weight": 1.0,
-      "_src": "emailcheck_verifywithhunter",
-      "_tgt": "cache_memorycache_set",
+      "_src": "cache_memorycache_set",
+      "_tgt": "emailcheck_verifywithhunter",
       "source": "cache_memorycache_set",
       "target": "emailcheck_verifywithhunter"
     },
@@ -7827,8 +7890,8 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\profile\\page.tsx",
       "source_location": "L93",
       "weight": 1.0,
-      "_src": "page_handleprofileupdate",
-      "_tgt": "emailcheck_checkemailaddress",
+      "_src": "emailcheck_checkemailaddress",
+      "_tgt": "page_handleprofileupdate",
       "source": "emailcheck_checkemailaddress",
       "target": "page_handleprofileupdate"
     },
@@ -7839,8 +7902,8 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\profile\\page.tsx",
       "source_location": "L131",
       "weight": 1.0,
-      "_src": "page_handleprofileemailblur",
-      "_tgt": "emailcheck_checkemailaddress",
+      "_src": "emailcheck_checkemailaddress",
+      "_tgt": "page_handleprofileemailblur",
       "source": "emailcheck_checkemailaddress",
       "target": "page_handleprofileemailblur"
     },
@@ -7851,8 +7914,8 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\components\\AuthModal.tsx",
       "source_location": "L224",
       "weight": 1.0,
-      "_src": "authmodal_handleregister",
-      "_tgt": "emailcheck_checkemailaddress",
+      "_src": "emailcheck_checkemailaddress",
+      "_tgt": "authmodal_handleregister",
       "source": "emailcheck_checkemailaddress",
       "target": "authmodal_handleregister"
     },
@@ -7863,8 +7926,8 @@
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\components\\AuthModal.tsx",
       "source_location": "L282",
       "weight": 1.0,
-      "_src": "authmodal_handlesignupemailblur",
-      "_tgt": "emailcheck_checkemailaddress",
+      "_src": "emailcheck_checkemailaddress",
+      "_tgt": "authmodal_handlesignupemailblur",
       "source": "emailcheck_checkemailaddress",
       "target": "authmodal_handlesignupemailblur"
     },
@@ -7974,6 +8037,18 @@
       "_tgt": "admin_integration_test_createorder",
       "source": "c_engineering_tea_project_backend_test_admin_integration_test_js",
       "target": "admin_integration_test_createorder",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\next.config.mjs",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_src": "c_engineering_tea_project_next_frontend_next_config_mjs",
+      "_tgt": "next_config_sanitizeapiorigin",
+      "source": "c_engineering_tea_project_next_frontend_next_config_mjs",
+      "target": "next_config_sanitizeapiorigin",
       "confidence_score": 1.0
     },
     {
@@ -8220,7 +8295,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\page.tsx",
-      "source_location": "L59",
+      "source_location": "L60",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_page_tsx",
       "_tgt": "page_clamprating",
@@ -8232,7 +8307,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\page.tsx",
-      "source_location": "L65",
+      "source_location": "L66",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_page_tsx",
       "_tgt": "page_renderratingtext",
@@ -8244,7 +8319,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\page.tsx",
-      "source_location": "L100",
+      "source_location": "L101",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_page_tsx",
       "_tgt": "page_fetchproducts",
@@ -8256,7 +8331,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\page.tsx",
-      "source_location": "L139",
+      "source_location": "L146",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_page_tsx",
       "_tgt": "page_fetchtestimonials",
@@ -8268,7 +8343,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\page.tsx",
-      "source_location": "L154",
+      "source_location": "L161",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_page_tsx",
       "_tgt": "page_handleaddtocart",
@@ -8280,7 +8355,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\page.tsx",
-      "source_location": "L163",
+      "source_location": "L170",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_page_tsx",
       "_tgt": "page_handletabkeydown",
@@ -8292,7 +8367,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\page.tsx",
-      "source_location": "L179",
+      "source_location": "L186",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_page_tsx",
       "_tgt": "page_scrolltestimonials",
@@ -8304,7 +8379,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\page.tsx",
-      "source_location": "L184",
+      "source_location": "L191",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_page_tsx",
       "_tgt": "page_handlenewslettersubmit",
@@ -8316,7 +8391,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\page.tsx",
-      "source_location": "L66",
+      "source_location": "L67",
       "weight": 1.0,
       "_src": "page_renderratingtext",
       "_tgt": "page_clamprating",
@@ -8325,10 +8400,22 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\page.tsx",
+      "source_location": "L68",
+      "weight": 1.0,
+      "_src": "page_renderratingtext",
+      "_tgt": "tabsections_repeat",
+      "source": "page_renderratingtext",
+      "target": "tabsections_repeat"
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\shop\\page.tsx",
-      "source_location": "L91",
+      "source_location": "L101",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_shop_page_tsx",
       "_tgt": "page_fetchproducts",
@@ -8364,7 +8451,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\page.tsx",
-      "source_location": "L195",
+      "source_location": "L206",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_product_slug_page_tsx",
       "_tgt": "page_handleaddtocart",
@@ -8376,7 +8463,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\shop\\page.tsx",
-      "source_location": "L181",
+      "source_location": "L213",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_shop_page_tsx",
       "_tgt": "page_handleaddtocart",
@@ -8388,13 +8475,25 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\wishlist\\page.tsx",
-      "source_location": "L73",
+      "source_location": "L75",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_wishlist_page_tsx",
       "_tgt": "page_handleaddtocart",
       "source": "page_handleaddtocart",
       "target": "c_engineering_tea_project_next_frontend_src_app_wishlist_page_tsx",
       "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\page.tsx",
+      "source_location": "L215",
+      "weight": 1.0,
+      "_src": "page_handleaddtocart",
+      "_tgt": "image_resolveproductimageurl",
+      "source": "page_handleaddtocart",
+      "target": "image_resolveproductimageurl"
     },
     {
       "relation": "contains",
@@ -8447,6 +8546,18 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\about\\page.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_src": "c_engineering_tea_project_next_frontend_src_app_about_page_tsx",
+      "_tgt": "page_about",
+      "source": "c_engineering_tea_project_next_frontend_src_app_about_page_tsx",
+      "target": "page_about",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\layout.tsx",
       "source_location": "L10",
       "weight": 1.0,
@@ -8460,7 +8571,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L149",
+      "source_location": "L150",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_handleescape",
@@ -8472,7 +8583,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L197",
+      "source_location": "L198",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_handleadminlogin",
@@ -8484,7 +8595,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L231",
+      "source_location": "L232",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_loadoverview",
@@ -8496,7 +8607,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L242",
+      "source_location": "L243",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_loadproducts",
@@ -8508,7 +8619,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L254",
+      "source_location": "L255",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_loadorders",
@@ -8520,7 +8631,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L269",
+      "source_location": "L270",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_loadactivity",
@@ -8532,7 +8643,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L280",
+      "source_location": "L281",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_loadusers",
@@ -8544,7 +8655,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L292",
+      "source_location": "L293",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_loadlowstock",
@@ -8556,7 +8667,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L303",
+      "source_location": "L304",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_loadmessages",
@@ -8568,7 +8679,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L316",
+      "source_location": "L317",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_loadsubscribers",
@@ -8580,7 +8691,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L329",
+      "source_location": "L330",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_loadcoupons",
@@ -8592,7 +8703,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L342",
+      "source_location": "L343",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_loadtestimonials",
@@ -8604,7 +8715,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L355",
+      "source_location": "L356",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_handletestimonialsubmit",
@@ -8616,7 +8727,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L379",
+      "source_location": "L380",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_deletetestimonial",
@@ -8628,7 +8739,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L396",
+      "source_location": "L397",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_toggletestimonialapproval",
@@ -8640,7 +8751,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L406",
+      "source_location": "L407",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_toggletestimonialfeatured",
@@ -8652,7 +8763,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L416",
+      "source_location": "L417",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_openedittestimonial",
@@ -8664,7 +8775,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L430",
+      "source_location": "L431",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_handlecouponsubmit",
@@ -8676,7 +8787,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L464",
+      "source_location": "L465",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_deletecoupon",
@@ -8688,7 +8799,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L482",
+      "source_location": "L483",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_openeditcoupon",
@@ -8700,7 +8811,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L505",
+      "source_location": "L506",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_togglecouponstatus",
@@ -8712,7 +8823,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L520",
+      "source_location": "L521",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_changeuserrole",
@@ -8724,7 +8835,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L540",
+      "source_location": "L541",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_exportcsv",
@@ -8736,7 +8847,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L559",
+      "source_location": "L560",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_downloadinvoice",
@@ -8748,7 +8859,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L578",
+      "source_location": "L579",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_updateorderstatus",
@@ -8760,7 +8871,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L587",
+      "source_location": "L588",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_updatetracking",
@@ -8772,7 +8883,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L599",
+      "source_location": "L600",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_deleteproduct",
@@ -8784,7 +8895,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L619",
+      "source_location": "L620",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_opencreateproduct",
@@ -8796,7 +8907,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L625",
+      "source_location": "L626",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_openeditproduct",
@@ -8808,7 +8919,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L653",
+      "source_location": "L654",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_handleproductformchange",
@@ -8820,7 +8931,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L657",
+      "source_location": "L665",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_togglemood",
@@ -8832,7 +8943,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L664",
+      "source_location": "L672",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_uploadimages",
@@ -8844,7 +8955,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L686",
+      "source_location": "L697",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_removeimage",
@@ -8856,7 +8967,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L690",
+      "source_location": "L701",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_handledrop",
@@ -8868,7 +8979,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L697",
+      "source_location": "L708",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_handleproductsubmit",
@@ -8880,7 +8991,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L739",
+      "source_location": "L815",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_admin_page_tsx",
       "_tgt": "page_capitalize",
@@ -8892,7 +9003,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\shop\\page.tsx",
-      "source_location": "L77",
+      "source_location": "L87",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_shop_page_tsx",
       "_tgt": "page_handleescape",
@@ -8904,7 +9015,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L733",
+      "source_location": "L802",
       "weight": 1.0,
       "_src": "page_handleproductsubmit",
       "_tgt": "page_loadproducts",
@@ -8916,7 +9027,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L582",
+      "source_location": "L583",
       "weight": 1.0,
       "_src": "page_updateorderstatus",
       "_tgt": "page_loadorders",
@@ -8928,7 +9039,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L594",
+      "source_location": "L595",
       "weight": 1.0,
       "_src": "page_updatetracking",
       "_tgt": "page_loadorders",
@@ -8940,7 +9051,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L459",
+      "source_location": "L460",
       "weight": 1.0,
       "_src": "page_handlecouponsubmit",
       "_tgt": "page_loadcoupons",
@@ -8952,7 +9063,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L513",
+      "source_location": "L514",
       "weight": 1.0,
       "_src": "page_togglecouponstatus",
       "_tgt": "page_loadcoupons",
@@ -8964,7 +9075,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L375",
+      "source_location": "L376",
       "weight": 1.0,
       "_src": "page_handletestimonialsubmit",
       "_tgt": "page_loadtestimonials",
@@ -8976,7 +9087,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L402",
+      "source_location": "L403",
       "weight": 1.0,
       "_src": "page_toggletestimonialapproval",
       "_tgt": "page_loadtestimonials",
@@ -8988,7 +9099,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L412",
+      "source_location": "L413",
       "weight": 1.0,
       "_src": "page_toggletestimonialfeatured",
       "_tgt": "page_loadtestimonials",
@@ -8998,9 +9109,21 @@
     },
     {
       "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
+      "source_location": "L645",
+      "weight": 1.0,
+      "_src": "page_openeditproduct",
+      "_tgt": "image_resolveproductimagelist",
+      "source": "page_openeditproduct",
+      "target": "image_resolveproductimagelist"
+    },
+    {
+      "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\page.tsx",
-      "source_location": "L694",
+      "source_location": "L705",
       "weight": 1.0,
       "_src": "page_handledrop",
       "_tgt": "page_uploadimages",
@@ -9019,6 +9142,30 @@
       "source": "c_engineering_tea_project_next_frontend_src_app_admin_components_tabsections_tsx",
       "target": "tabsections_sectionerror",
       "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\admin\\components\\TabSections.tsx",
+      "source_location": "L1031",
+      "weight": 1.0,
+      "_src": "c_engineering_tea_project_next_frontend_src_app_admin_components_tabsections_tsx",
+      "_tgt": "tabsections_repeat",
+      "source": "c_engineering_tea_project_next_frontend_src_app_admin_components_tabsections_tsx",
+      "target": "tabsections_repeat",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\renderStars.ts",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_src": "renderstars_renderstars",
+      "_tgt": "tabsections_repeat",
+      "source": "tabsections_repeat",
+      "target": "renderstars_renderstars"
     },
     {
       "relation": "contains",
@@ -9252,7 +9399,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\page.tsx",
-      "source_location": "L72",
+      "source_location": "L73",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_product_slug_page_tsx",
       "_tgt": "page_geterrormessage",
@@ -9264,7 +9411,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\page.tsx",
-      "source_location": "L128",
+      "source_location": "L134",
       "weight": 1.0,
       "_src": "page_fetchproduct",
       "_tgt": "page_geterrormessage",
@@ -9276,7 +9423,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\page.tsx",
-      "source_location": "L161",
+      "source_location": "L167",
       "weight": 1.0,
       "_src": "page_togglewishlist",
       "_tgt": "page_geterrormessage",
@@ -9288,7 +9435,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\page.tsx",
-      "source_location": "L241",
+      "source_location": "L252",
       "weight": 1.0,
       "_src": "page_handlereviewsubmit",
       "_tgt": "page_geterrormessage",
@@ -9420,7 +9567,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\wishlist\\page.tsx",
-      "source_location": "L26",
+      "source_location": "L28",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_wishlist_page_tsx",
       "_tgt": "page_geterrormessage",
@@ -9432,7 +9579,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\wishlist\\page.tsx",
-      "source_location": "L53",
+      "source_location": "L55",
       "weight": 1.0,
       "_src": "page_loadwishlist",
       "_tgt": "page_geterrormessage",
@@ -9444,7 +9591,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\wishlist\\page.tsx",
-      "source_location": "L67",
+      "source_location": "L69",
       "weight": 1.0,
       "_src": "page_removefromwishlist",
       "_tgt": "page_geterrormessage",
@@ -9816,7 +9963,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\page.tsx",
-      "source_location": "L76",
+      "source_location": "L77",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_product_slug_page_tsx",
       "_tgt": "page_sizetograms",
@@ -9828,7 +9975,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\page.tsx",
-      "source_location": "L119",
+      "source_location": "L121",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_product_slug_page_tsx",
       "_tgt": "page_fetchproduct",
@@ -9840,7 +9987,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\page.tsx",
-      "source_location": "L141",
+      "source_location": "L147",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_product_slug_page_tsx",
       "_tgt": "page_checkwishlist",
@@ -9852,7 +9999,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\page.tsx",
-      "source_location": "L151",
+      "source_location": "L157",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_product_slug_page_tsx",
       "_tgt": "page_togglewishlist",
@@ -9864,7 +10011,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\page.tsx",
-      "source_location": "L173",
+      "source_location": "L180",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_product_slug_page_tsx",
       "_tgt": "page_fetchreviews",
@@ -9876,7 +10023,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\page.tsx",
-      "source_location": "L184",
+      "source_location": "L191",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_product_slug_page_tsx",
       "_tgt": "page_fetchrelated",
@@ -9888,7 +10035,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\page.tsx",
-      "source_location": "L210",
+      "source_location": "L221",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_product_slug_page_tsx",
       "_tgt": "page_handlebuynow",
@@ -9900,7 +10047,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\page.tsx",
-      "source_location": "L227",
+      "source_location": "L238",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_product_slug_page_tsx",
       "_tgt": "page_handlereviewsubmit",
@@ -9912,7 +10059,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\page.tsx",
-      "source_location": "L730",
+      "source_location": "L746",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_product_slug_page_tsx",
       "_tgt": "page_renderstars",
@@ -9931,6 +10078,18 @@
       "_tgt": "api_apirequest",
       "source": "page_fetchproduct",
       "target": "api_apirequest"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\page.tsx",
+      "source_location": "L125",
+      "weight": 1.0,
+      "_src": "page_fetchproduct",
+      "_tgt": "image_resolveproductimagelist",
+      "source": "page_fetchproduct",
+      "target": "image_resolveproductimagelist"
     },
     {
       "relation": "calls",
@@ -9979,6 +10138,18 @@
       "_tgt": "api_apirequest",
       "source": "page_fetchrelated",
       "target": "api_apirequest"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\product\\[slug]\\page.tsx",
+      "source_location": "L230",
+      "weight": 1.0,
+      "_src": "page_handlebuynow",
+      "_tgt": "image_resolveproductimageurl",
+      "source": "page_handlebuynow",
+      "target": "image_resolveproductimageurl"
     },
     {
       "relation": "calls",
@@ -10596,7 +10767,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\shop\\page.tsx",
-      "source_location": "L156",
+      "source_location": "L188",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_shop_page_tsx",
       "_tgt": "page_togglefilter",
@@ -10608,7 +10779,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\shop\\page.tsx",
-      "source_location": "L166",
+      "source_location": "L198",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_shop_page_tsx",
       "_tgt": "page_handlesortchange",
@@ -10692,7 +10863,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\wishlist\\page.tsx",
-      "source_location": "L45",
+      "source_location": "L47",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_wishlist_page_tsx",
       "_tgt": "page_loadwishlist",
@@ -10704,7 +10875,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\app\\wishlist\\page.tsx",
-      "source_location": "L59",
+      "source_location": "L61",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_app_wishlist_page_tsx",
       "_tgt": "page_removefromwishlist",
@@ -11087,6 +11258,18 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\components\\ProductCard.tsx",
+      "source_location": "L24",
+      "weight": 1.0,
+      "_src": "c_engineering_tea_project_next_frontend_src_components_productcard_tsx",
+      "_tgt": "productcard_formatcaffeine",
+      "source": "c_engineering_tea_project_next_frontend_src_components_productcard_tsx",
+      "target": "productcard_formatcaffeine",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\components\\Providers.tsx",
       "source_location": "L11",
       "weight": 1.0,
@@ -11412,7 +11595,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\api.ts",
-      "source_location": "L36",
+      "source_location": "L44",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_utils_api_ts",
       "_tgt": "api_wait",
@@ -11424,7 +11607,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\api.ts",
-      "source_location": "L40",
+      "source_location": "L48",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_utils_api_ts",
       "_tgt": "api_fetchwithretry",
@@ -11436,7 +11619,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\api.ts",
-      "source_location": "L68",
+      "source_location": "L76",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_utils_api_ts",
       "_tgt": "api_dorefresh",
@@ -11448,7 +11631,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\api.ts",
-      "source_location": "L95",
+      "source_location": "L103",
       "weight": 1.0,
       "_src": "c_engineering_tea_project_next_frontend_src_utils_api_ts",
       "_tgt": "api_apirequest",
@@ -11460,7 +11643,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\api.ts",
-      "source_location": "L33",
+      "source_location": "L41",
       "weight": 1.0,
       "_src": "api_getapibases",
       "_tgt": "api_unique",
@@ -11472,7 +11655,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\api.ts",
-      "source_location": "L99",
+      "source_location": "L107",
       "weight": 1.0,
       "_src": "api_apirequest",
       "_tgt": "api_getapibases",
@@ -11484,7 +11667,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\api.ts",
-      "source_location": "L49",
+      "source_location": "L57",
       "weight": 1.0,
       "_src": "api_fetchwithretry",
       "_tgt": "api_wait",
@@ -11496,7 +11679,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\api.ts",
-      "source_location": "L113",
+      "source_location": "L121",
       "weight": 1.0,
       "_src": "api_apirequest",
       "_tgt": "api_fetchwithretry",
@@ -11508,7 +11691,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\api.ts",
-      "source_location": "L118",
+      "source_location": "L126",
       "weight": 1.0,
       "_src": "api_apirequest",
       "_tgt": "api_dorefresh",
@@ -11766,6 +11949,30 @@
       "_tgt": "geolocation_reversegeocode",
       "source": "geolocation_reversegeocode",
       "target": "geolocation_getaddressfromcurrentlocation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\image.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_src": "c_engineering_tea_project_next_frontend_src_utils_image_ts",
+      "_tgt": "image_resolveproductimageurl",
+      "source": "c_engineering_tea_project_next_frontend_src_utils_image_ts",
+      "target": "image_resolveproductimageurl",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Engineering\\Tea Project\\next-frontend\\src\\utils\\image.ts",
+      "source_location": "L30",
+      "weight": 1.0,
+      "_src": "c_engineering_tea_project_next_frontend_src_utils_image_ts",
+      "_tgt": "image_resolveproductimagelist",
+      "source": "c_engineering_tea_project_next_frontend_src_utils_image_ts",
+      "target": "image_resolveproductimagelist",
       "confidence_score": 1.0
     },
     {
