@@ -516,6 +516,9 @@ export function OrdersTab({
     updateTracking,
     updateOrderStatus,
     downloadInvoice,
+    selectedOrders,
+    setSelectedOrders,
+    bulkUpdateStatus,
     actionLoading,
     error,
     onRetry,
@@ -532,9 +535,31 @@ export function OrdersTab({
     updateTracking: (orderId: string, trackingNumber: string, trackingUrl: string) => Promise<void>;
     updateOrderStatus: (id: string, status: string) => Promise<void>;
     downloadInvoice: (orderId: string) => Promise<void>;
+    selectedOrders: string[];
+    setSelectedOrders: (ids: string[]) => void;
+    bulkUpdateStatus: (status: string) => Promise<void>;
     actionLoading: string | null;
 }) {
     if (error) return <SectionError message={error} onRetry={onRetry} />;
+
+    const allSelected = orders.length > 0 && selectedOrders.length === orders.length;
+    const someSelected = selectedOrders.length > 0;
+
+    const handleSelectAll = () => {
+        if (allSelected) {
+            setSelectedOrders([]);
+        } else {
+            setSelectedOrders(orders.map(o => o._id));
+        }
+    };
+
+    const handleSelectOrder = (id: string) => {
+        if (selectedOrders.includes(id)) {
+            setSelectedOrders(selectedOrders.filter(s => s !== id));
+        } else {
+            setSelectedOrders([...selectedOrders, id]);
+        }
+    };
 
     return (
         <div className="admin__section active" id="sectionOrders">
@@ -562,12 +587,42 @@ export function OrdersTab({
                     <button className="btn btn--ghost btn--sm" onClick={() => loadOrders(1, orderSearch, orderStatusFilter)}>Search</button>
                 </div>
             </div>
+
+            {someSelected && (
+                <div className="admin-bulk-actions">
+                    <span>{selectedOrders.length} selected</span>
+                    <select
+                        onChange={(e) => { if (e.target.value) bulkUpdateStatus(e.target.value); e.target.value = ''; }}
+                        className="admin-bulk-select"
+                        disabled={!!actionLoading}
+                    >
+                        <option value="">Bulk Update Status</option>
+                        {['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'].map(s => (
+                            <option key={s} value={s}>{capitalize(s)}</option>
+                        ))}
+                    </select>
+                    <button className="btn btn--ghost btn--sm" onClick={() => setSelectedOrders([])}>Clear</button>
+                </div>
+            )}
+
             <div className="admin__table-wrap">
                 <table className="admin__table">
-                    <thead><tr><th>Order #</th><th>Date & Time</th><th>Customer</th><th>Total</th><th>Status</th><th>Tracking</th><th>Actions</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" checked={allSelected} onChange={handleSelectAll} /></th>
+                            <th>Order #</th>
+                            <th>Date & Time</th>
+                            <th>Customer</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Tracking</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
                     <tbody>
                         {orders.map(order => (
                             <tr key={order._id}>
+                                <td><input type="checkbox" checked={selectedOrders.includes(order._id)} onChange={() => handleSelectOrder(order._id)} /></td>
                                 <td>{order.orderNumber}</td>
                                 <td className="admin-orders-date">{order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}<br />{order.createdAt ? new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }) : ''}</td>
                                 <td>{order.user?.name || order.user?.email || 'N/A'}</td>

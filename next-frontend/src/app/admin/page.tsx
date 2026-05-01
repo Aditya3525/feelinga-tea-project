@@ -53,6 +53,7 @@ export default function Admin() {
     const [orderPagination, setOrderPagination] = useState<AdminPagination>({ page: 1, totalPages: 1 });
     const [orderSearch, setOrderSearch] = useState('');
     const [orderStatusFilter, setOrderStatusFilter] = useState('');
+    const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
     const [activity, setActivity] = useState<AdminList>([]);
 
     // Users state
@@ -261,6 +262,7 @@ export default function Admin() {
             const data = await adminApi(url);
             setOrders(data.data || []);
             setOrderPagination(data.pagination || { page: 1, totalPages: 1 });
+            setSelectedOrders([]); // Clear selections on reload
         } catch (err) {
             console.error(err);
             setTabError('orders', 'Orders could not be loaded.');
@@ -582,6 +584,18 @@ export default function Admin() {
             await adminApi(`/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) });
             loadOrders(orderPagination.page);
         } catch (err: any) { showToast(err.message || 'Failed to update status', 'error'); }
+        finally { setActionLoading(null); }
+    };
+
+    const bulkUpdateStatus = async (status: string) => {
+        if (selectedOrders.length === 0) return;
+        setActionLoading('bulk-status');
+        try {
+            await adminApi('/orders/bulk-status', { method: 'PATCH', body: JSON.stringify({ ids: selectedOrders, status }) });
+            setSelectedOrders([]);
+            loadOrders(orderPagination.page);
+            showToast(`Updated ${selectedOrders.length} orders to ${status}`, 'success');
+        } catch (err: any) { showToast(err.message || 'Failed to bulk update status', 'error'); }
         finally { setActionLoading(null); }
     };
 
@@ -997,6 +1011,9 @@ export default function Admin() {
                             updateTracking={updateTracking}
                             updateOrderStatus={updateOrderStatus}
                             downloadInvoice={downloadInvoice}
+                            selectedOrders={selectedOrders}
+                            setSelectedOrders={setSelectedOrders}
+                            bulkUpdateStatus={bulkUpdateStatus}
                             actionLoading={actionLoading}
                             error={tabErrors.orders}
                             onRetry={() => { void loadOrders(orderPagination.page, orderSearch, orderStatusFilter); }}
