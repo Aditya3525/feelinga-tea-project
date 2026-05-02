@@ -3284,6 +3284,10 @@ p {
   color: rgba(255, 255, 255, 0.35);
 }
 
+.footer__credit {
+  font-weight: 700;
+}
+
 /* ===== CART DRAWER ===== */
 
 .footer__legal {
