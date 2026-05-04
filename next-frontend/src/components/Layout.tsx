@@ -492,7 +492,6 @@ export default function Layout({ children }: AppProviderProps) {
                         <span>© 2026 Feelinga. All rights reserved.</span>
                         <span className="footer__made-with">Made with <AppIcon name="leaf" size={14} aria-hidden /> in India</span>
                         <span className="footer__credit">Designed & Developed by Aditya Shirsat and Omkar Shinde</span>
-                        <Link href="/admin" className="footer__admin-link">Admin Access</Link>
                     </div>
                     <div className="footer__legal">
                         <span>Feelinga is a brand of <strong>Vithubadayaji Industries Pvt. Ltd.</strong></span>
