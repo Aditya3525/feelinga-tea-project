@@ -37,7 +37,7 @@ export default function About() {
                             <p>&quot;I wanted people to experience tea the way it&apos;s meant to be - not just a drink, but a daily dose of happiness.&quot; - <em>Kailas Ishwar Mane, Founder and Managing Director</em></p>
                         </div>
                         <div className="about-visual about-visual--centered">
-                            <Image src="/images/founder.jpg" alt="Kailas Ishwar Mane - Founder of Feelinga" width={320} height={400} className="about-founder-image" />
+                            <Image src="/images/logo.png" alt="Feelinga logo" width={320} height={320} className="about-founder-image" />
                         </div>
                     </div>
                 </div>
