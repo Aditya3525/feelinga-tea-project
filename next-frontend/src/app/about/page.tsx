@@ -59,7 +59,7 @@ export default function About() {
                             <p><strong>Support Phone:</strong> <a href="tel:+919673592818">+91 96735 92818</a></p>
                             <p>Our official ownership and business records are maintained internally as part of our compliance documentation.</p>
                         </div>
-                        <div className="about-visual" aria-hidden="true"><AppIcon name="award" size={38} aria-hidden /></div>
+                        <div className="about-visual about-visual--icon" aria-hidden="true"><AppIcon name="award" size={56} aria-hidden /></div>
                     </div>
                 </div>
             </section>
@@ -74,7 +74,7 @@ export default function About() {
                             <p>We partner directly with 15+ small-estate growers across Darjeeling, Assam, the Nilgiris, and Kangra Valley. No middlemen, no blending houses - just a direct relationship between the garden and your cup.</p>
                             <p>Every lot is personally tasted and selected by our team. We visit our partner estates twice a year, working closely with the pluckers and tea makers to ensure quality, fair wages, and sustainable farming practices.</p>
                         </div>
-                        <div className="about-visual" aria-hidden="true"><AppIcon name="mountain" size={38} aria-hidden /></div>
+                        <div className="about-visual about-visual--icon" aria-hidden="true"><AppIcon name="mountain" size={56} aria-hidden /></div>
                     </div>
                 </div>
             </section>
