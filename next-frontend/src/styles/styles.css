@@ -4132,8 +4132,10 @@ p {
 }
 
 .about-hero .overline {
-  display: block;
+  display: inline-block;
   text-align: center;
+  margin: 0 auto;
+  width: max-content;
 }
 
 .about-hero__quick-nav {
@@ -4187,6 +4189,8 @@ p {
   background: var(--color-bg-alt);
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
+  justify-self: center;
+  margin: 0 auto;
 }
 
 .about-visual--icon svg {
