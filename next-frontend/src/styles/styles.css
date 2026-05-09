@@ -6259,7 +6259,7 @@ textarea:focus-visible {
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-sm);
   overflow: hidden;
-  box-border
+  box-sizing: border-box;
 }
 
 .quickview__qty-btn {
