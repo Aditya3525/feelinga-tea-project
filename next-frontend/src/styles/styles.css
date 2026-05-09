@@ -3044,14 +3044,15 @@ p {
 }
 
 .testimonial-card {
-  min-width: min(380px, calc(100vw - var(--space-lg)));
-  max-width: calc(100vw - var(--space-lg));
+  flex: 0 0 100%;
+  width: 100%;
+  min-width: 100%;
+  max-width: 100%;
   padding: var(--space-2xl);
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-2xl);
   scroll-snap-align: center;
-  flex-shrink: 0;
   transition: all var(--transition-spring);
   position: relative;
   overflow: hidden;
@@ -4905,8 +4906,8 @@ a.btn,
   }
 
   .testimonial-card {
-    min-width: calc(100vw - var(--space-xl));
-    max-width: calc(100vw - var(--space-xl));
+    min-width: 100%;
+    max-width: 100%;
     padding: var(--space-lg);
     min-height: 300px;
     display: flex;
@@ -5093,8 +5094,8 @@ a.btn,
   }
 
   .testimonial-card {
-    min-width: calc(100vw - var(--space-3xl));
-    max-width: calc(100vw - var(--space-3xl));
+    min-width: 100%;
+    max-width: 100%;
     padding: var(--space-xl);
     scroll-snap-align: center;
   }
@@ -5268,7 +5269,8 @@ a.btn,
 
   /* Testimonial cards fit within screen */
   .testimonial-card {
-    min-width: 260px;
+    min-width: 100%;
+    max-width: 100%;
   }
 
   .testimonials-arrow {
@@ -6238,6 +6240,7 @@ textarea:focus-visible {
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-sm);
   overflow: hidden;
+  box-border
 }
 
 .quickview__qty-btn {
@@ -9768,7 +9771,8 @@ img[loading="lazy"] {
     gap: var(--space-md);
   }
   .testimonial-card {
-    min-width: 84vw;
+    min-width: 100%;
+    max-width: 100%;
     padding: var(--space-xl) var(--space-lg);
   }
   .testimonial-card__text {
@@ -9886,7 +9890,8 @@ img[loading="lazy"] {
     display: none; /* arrows are redundant when touch-scroll works */
   }
   .testimonial-card {
-    min-width: min(300px, 82vw);
+    min-width: 100%;
+    max-width: 100%;
     padding: var(--space-xl);
   }
 
@@ -10408,7 +10413,8 @@ img[loading="lazy"] {
   }
 
   .testimonial-card {
-    min-width: 280px;
+    min-width: 100%;
+    max-width: 100%;
     padding: var(--space-lg);
   }
 
@@ -10829,7 +10835,8 @@ img[loading="lazy"] {
 
   /* Testimonials */
   .testimonial-card {
-    min-width: 260px;
+    min-width: 100%;
+    max-width: 100%;
     padding: var(--space-md);
   }
 
@@ -11652,8 +11659,9 @@ img[loading="lazy"] {
 
   .testimonial-card {
     scroll-snap-align: center;
-    min-width: 280px;
-    margin: 0 var(--space-sm);
+    min-width: 100%;
+    max-width: 100%;
+    margin: 0;
   }
 
   .testimonial-card__text {
