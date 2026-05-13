@@ -391,7 +391,7 @@ export default function Checkout() {
     if (checkoutItems.length === 0 && step < 4) {
         return (
             <Layout>
-                <div className="container section">
+                <div className="container section checkout-shell">
                     <EmptyState
                         icon="shopping"
                         iconSize="lg"
@@ -414,7 +414,7 @@ export default function Checkout() {
                         <h1>Checkout</h1>
                     </div>
                 </div>
-                <div className="container section checkout-auth-gate">
+                <div className="container section checkout-shell checkout-auth-gate">
                     <div className="checkout-auth-gate__icon"><AppIcon name="lock" size={48} aria-hidden /></div>
                     <h2 className="checkout-auth-gate__title">Sign in to continue</h2>
                     <p className="checkout-auth-gate__description">
@@ -463,7 +463,7 @@ export default function Checkout() {
                 </div>
             </div>
 
-            <div className="container section">
+            <div className="container section checkout-shell">
                 {/* Progress */}
                 <div className="checkout-stepper" role="list" aria-label="Checkout progress">
                     <p className="visually-hidden" aria-live="polite">Step {step} of 4: {stepLabels[Math.min(step - 1, stepLabels.length - 1)]}</p>
@@ -476,7 +476,7 @@ export default function Checkout() {
                 </div>
 
                 <div className="checkout-layout">
-                    <div>
+                    <div className="checkout-panel checkout-panel--main">
                         {/* Step 1: Shipping */}
                         {step === 1 && (
                             <div>
@@ -590,7 +590,7 @@ export default function Checkout() {
 
                     {/* Order Summary Sidebar */}
                     {step < 4 && (
-                        <div className="checkout-summary">
+                        <div className="checkout-summary checkout-panel checkout-panel--summary">
                             <h3 className="checkout-summary__title">Order Summary</h3>
                             <button
                                 type="button"

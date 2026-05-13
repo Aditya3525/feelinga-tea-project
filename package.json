@@ -1,6 +1,7 @@
 {
   "name": "tea-project",
   "version": "1.0.0",
+  "private": true,
   "description": "Tea Project - Run frontend and backend concurrently",
   "scripts": {
     "build": "npm run build --prefix next-frontend",
@@ -12,7 +13,6 @@
     "postinstall": "npm install --prefix next-frontend"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2",
-    "next": "16.1.6"
+    "concurrently": "^8.2.2"
   }
 }

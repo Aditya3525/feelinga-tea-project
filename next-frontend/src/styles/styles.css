@@ -5567,10 +5567,42 @@ a.btn,
   /* Checkout */
   .checkout-stepper {
     gap: var(--space-xs) !important;
+    margin-bottom: var(--space-xl);
   }
 
   .checkout-stepper__step {
     font-size: 0.7rem;
+  }
+
+  .checkout-panel {
+    padding: var(--space-lg);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  }
+
+  .checkout-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .checkout-section-header .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .checkout-step-actions {
+    flex-direction: column;
+  }
+
+  .checkout-step-actions .btn {
+    width: 100%;
+  }
+
+  .checkout-coupon__form-row {
+    flex-direction: column;
+  }
+
+  .checkout-coupon__form-row .btn {
+    width: 100%;
   }
 
   /* Badges */
@@ -7204,6 +7236,24 @@ textarea:focus-visible {
 }
 
 /* Checkout page 2-column layout → single column on mobile */
+.checkout-shell,
+.section.checkout-shell {
+  padding-left: clamp(var(--space-md), 4vw, var(--space-3xl));
+  padding-right: clamp(var(--space-md), 4vw, var(--space-3xl));
+}
+
+.checkout-panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: clamp(var(--space-lg), 3vw, var(--space-2xl));
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.08);
+}
+
+.checkout-panel--summary {
+  background: var(--color-bg-alt);
+}
+
 .checkout-layout {
   display: grid;
   gap: var(--space-3xl);
@@ -7469,9 +7519,6 @@ textarea:focus-visible {
 }
 
 .checkout-summary {
-  background: var(--color-bg-alt);
-  border-radius: var(--radius-lg);
-  padding: var(--space-xl);
   position: sticky;
   top: 100px;
 }
@@ -7616,7 +7663,26 @@ textarea:focus-visible {
   .checkout-layout {
     grid-template-columns: 1fr;
     gap: var(--space-xl);
-    padding: 0 var(--space-sm);
+    padding: 0;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .checkout-panel {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .checkout-section-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .checkout-section-header .btn {
+    width: 100%;
+    justify-content: center;
+    padding-inline: var(--space-sm);
   }
 
   .checkout-summary {
@@ -12903,5 +12969,13 @@ img[loading="lazy"] {
     .plp-products {
       grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
       gap: var(--space-sm) !important;
+    }
+  }
+
+  /* Final checkout mobile padding consistency */
+  @media (max-width: 768px) {
+    .container.section.checkout-shell {
+      padding-left: var(--space-md);
+      padding-right: var(--space-md);
     }
   }

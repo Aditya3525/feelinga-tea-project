@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import * as Sentry from '@sentry/node';
 import logger from '../utils/logger.js';
 
 export class AppError extends Error {
@@ -47,6 +48,9 @@ const errorHandler = (err: any, req: Request, res: Response, _next: NextFunction
     }
 
     if (statusCode >= 500) {
+        if (process.env.SENTRY_DSN?.trim()) {
+            Sentry.captureException(err);
+        }
         logger.error({ err, statusCode, method: req.method, url: req.url }, message);
     } else {
         logger.warn({ statusCode, method: req.method, url: req.url }, message);

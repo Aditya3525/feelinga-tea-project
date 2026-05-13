@@ -45,6 +45,10 @@
       - key: ADMIN_EMAIL
         sync: false
 
+      # Monitoring / error tracking
+      - key: SENTRY_DSN
+        sync: false
+
       # Google OAuth
       - key: GOOGLE_CLIENT_ID
         sync: false

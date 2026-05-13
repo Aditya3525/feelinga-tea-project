@@ -4,6 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
+import * as Sentry from '@sentry/node';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import mongoose from 'mongoose';
@@ -29,10 +30,11 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase();
 const enforceHttps = process.env.ENFORCE_HTTPS === 'true';
+const sentryDsn = process.env.SENTRY_DSN?.trim();
 
 // ===== ENV VALIDATION =====
 const requiredEnvVars = ['MONGODB_URI', 'JWT_SECRET', 'JWT_REFRESH_SECRET'];
-const optionalEnvVars = ['GOOGLE_CLIENT_ID', 'CLIENT_URL'];
+const optionalEnvVars = ['GOOGLE_CLIENT_ID', 'CLIENT_URL', 'SENTRY_DSN'];
 const missing = requiredEnvVars.filter(v => !process.env[v]);
 if (missing.length > 0) {
     logger.fatal({ missing }, 'Missing required environment variables');
@@ -41,6 +43,15 @@ if (missing.length > 0) {
 const unset = optionalEnvVars.filter(v => !process.env[v]);
 if (unset.length > 0) {
     logger.warn({ vars: unset }, 'Optional env vars not set — some features may be disabled');
+}
+
+if (sentryDsn) {
+    Sentry.init({
+        dsn: sentryDsn,
+        environment: process.env.NODE_ENV,
+    });
+} else if (process.env.NODE_ENV === 'production') {
+    logger.warn('SENTRY_DSN not set; backend error tracking is disabled');
 }
 
 // ===== GLOBAL MIDDLEWARE =====
@@ -224,13 +235,25 @@ if (process.env.NODE_ENV !== 'test') {
 // ===== GRACEFUL SHUTDOWN & PROCESS SAFETY =====
 process.on('unhandledRejection', (reason: any) => {
     logger.fatal({ err: reason }, 'Unhandled Promise Rejection');
+    if (sentryDsn) {
+        Sentry.captureException(reason instanceof Error ? reason : new Error(String(reason)));
+    }
     if (process.env.NODE_ENV === 'production') {
+        if (sentryDsn) {
+            void Sentry.flush(2000).finally(() => process.exit(1));
+            return;
+        }
         process.exit(1);
     }
 });
 
 process.on('uncaughtException', (err) => {
     logger.fatal({ err }, 'Uncaught Exception');
+    if (sentryDsn) {
+        Sentry.captureException(err);
+        void Sentry.flush(2000).finally(() => process.exit(1));
+        return;
+    }
     process.exit(1);
 });
 

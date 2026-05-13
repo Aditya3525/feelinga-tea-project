@@ -45,6 +45,7 @@ Set these in **Render â†’ Environment** (marked `sync: false` in `render.ya
 | `MONGODB_URI` | Atlas connection string |
 | `CLIENT_URL` | Your Vercel URL e.g. `https://feelinga-tea.vercel.app` |
 | `ADMIN_EMAIL` | The email address that gets admin role on first login |
+| `SENTRY_DSN` | Sentry project DSN for backend error tracking |
 | `GOOGLE_CLIENT_ID` | From [Google Cloud Console](https://console.cloud.google.com/) â†’ Credentials |
 | `EMAIL_FROM` | e.g. `"Feelinga Tea" <noreply@yourdomain.com>` |
 | `SMTP_HOST` | Your SMTP provider host |

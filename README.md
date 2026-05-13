@@ -130,8 +130,14 @@ Premium tea e-commerce platform built with Next.js and Express.
 │   ├── graph.json
 │   ├── graph.html
 │   └── GRAPH_REPORT.md
+├── docs/                       Supporting docs & local artifacts
+│   ├── ROADMAP.md
+│   ├── presentation.md
+│   ├── Graphify_Setup_Guide.txt
+│   ├── GRAPHIFY_AGENT_PROMPTS.md
+│   └── hello_world.html
 ├── render.yaml                 Render deployment blueprint
-└── ROADMAP.md                  Improvement roadmap
+└── vercel.json                 Vercel deployment config
 ```
 
 ## Getting Started
