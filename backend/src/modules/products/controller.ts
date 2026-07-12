@@ -4,6 +4,7 @@ import { AppError } from '../../middleware/errorHandler.js';
 import { logAdminAction } from '../../utils/auditLog.js';
 import { cache, TTL } from '../../utils/cache.js';
 import { escapeRegex } from '../../utils/sanitize.js';
+import { updateProductSchema } from './schema.js';
 
 // GET /products
 export const list = async (req: Request, res: Response, next: NextFunction) => {
@@ -234,11 +235,13 @@ export const bulkDelete = async (req: Request, res: Response, next: NextFunction
 // PATCH /products/:id (admin)
 export const update = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        if (req.body.stock !== undefined) {
-            req.body.stock = Number(req.body.stock);
-            req.body.inStock = req.body.stock > 0;
+        // Parse through schema to strip unknown fields — prevents mass assignment
+        const parsed = updateProductSchema.parse(req.body);
+        if (parsed.stock !== undefined) {
+            parsed.stock = Number(parsed.stock);
+            (parsed as any).inStock = parsed.stock > 0;
         }
-        const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+        const product = await Product.findByIdAndUpdate(req.params.id, parsed, { new: true, runValidators: true });
         if (!product) throw new AppError('Product not found', 404);
         cache.invalidate('products:');
         await logAdminAction({
@@ -247,7 +250,7 @@ export const update = async (req: Request, res: Response, next: NextFunction) =>
             entityType: 'product',
             entityId: product._id,
             summary: `Updated product "${product.name}"`,
-            meta: { fields: Object.keys(req.body || {}) },
+            meta: { fields: Object.keys(parsed) },
         });
         res.json({ status: 'success', data: product });
     } catch (err) {

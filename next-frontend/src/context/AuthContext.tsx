@@ -14,7 +14,6 @@ export function AuthProvider({ children }: AppProviderProps) {
 
     const clearAuthStorage = () => {
         localStorage.removeItem('feelinga_user');
-        localStorage.removeItem('feelinga_token');
         localStorage.removeItem('feelinga_refresh');
         // Clear local cart to prevent stale basket data after logout/session expiry.
         localStorage.removeItem('feelinga_cart');
@@ -22,22 +21,21 @@ export function AuthProvider({ children }: AppProviderProps) {
 
     useEffect(() => {
         const stored = localStorage.getItem('feelinga_user');
-        const token = localStorage.getItem('feelinga_token');
-        if (stored && token) {
+        if (stored) {
             // Hydrate immediately from localStorage for fast UI
             const u = JSON.parse(stored) as UserProfile;
             setUser(u);
             setIsAuthenticated(true);
             setIsAdmin(u.role === 'admin');
 
-            // Validate token in background
+            // Validate session cookie in background
             apiRequest('/auth/me').then(data => {
                 const freshUser = data.data.user as UserProfile;
                 localStorage.setItem('feelinga_user', JSON.stringify(freshUser));
                 setUser(freshUser);
                 setIsAdmin(freshUser.role === 'admin');
             }).catch(() => {
-                // Token invalid — clear auth state
+                // Session invalid — clear auth state
                 clearAuthStorage();
                 setUser(null);
                 setIsAuthenticated(false);
@@ -48,9 +46,9 @@ export function AuthProvider({ children }: AppProviderProps) {
         }
     }, []);
 
-    const persist = (userData: UserProfile, accessToken: string, refreshToken: string) => {
+    const persist = (userData: UserProfile, _accessToken: string, refreshToken: string) => {
+        // Access token is set as httpOnly cookie by the server — do not store in localStorage.
         localStorage.setItem('feelinga_user', JSON.stringify(userData));
-        localStorage.setItem('feelinga_token', accessToken);
         localStorage.setItem('feelinga_refresh', refreshToken);
         setUser(userData);
         setIsAuthenticated(true);
@@ -81,10 +79,7 @@ export function AuthProvider({ children }: AppProviderProps) {
 
     const logout = async () => {
         try {
-            const token = localStorage.getItem('feelinga_token');
-            if (token) {
-                await apiRequest('/auth/logout', { method: 'POST' });
-            }
+            await apiRequest('/auth/logout', { method: 'POST' });
         } catch {
             // Even if server logout fails, always clear local auth state.
         } finally {

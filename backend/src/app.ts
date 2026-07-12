@@ -1,4 +1,5 @@
-﻿import 'dotenv/config';
+import 'dotenv/config';
+import crypto from 'crypto';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -104,14 +105,22 @@ if (enforceHttps && process.env.NODE_ENV === 'production') {
     });
 }
 
-// Request logging
+// Request logging — use 'combined' in prod to avoid leaking tokens via dev format
 if (process.env.NODE_ENV !== 'test') {
-    app.use(morgan('dev'));
+    app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 }
 
-// Body parsing
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
+// Body parsing — 100kb is generous for a tea store; guards against JSON DoS
+app.use(express.json({ limit: '100kb' }));
+app.use(express.urlencoded({ extended: true, limit: '100kb' }));
+
+// Correlation ID — attach a unique trace ID to every request for log tracing
+app.use((req, res, next) => {
+    const id = (req.headers['x-request-id'] as string) || crypto.randomUUID();
+    res.setHeader('X-Request-Id', id);
+    (req as any).requestId = id;
+    next();
+});
 
 // Request timeout (30 seconds)
 app.use((req, res, next) => {
@@ -156,22 +165,29 @@ const loginLimiter = rateLimit({
     },
     message: { status: 'error', message: 'Too many login attempts. Please try again later.' },
 });
+// Email-check endpoint calls Hunter.io — throttle to prevent enumeration/cost abuse
+const checkEmailLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: isDev ? 200 : 20,
+    message: { status: 'error', message: 'Too many email check requests, please try again later.' },
+});
 
 // ===== API ROUTES =====
 
 app.get('/api/v1/health', (req, res) => {
     const dbState = mongoose.connection.readyState;
     const dbStates: Record<number, string> = { 0: 'disconnected', 1: 'connected', 2: 'connecting', 3: 'disconnecting' };
+    // ponytail: omit 'environment' to avoid fingerprinting the runtime in production
     res.json({
         status: dbState === 1 ? 'success' : 'degraded',
         message: 'Feelinga API is running',
         timestamp: new Date().toISOString(),
-        environment: process.env.NODE_ENV,
         database: dbStates[dbState] || 'unknown',
     });
 });
 
 app.use('/api/v1/auth/login', loginLimiter);
+app.use('/api/v1/auth/check-email', checkEmailLimiter);
 app.use('/api/v1/auth', authLimiter, authRoutes);
 app.use('/api/v1/products', productRoutes);
 app.use('/api/v1/orders', orderRoutes);

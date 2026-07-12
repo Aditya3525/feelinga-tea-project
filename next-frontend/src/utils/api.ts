@@ -74,7 +74,8 @@ async function fetchWithRetry(url: string, init: RequestInit, method: string): P
 let refreshPromise: Promise<{ accessToken: string; refreshToken: string } | null> | null = null;
 
 async function doRefresh(apiBase: string): Promise<{ accessToken: string; refreshToken: string } | null> {
-    const refreshToken = localStorage.getItem('feelinga_refresh');
+    // Send stored refresh token in body as fallback alongside the httpOnly cookie
+    const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('feelinga_refresh') : null;
     try {
         const res = await fetch(`${apiBase}/auth/refresh`, {
             method: 'POST',
@@ -84,7 +85,9 @@ async function doRefresh(apiBase: string): Promise<{ accessToken: string; refres
         });
         if (res.ok) {
             const data = await res.json();
-            localStorage.setItem('feelinga_token', data.data.accessToken);
+            // ponytail: access token lives in httpOnly cookie set by server — do NOT
+            // write it to localStorage (that makes it XSS-readable).
+            // Only persist the refresh token (opaque, sent in POST body as fallback).
             if (data?.data?.refreshToken) {
                 localStorage.setItem('feelinga_refresh', data.data.refreshToken);
             }
@@ -94,14 +97,15 @@ async function doRefresh(apiBase: string): Promise<{ accessToken: string; refres
         console.warn('[Auth] Token refresh failed:', err instanceof Error ? err.message : 'Network error');
     }
     // Refresh failed — clear dead tokens so login gate / AuthContext can react
-    localStorage.removeItem('feelinga_token');
     localStorage.removeItem('feelinga_refresh');
     localStorage.removeItem('feelinga_user');
     return null;
 }
 
 export async function apiRequest(path: string, options: any = {}) {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('feelinga_token') : null;
+    // Access token lives in the httpOnly cookie set by the server (setAuthCookies).
+    // We do NOT read it from localStorage — that would make it XSS-readable.
+    // credentials: 'include' below carries the cookie on every request automatically.
     const method = String(options.method || 'GET').toUpperCase();
 
     const bases = getApiBases();
@@ -112,7 +116,6 @@ export async function apiRequest(path: string, options: any = {}) {
         const url = `${base}${path}`;
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',
-            ...(token && { Authorization: `Bearer ${token}` }),
             ...options.headers,
         };
 
@@ -127,7 +130,7 @@ export async function apiRequest(path: string, options: any = {}) {
                 }
                 const tokens = await refreshPromise;
                 if (tokens) {
-                    headers.Authorization = `Bearer ${tokens.accessToken}`;
+                    // Server re-sets the access cookie on refresh — just retry the request
                     res = await fetchWithRetry(url, { ...options, headers, credentials: 'include' }, method);
                 }
             }
