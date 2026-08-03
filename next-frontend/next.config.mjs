@@ -11,6 +11,7 @@ const apiOrigin = sanitizeApiOrigin(process.env.NEXT_PUBLIC_API_URL || fallbackA
 const remotePatterns = [
   { protocol: 'http', hostname: 'localhost', port: '5000' },
   { protocol: 'http', hostname: '127.0.0.1', port: '5000' },
+  { protocol: 'https', hostname: 'feelinga-tea-api.onrender.com' },
 ];
 
 try {
