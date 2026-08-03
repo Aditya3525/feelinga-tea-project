@@ -16,11 +16,8 @@ export const createProductSchema = z.object({
     type: z.enum(teaTypes),
     description: z.string().min(10).max(1000),
     shortDescription: z.string().max(200).optional(),
-    prices: z.object({
-        '50g': z.number().positive().optional(),
-        '100g': z.number().positive(),
-        '200g': z.number().positive().optional(),
-    }),
+    prices: z.record(z.string().min(1).max(20), z.number().positive())
+        .refine(p => '100g' in p && p['100g'] > 0, { message: '100g price is required and must be positive' }),
     moods: z.array(z.enum(moodTypes)).optional(),
     origin: z.string().min(2),
     caffeine: z.enum(caffeineTypes).optional(),
@@ -40,11 +37,7 @@ export const updateProductSchema = z.object({
     type: z.enum(teaTypes).optional(),
     description: z.string().min(10).max(1000).optional(),
     shortDescription: z.string().max(200).optional(),
-    prices: z.object({
-        '50g': z.number().positive().optional(),
-        '100g': z.number().positive().optional(),
-        '200g': z.number().positive().optional(),
-    }).optional(),
+    prices: z.record(z.string().min(1).max(20), z.number().positive()).optional(),
     moods: z.array(z.enum(moodTypes)).optional(),
     origin: z.string().min(2).optional(),
     caffeine: z.enum(caffeineTypes).optional(),
@@ -56,7 +49,7 @@ export const updateProductSchema = z.object({
     isNewArrival: z.boolean().optional(),
     tags: z.array(z.string()).optional(),
     brewingInstructions: brewingInstructionsSchema.optional(),
-}).strict();
+});
 
 export const bulkStockSchema = z.object({
     productIds: z.array(z.string()).min(1),

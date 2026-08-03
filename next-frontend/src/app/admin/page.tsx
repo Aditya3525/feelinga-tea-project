@@ -114,6 +114,7 @@ export default function Admin() {
         stock: 100, caffeine: 'medium', tastingNotes: '', tags: '', images: [] as string[],
         moods: [] as string[], isBestSeller: false, isNewArrival: true, inStock: true,
         brewTemp: '', brewSteep: '', brewAmount: '',
+        customSizes: [] as { label: string; price: string }[],
     };
     const [productForm, setProductForm] = useState<AdminRecord>(emptyProduct);
     const [uploading, setUploading] = useState(false);
@@ -639,6 +640,11 @@ export default function Admin() {
 
     const openEditProduct = (p: AdminRecord) => {
         setEditingProduct(p);
+        const stdSizes = new Set(['50g', '100g', '200g']);
+        const rawPrices: Record<string, number> = p.prices || {};
+        const customSizes = Object.entries(rawPrices)
+            .filter(([k]) => !stdSizes.has(k))
+            .map(([label, price]) => ({ label, price: String(price) }));
         setProductForm({
             name: p.name || '',
             slug: p.slug || '',
@@ -661,6 +667,7 @@ export default function Admin() {
             isBestSeller: p.isBestSeller || false,
             isNewArrival: p.isNewArrival || false,
             inStock: p.inStock !== false,
+            customSizes,
         });
         setShowProductForm(true);
     };
@@ -689,10 +696,11 @@ export default function Admin() {
         try {
             const formData = new FormData();
             for (let i = 0; i < files.length; i++) formData.append('images', files[i]);
-            const tkn = localStorage.getItem('feelinga_token');
+            // Auth is carried by the httpOnly access-token cookie — credentials:'include' is enough.
+            // 'feelinga_token' was never stored in localStorage; sending it caused 401s.
             const res = await fetch('/api/v1/upload/images', {
                 method: 'POST',
-                headers: { Authorization: `Bearer ${tkn}` },
+                credentials: 'include',
                 body: formData,
             });
             const data = await res.json().catch(() => ({}));
@@ -710,6 +718,22 @@ export default function Admin() {
 
     const removeImage = (index: number) => {
         setProductForm(prev => ({ ...prev, images: prev.images.filter((_img: string, i: number) => i !== index) }));
+    };
+
+    const addCustomSize = () => {
+        setProductForm(prev => ({ ...prev, customSizes: [...(prev.customSizes || []), { label: '', price: '' }] }));
+    };
+
+    const changeCustomSize = (index: number, field: 'label' | 'price', value: string) => {
+        setProductForm(prev => {
+            const updated = [...(prev.customSizes || [])];
+            updated[index] = { ...updated[index], [field]: value };
+            return { ...prev, customSizes: updated };
+        });
+    };
+
+    const removeCustomSize = (index: number) => {
+        setProductForm(prev => ({ ...prev, customSizes: (prev.customSizes || []).filter((_: any, i: number) => i !== index) }));
     };
 
     const handleDrop = (e: any) => {
@@ -776,6 +800,13 @@ export default function Admin() {
             ? Array.from(new Set(productForm.tags.split(',').map((s: string) => s.trim()).filter(Boolean)))
             : [];
 
+        const customPrices: Record<string, number> = {};
+        for (const row of (productForm.customSizes || []) as { label: string; price: string }[]) {
+            const l = row.label.trim();
+            const p = Number(row.price);
+            if (l && Number.isFinite(p) && p > 0) customPrices[l] = p;
+        }
+
         const body = {
             name: normalizedName,
             slug: normalizedSlug,
@@ -787,6 +818,7 @@ export default function Admin() {
                 ...(price50g !== null ? { '50g': price50g } : {}),
                 '100g': price100g,
                 ...(price200g !== null ? { '200g': price200g } : {}),
+                ...customPrices,
             },
             stock: normalizedStock,
             caffeine: productForm.caffeine,
@@ -992,6 +1024,9 @@ export default function Admin() {
                             deleteProduct={deleteProduct}
                             actionLoading={actionLoading}
                             loadProducts={loadProducts}
+                            addCustomSize={addCustomSize}
+                            changeCustomSize={changeCustomSize}
+                            removeCustomSize={removeCustomSize}
                             error={tabErrors.products}
                             onRetry={() => { void loadProducts(productPagination.page); }}
                         />

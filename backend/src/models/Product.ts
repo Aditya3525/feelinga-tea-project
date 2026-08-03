@@ -29,9 +29,9 @@ const productSchema = new mongoose.Schema({
         maxlength: 200,
     },
     prices: {
-        '50g': { type: Number },
-        '100g': { type: Number, required: true },
-        '200g': { type: Number },
+        type: Map,
+        of: Number,
+        required: true,
     },
     moods: [{
         type: String,
@@ -104,7 +104,8 @@ productSchema.index({ deletedAt: 1 });
 
 // Virtual for default price
 productSchema.virtual('price').get(function () {
-    return this.prices?.['100g'] || 0;
+    const prices = this.prices as Map<string, number> | undefined;
+    return prices?.get('100g') || 0;
 });
 
 productSchema.set('toJSON', { virtuals: true });

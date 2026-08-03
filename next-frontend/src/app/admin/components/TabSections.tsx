@@ -290,6 +290,9 @@ export function ProductsTab({
     deleteProduct,
     actionLoading,
     loadProducts,
+    addCustomSize,
+    changeCustomSize,
+    removeCustomSize,
     error,
     onRetry,
 }: SectionBaseProps & {
@@ -314,6 +317,9 @@ export function ProductsTab({
     deleteProduct: (id: string, name: string) => Promise<void>;
     actionLoading: string | null;
     loadProducts: (page?: number) => Promise<void>;
+    addCustomSize: () => void;
+    changeCustomSize: (index: number, field: 'label' | 'price', value: string) => void;
+    removeCustomSize: (index: number) => void;
 }) {
     if (error) return <SectionError message={error} onRetry={onRetry} />;
 
@@ -374,6 +380,52 @@ export function ProductsTab({
                                         </div>
                                     </div>
                                 </div>
+
+                                {/* Custom sizes */}
+                                {((productForm.customSizes || []) as { label: string; price: string }[]).map((row, i) => (
+                                    <div key={i} className="admin-form-subgrid" style={{ marginTop: '0.5rem', alignItems: 'center' }}>
+                                        <div>
+                                            <label className="admin-form-label">Size label (e.g. 250g)</label>
+                                            <input
+                                                className="admin-form-control"
+                                                type="text"
+                                                placeholder="e.g. 250g"
+                                                value={row.label}
+                                                onChange={e => changeCustomSize(i, 'label', e.target.value)}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="admin-form-label">Price (₹)</label>
+                                            <input
+                                                className="admin-form-control"
+                                                type="number"
+                                                min={0}
+                                                step="0.01"
+                                                placeholder="e.g. 399"
+                                                value={row.price}
+                                                onChange={e => changeCustomSize(i, 'price', e.target.value)}
+                                            />
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'flex-end', paddingBottom: '2px' }}>
+                                            <button
+                                                type="button"
+                                                className="btn btn--ghost btn--sm admin-btn-danger"
+                                                onClick={() => removeCustomSize(i)}
+                                                aria-label={`Remove custom size ${row.label || i + 1}`}
+                                            >
+                                                Remove
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                                <button
+                                    type="button"
+                                    className="btn btn--ghost btn--sm"
+                                    style={{ marginTop: '0.75rem' }}
+                                    onClick={addCustomSize}
+                                >
+                                    + Add Custom Size
+                                </button>
                             </section>
 
                             <section className="admin-form-section">
