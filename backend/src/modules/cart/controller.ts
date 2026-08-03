@@ -19,7 +19,7 @@ export const get = async (req: Request, res: Response, next: NextFunction) => {
         for (const item of cart.items) {
             const product = productMap.get(item.product.toString());
             if (product) {
-                const price = (product.prices as Record<string, number>)?.[item.size] || (product.prices as any)?.['100g'];
+                const price = (product.prices as unknown as Map<string, number>).get(item.size) || (product.prices as unknown as Map<string, number>).get('100g') || 0;
                 items.push({
                     id: (item as any)._id.toString(), productId: item.product.toString(),
                     name: product.name, type: product.type, size: item.size, qty: item.qty,

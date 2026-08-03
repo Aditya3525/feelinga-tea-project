@@ -56,7 +56,7 @@ export const create = async (req: Request, res: Response, next: NextFunction) =>
                 const product = productMap.get(String(item.productId));
                 if (!product) throw new AppError(`Product ${item.productId} not found`, 404);
                 if (!product.inStock) throw new AppError(`${product.name} is out of stock`, 400);
-                const price = (product.prices as Record<string, number>)?.[item.size] || (product.prices as any)?.['100g'];
+                const price = (product.prices as unknown as Map<string, number>).get(item.size) || (product.prices as unknown as Map<string, number>).get('100g');
                 if (!price) throw new AppError(`Invalid size ${item.size} for ${product.name}`, 400);
                 orderItems.push({ product: product._id, name: product.name, size: item.size, price, qty: item.qty, image: product.images?.[0] });
             }
