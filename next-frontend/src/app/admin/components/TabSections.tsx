@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import AppIcon from '../../../components/AppIcon';
+import { resolveProductImageUrl } from '../../../utils/image';
 
 type AdminRecord = Record<string, any>;
 
@@ -480,7 +481,7 @@ export function ProductsTab({
                                     <div className="admin-product-images">
                                         {productForm.images.map((url: string, i: number) => (
                                             <div key={i} className="admin-product-images__thumb">
-                                                <Image src={url} alt={`Product ${i + 1}`} width={72} height={72} className="admin-product-images__img" />
+                                                <Image src={resolveProductImageUrl(url)} alt={`Product ${i + 1}`} width={72} height={72} className="admin-product-images__img" />
                                                 <button type="button" className="admin-product-images__remove" onClick={() => removeImage(i)}><AppIcon name="xCircle" size={12} aria-hidden /></button>
                                             </div>
                                         ))}

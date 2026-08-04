@@ -662,7 +662,7 @@ export default function Admin() {
             brewTemp: p.brewingInstructions?.temperature || '',
             brewSteep: p.brewingInstructions?.steepTime || '',
             brewAmount: p.brewingInstructions?.amount || '',
-            images: resolveProductImageList(p.images || []),
+            images: p.images || [],
             moods: p.moods || [],
             isBestSeller: p.isBestSeller || false,
             isNewArrival: p.isNewArrival || false,
@@ -705,9 +705,7 @@ export default function Admin() {
             });
             const data = await res.json().catch(() => ({}));
             if (!res.ok) throw new Error(data.message || 'Upload failed');
-            const uploadedUrls = Array.isArray(data?.data?.urls)
-                ? data.data.urls.map((url: string) => resolveProductImageUrl(url))
-                : [];
+            const uploadedUrls = Array.isArray(data?.data?.urls) ? data.data.urls : [];
             setProductForm(prev => ({ ...prev, images: [...prev.images, ...uploadedUrls] }));
         } catch (err: any) {
             showToast(err.message || 'Upload failed', 'error');
