@@ -10,6 +10,10 @@ function getBackendOrigin(): string {
         if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
             return 'https://feelinga-tea-api.onrender.com';
         }
+    } else {
+        if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+            return 'https://feelinga-tea-api.onrender.com';
+        }
     }
     return '';
 }
