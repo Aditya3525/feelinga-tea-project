@@ -42,14 +42,8 @@ export function resolveProductImageUrl(raw?: string | null, fallback = '/images/
         normalized = normalized.slice(normalized.indexOf('/uploads/'));
     }
 
-    // Prepend backend origin in production for absolute image retrieval.
-    if (normalized.startsWith('/uploads/')) {
-        const origin = getBackendOrigin();
-        if (origin) {
-            return `${origin}${normalized}`;
-        }
-    }
-
+    // Keep paths relative to let Next.js rewrites proxy them server-side.
+    // This prevents Brave Shields/ad-blockers from blocking cross-origin image urls.
     return normalized;
 }
 
