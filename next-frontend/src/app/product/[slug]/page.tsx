@@ -892,6 +892,20 @@ export default function ProductDetail() {
                     </button>
                 </div>
             </div>
+
+            {typeof window !== 'undefined' && window.location.search.includes('debug=1') && (
+                <div className="container" style={{ padding: '20px', background: '#fee', border: '1px solid #f99', margin: '20px 0', fontSize: '12px', fontFamily: 'monospace', borderRadius: '8px', zIndex: 9999, position: 'relative' }}>
+                    <h3 style={{ margin: '0 0 10px 0', color: '#c33' }}>PDP Images Debug Panel</h3>
+                    <p><strong>Slug:</strong> {slug}</p>
+                    <p><strong>Product Name:</strong> {product?.name}</p>
+                    <p><strong>Raw images array:</strong> {JSON.stringify(product?.images)}</p>
+                    <p><strong>productImages[0]:</strong> {productImages[0]}</p>
+                    <p><strong>selectedImage:</strong> {selectedImage}</p>
+                    <p><strong>Resolved Image Src:</strong> {productImages[selectedImage] || productImages[0]}</p>
+                    <p><strong>typeof window:</strong> {typeof window}</p>
+                    <p><strong>Browser Hostname:</strong> {typeof window !== 'undefined' ? window.location.hostname : 'SSR'}</p>
+                </div>
+            )}
         </Layout>
     );
 }
